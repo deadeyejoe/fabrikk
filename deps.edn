@@ -8,7 +8,8 @@
                                djblue/portal {:mvn/version "0.29.1"}
                                aysylu/loom {:mvn/version "1.0.2"}
                                
-                               poly/specs {:local/root "components/specs"}}}
+                               poly/specs {:local/root "components/specs"}
+                               poly/factory {:local/root "components/factory"}}}
 
             :test {:extra-paths []}
 

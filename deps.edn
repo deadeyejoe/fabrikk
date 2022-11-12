@@ -7,10 +7,11 @@
                                expound/expound {:mvn/version "0.9.0"}
                                djblue/portal {:mvn/version "0.29.1"}
                                aysylu/loom {:mvn/version "1.0.2"}
-                               
-                               poly/specs {:local/root "components/specs"}
+
+                               poly/entity {:local/root "components/entity"}
+                               poly/directive {:local/root "components/directive"}
                                poly/factory {:local/root "components/factory"}
-                               poly/directive {:local/root "components/directive"}}}
+                               poly/specs {:local/root "components/specs"}}}
 
             :test {:extra-paths []}
 

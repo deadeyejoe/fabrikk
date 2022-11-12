@@ -9,7 +9,8 @@
                                aysylu/loom {:mvn/version "1.0.2"}
                                
                                poly/specs {:local/root "components/specs"}
-                               poly/factory {:local/root "components/factory"}}}
+                               poly/factory {:local/root "components/factory"}
+                               poly/directive {:local/root "components/directive"}}}
 
             :test {:extra-paths []}
 

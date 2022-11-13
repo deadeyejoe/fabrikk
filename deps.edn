@@ -11,6 +11,7 @@
                                poly/build-graph {:local/root "components/build-graph"}
                                poly/directive {:local/root "components/directive"}
                                poly/entity {:local/root "components/entity"}
+                               poly/execution-context {:local/root "components/execution-context"}
                                poly/factory {:local/root "components/factory"}
                                poly/specs {:local/root "components/specs"}}}
 

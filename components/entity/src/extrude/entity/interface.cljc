@@ -1,8 +1,12 @@
 (ns extrude.entity.interface
-  (:require [extrude.entity.core :as core]))
+  (:require [extrude.entity.core :as core]
+            [clojure.spec.alpha :as s]))
 
-(defn build [factory value]
-  (core/build factory value))
+(s/def ::instance ::core/instance)
+(s/def ::uuid ::core/uuid)
+
+(defn create! [factory value]
+  (core/create! factory value))
 
 (defn refresh-uuid [entity]
   (core/refresh-uuid entity))

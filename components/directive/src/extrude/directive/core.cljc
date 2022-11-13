@@ -20,12 +20,14 @@
 (defn directive? [m]
   (contains? m directive-type-kw))
 
-(def run-directive-dispatch directive-type-kw)
+(defn run-directive-dispatch [_ _ directive]
+  (get directive-type-kw directive))
 (defmulti run #'run-directive-dispatch)
-(defmethod run :default [directive]
-  (if (fn? directive)
-    (directive)
-    directive))
+(defmethod run :default [build-context key directive]
+  (context/assoc-value build-context key
+                       (if (fn? directive)
+                         (directive)
+                         directive)))
 
 (defn evaluate
   "Run directive, applying before/after hooks if present"

@@ -1,0 +1,4 @@
+{:paths ["src" "resources"]
+ :deps {aysylu/loom {:mvn/version "1.0.2"}}
+ :aliases {:test {:extra-paths ["test"]
+                  :extra-deps {}}}}

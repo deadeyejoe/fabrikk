@@ -15,7 +15,7 @@
 
 
 
-(defn build [{:keys [factory-id primary-id] :as factory} value]
+(defn create! [{:keys [factory-id primary-id] :as factory} value]
   {:factory-id factory-id
    :factory factory
    :persisted false
@@ -67,7 +67,7 @@
   (combine entity other-entity))
 
 (comment
-  (let [one (build {} {1 2})
+  (let [one (create! {} {1 2})
         two (assoc one :persisted true)]
     [(uuid-match? one two)
      (persisted-match? one two)

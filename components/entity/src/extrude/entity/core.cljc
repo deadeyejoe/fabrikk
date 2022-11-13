@@ -1,6 +1,7 @@
 (ns extrude.entity.core
   (:require [extrude.specs.interface :as specs]
-            [clojure.spec.alpha :as s]))
+            [clojure.spec.alpha :as s]
+            [extrude.utils.interface :as utils]))
 
 (s/def ::uuid uuid?)
 (s/def ::id any?)
@@ -73,3 +74,8 @@
      (persisted-match? one two)
      (value-match? one two)
      (combine one two)]))
+
+(def value :value)
+
+(defn update-value [entity f args]
+  (apply update entity :value f args))

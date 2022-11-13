@@ -1,5 +1,6 @@
 (ns extrude.execution-context.interface
-  (:require [extrude.build-graph.interface :as build-graph]))
+  (:require [extrude.build-graph.interface :as build-graph]
+            [extrude.execution-context.core :as core]))
 
 (defn init []
   (build-graph/init))
@@ -12,3 +13,9 @@
 
 (defn associate [primary label associated-context]
   (build-graph/associate primary label associated-context))
+
+(defn assoc-value [context key value]
+  (core/assoc-value context key value))
+
+(defn ->result-meta [context]
+  (core/->result-meta context))

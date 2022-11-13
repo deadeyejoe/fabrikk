@@ -25,3 +25,9 @@
 
 (defn combine-no-conflict [entity other-entity]
   (core/combine-no-conflict entity other-entity))
+
+(defn value [entity]
+  (core/value entity))
+
+(defn update-value [entity f & args]
+  (core/update-value entity f args))

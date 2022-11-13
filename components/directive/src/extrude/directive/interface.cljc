@@ -12,17 +12,5 @@
 
 (def run core/run)
 
-(defn evaluate [directive]
-  (core/evaluate directive))
-
-(defn before [directive f]
-  (core/before directive f))
-
-(defn after [directive f]
-  (core/after directive f))
-
-(defn run-directives [m]
-  (core/run-directives m))
-
-(defn evaluate-directives [m]
-  (core/evaluate-directives m))
+(defn run-directives [context m]
+  (core/run-directives context m))

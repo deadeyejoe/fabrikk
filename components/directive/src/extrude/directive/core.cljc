@@ -24,6 +24,7 @@
   (get directive-type-kw directive))
 (defmulti run #'run-directive-dispatch)
 (defmethod run :default [build-context key directive]
+  ; context ns manipulates a build graph initially
   (context/assoc-value build-context key
                        (if (fn? directive)
                          (directive)

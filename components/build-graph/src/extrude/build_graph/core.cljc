@@ -1,9 +1,8 @@
 (ns extrude.build-graph.core
   (:require [extrude.entity.interface :as entity]
+            [extrude.build-graph.labels :as labels]
             [clojure.spec.alpha :as s]
-            [loom.graph :as graph]
-            [loom.attr :as attr])
-  (:refer-clojure :exclude [refer]))
+            [loom.graph :as graph]))
 
 (s/def ::graph graph/directed?)
 (s/def ::primary ::entity/instance)
@@ -14,6 +13,7 @@
 
 (defn init []
   {:graph (graph/digraph)
+   :labels {}
    :codex {}
    :primary nil})
 
@@ -38,7 +38,7 @@
   (let [edge [entity-id other-entity-id]]
     (-> bg
         (update :graph graph/add-edges edge)
-        (update :graph attr/add-attr edge :label label))))
+        (update :labels labels/collect edge label))))
 
 (defn merge-graphs [graph other]
   (-> graph
@@ -52,9 +52,10 @@
      (graph/edges two)
      (merge-graphs one two)]))
 
-(defn merge-builds [{:keys [graph codex] :as primary} to-merge]
+(defn merge-builds [{:keys [graph labels codex] :as primary} to-merge]
   (-> primary
       (assoc :codex (merge-with entity/combine-no-conflict codex (:codex to-merge)))
+      (assoc :labels (labels/merge-attrs labels (:labels to-merge)))
       (assoc :graph (merge-graphs graph (:graph to-merge)))))
 
 (defn associate [primary label {associated-primary :primary :as associated-build-graph}]
@@ -62,10 +63,10 @@
       (merge-builds associated-build-graph)
       (link (:uuid primary) label associated-primary)))
 
-(comment
-  (let [one (-> (graph/digraph [1 2] [2 3] [1 4])
-                (attr/add-attr 1 :label :one)
-                (attr/add-attr [1 2] :label :foo)
-                (attr/add-attr [2 3] :label :bar)
-                (attr/add-attr [1 4] :label :baz))]
-    one))
+(defn path
+  "Given a build graph and a path comprised of a sequence of labels. Starting at the 
+   primary node, traverse edges with each label in turn, and return the node at the end of
+   the path, if it exists. Or nil otherwise"
+  [{:keys [codex labels primary]} path]
+  (when-let [traversed-edges (labels/traverse-path labels primary path)]
+    (get codex (-> traversed-edges last last))))

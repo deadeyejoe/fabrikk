@@ -1,11 +1,8 @@
 (ns extrude.build-graph.core
   (:require [extrude.entity.interface :as entity]
-            [extrude.build-graph.labels :as labels]
-            [clojure.spec.alpha :as s]
-            [loom.graph :as graph]
-            [extrude.build-graph.interface :as build-graph]))
+            [extrude.build-graph.label-graph :as label-graph]
+            [clojure.spec.alpha :as s]))
 
-(s/def ::graph graph/directed?)
 (s/def ::primary ::entity/instance)
 (s/def ::codex (s/map-of ::entity/uuid ::entity/instance))
 (s/def ::instance (s/keys :opt-un [::graph
@@ -13,17 +10,14 @@
                                    ::codex]))
 
 (defn init []
-  {:graph (graph/digraph)
-   :labels {}
+  {:labels {}
    :codex {}
    :primary nil})
 
 (defn ensure-node [{:keys [codex] :as bg} {:keys [uuid] :as entity}]
   (if-let [existing (get codex uuid)]
     (assoc-in bg [:codex uuid] (entity/combine-no-conflict existing entity))
-    (-> bg
-        (assoc-in [:codex uuid] entity)
-        (update :graph graph/add-nodes uuid))))
+    (assoc-in bg [:codex uuid] entity)))
 
 (defn set-primary! [bg {:keys [uuid] :as entity}]
   (-> bg
@@ -35,31 +29,17 @@
       (ensure-node entity)
       (set-primary! entity)))
 
-(defn link [bg entity-id label other-entity-id]
-  (let [edge [entity-id other-entity-id]]
-    (-> bg
-        (update :graph graph/add-edges edge)
-        (update :labels labels/collect edge label))))
+(defn link [bg entity-id label other-entity-id] 
+  (update bg :labels label-graph/link entity-id label other-entity-id))
 
-(defn merge-graphs [graph other]
-  (-> graph
-      (#(apply graph/add-nodes % (graph/nodes other)))
-      (#(apply graph/add-edges % (graph/edges other)))))
-
-(comment
-  (let [one (graph/digraph [2 1] [4 2])
-        two (graph/digraph [4 3] [3 1])]
-    [(graph/nodes two)
-     (graph/edges two)
-     (merge-graphs one two)]))
-
-(defn merge-builds [{:keys [graph labels codex] :as primary} to-merge]
+(defn merge-builds [{:keys [labels codex] :as primary} to-merge]
   (-> primary
       (assoc :codex (merge-with entity/combine-no-conflict codex (:codex to-merge)))
-      (assoc :labels (labels/merge-attrs labels (:labels to-merge)))
-      (assoc :graph (merge-graphs graph (:graph to-merge)))))
+      (assoc :labels (label-graph/merge labels (:labels to-merge)))))
 
-(defn associate [{:keys [primary] :as build-graph} label {associated-primary :primary :as associated-build-graph}]
+(defn associate [{:keys [primary] :as build-graph} 
+                 label
+                 {associated-primary :primary :as associated-build-graph}]
   (-> build-graph
       (merge-builds associated-build-graph)
       (link primary label associated-primary)))
@@ -68,6 +48,5 @@
   "Given a build graph and a path comprised of a sequence of labels. Starting at the 
    primary node, traverse edges with each label in turn, and return the node at the end of
    the path, if it exists. Or nil otherwise"
-  [{:keys [codex labels primary] :as build-graph} path]
-  (when-let [traversed-edges (labels/traverse-path labels primary path)]
-    (get codex (-> traversed-edges last last))))
+  [{:keys [codex labels primary] :as _build-graph} path]
+  (get codex (label-graph/traverse-path labels primary path)))

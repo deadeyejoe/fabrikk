@@ -53,7 +53,7 @@
         org-user (execution/build user {:with {:org org}})
         group (execution/build group
                                {:with {:users (build-list user 3
-                                                          {:with {:org (provide org)}})}})]
+                                                          {:with {:org org}})}})]
     [org
      org-user
      group]

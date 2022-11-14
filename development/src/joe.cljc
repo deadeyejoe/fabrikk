@@ -6,9 +6,11 @@
 
 (set! s/*explain-out* expound/printer)
 (defn open-portal []
-  (p/open {:launcher :vs-code})
-  (add-tap #'p/submit)
-  (tap> :TESTING))
+  (let [p (p/open {:launcher :vs-code})]
+    (add-tap #'p/submit)
+    (tap> :TESTING)
+    p))
 (comment
+  (refresh)
   (open-portal)
-  (refresh))
+  )

@@ -24,6 +24,11 @@
    :id (get value primary-id)
    :value value})
 
+(defn create-list! []
+  {:persistable false
+   :uuid (random-uuid)
+   :value []})
+
 (defn refresh-uuid [entity]
   (assoc entity :uuid (random-uuid)))
 

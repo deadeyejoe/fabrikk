@@ -8,6 +8,9 @@
 (defn create! [factory value]
   (core/create! factory value))
 
+(defn create-list! []
+  (core/create-list!))
+
 (defn refresh-uuid [entity]
   (core/refresh-uuid entity))
 

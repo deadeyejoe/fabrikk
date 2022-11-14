@@ -1,8 +1,10 @@
 (ns extrude.directive.standard
   (:require [extrude.directive.core :as core]
+            [extrude.entity.interface :as entity]
             [extrude.execution-context.interface :as context]
             [clojure.spec.alpha :as s]
-            [extrude.execution.interface :as execution]))
+            [extrude.execution.interface :as execution]
+            [extrude.entity.interface :as entity]))
 
 (s/def ::directive map?)
 
@@ -27,12 +29,15 @@
                      {:value factory
                       :build-opts build-opts})))
 
+(defn link-to-context [context key built-context]
+  (-> context
+      (context/associate key built-context)
+      (context/assoc-value key (context/->result-meta built-context))))
+
 (defmethod core/run ::build [context key {:keys [value build-opts] :as _directive}]
-  (tap> [::build context key _directive])
-  (let [built (execution/build-context value build-opts)]
-    (-> context
-        (context/associate key built)
-        (context/assoc-value key (context/->result-meta built)))))
+  (link-to-context context 
+                   key 
+                   (execution/build-context value build-opts)))
 
 ;; =========== BUILD LIST ===========
 
@@ -58,11 +63,26 @@
   (pad-with-last 3 [{}])
   (pad-with-last 3 []))
 
+(defn populate-list [list-context number factory build-opt-list]
+  (->> (pad-with-last number build-opt-list)
+       (map-indexed (fn [index build-opts]
+                      [index (execution/build-context factory build-opts)]))
+       (reduce (fn [current-list [index built-context]]
+                 (-> (context/associate current-list index built-context)
+                     (context/update-value conj (context/->result-meta built-context))))
+               list-context)))
+
 (defmethod core/run ::build-list [context key
                                   {:keys [value number build-opt-list]
                                    :or {number 0}
                                    :as _directive}]
-  (throw "Not implemented"))
+  (let [list-context (-> (entity/create! value [])
+                         (context/entity->context))
+        populated-list-context (populate-list list-context
+                                              number
+                                              value
+                                              build-opt-list)]
+    (link-to-context context key populated-list-context)))
 
 ;; =========== PROVIDE ===========
 

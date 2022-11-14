@@ -2,21 +2,29 @@
   (:require [extrude.entity.interface :as entity]
             [extrude.build-graph.interface :as build-graph]))
 
-(defn assoc-value [{:keys [primary] :as build-graph} key value]
+(defn update-value [{:keys [primary] :as build-graph} f args]
   (update-in build-graph
              [:codex primary]
-             entity/update-value #(assoc % key value)))
+             entity/update-value #(apply f % args)))
+
+(defn assoc-value [build-graph key value]
+  (update-value build-graph assoc [key value]))
 
 (comment
   (assoc-value {:primary 1
                 :codex {1 {}
                         2 {}}}
                :foo
-               :bar))
+               :bar)
+  (update-value {:primary 1
+                 :codex {1 {}
+                         2 {}}}
+                assoc  :foo :bar))
 
 (defn ->result-meta [{:keys [primary] :as build-graph}]
-  (with-meta
-    (-> build-graph
-        (get-in [:codex primary])
-        (entity/value))
-    build-graph))
+  (tap> [::result build-graph])
+  (let [bare-entity (-> build-graph
+                        (get-in [:codex primary])
+                        (entity/value))]
+    (tap> [ ::bare bare-entity])
+    (with-meta bare-entity build-graph)))

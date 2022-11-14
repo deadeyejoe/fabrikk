@@ -1,10 +1,9 @@
 (ns extrude.directive.standard
   (:require [extrude.directive.core :as core]
             [extrude.entity.interface :as entity]
-            [extrude.execution-context.interface :as context]
-            [clojure.spec.alpha :as s]
             [extrude.execution.interface :as execution]
-            [extrude.entity.interface :as entity]))
+            [extrude.execution-context.interface :as context]
+            [clojure.spec.alpha :as s]))
 
 (s/def ::directive map?)
 
@@ -90,5 +89,7 @@
   (core/->directive ::provide
                     {:value build-context}))
 
-(defmethod core/run ::provide [context key {sub-context :value}]
-  (throw "Not implemented"))
+(defmethod core/run ::provide [context key {provided :value}]
+  (if-let [provided-context (meta provided)]
+    (link-to-context context key provided-context)
+    (context/assoc-value context key provided)))

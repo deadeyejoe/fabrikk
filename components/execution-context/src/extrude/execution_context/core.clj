@@ -22,9 +22,7 @@
                 assoc  :foo :bar))
 
 (defn ->result-meta [{:keys [primary] :as build-graph}]
-  (tap> [::result build-graph])
   (let [bare-entity (-> build-graph
                         (get-in [:codex primary])
                         (entity/value))]
-    (tap> [ ::bare bare-entity])
     (with-meta bare-entity build-graph)))

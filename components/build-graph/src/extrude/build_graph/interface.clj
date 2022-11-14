@@ -12,3 +12,6 @@
 
 (defn associate [primary label associated-build-graph]
   (core/associate primary label associated-build-graph))
+
+(defn path [bg path]
+  (core/path bg path))

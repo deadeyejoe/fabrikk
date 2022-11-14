@@ -11,8 +11,8 @@
 (defn entity->context [entity]
   (build-graph/entity->build-graph entity))
 
-(defn associate [primary label associated-context]
-  (build-graph/associate primary label associated-context))
+(defn associate [context label associated-context]
+  (build-graph/associate context label associated-context))
 
 (defn assoc-value [context key value]
   (core/assoc-value context key value))

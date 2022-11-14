@@ -21,11 +21,10 @@
   (contains? m directive-type-kw))
 
 (defn run-directive-dispatch [_ _ directive]
-  (get directive-type-kw directive))
+  (get directive directive-type-kw))
 (defmulti run #'run-directive-dispatch)
 (defmethod run :default [build-context key directive]
   ; context ns manipulates a build graph initially
-  (tap> [build-context key directive])
   (context/assoc-value build-context key
                        (if (fn? directive)
                          (directive)

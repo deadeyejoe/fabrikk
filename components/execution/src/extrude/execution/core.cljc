@@ -19,9 +19,12 @@
         (after-build)
         (remove-transients transients))))
 
-(defn build [factory opts]
+(defn build-context [factory opts]
   (let [context (-> (context/init)
                     (context/set-primary! (entity/create! factory {})))]
     (build-entity context factory opts)))
+
+(defn build [factory opts]
+  (context/->result-meta (build-context factory opts)))
 
 (defn create [factory opts])

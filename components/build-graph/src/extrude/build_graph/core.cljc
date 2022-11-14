@@ -2,7 +2,8 @@
   (:require [extrude.entity.interface :as entity]
             [extrude.build-graph.labels :as labels]
             [clojure.spec.alpha :as s]
-            [loom.graph :as graph]))
+            [loom.graph :as graph]
+            [extrude.build-graph.interface :as build-graph]))
 
 (s/def ::graph graph/directed?)
 (s/def ::primary ::entity/instance)
@@ -58,15 +59,15 @@
       (assoc :labels (labels/merge-attrs labels (:labels to-merge)))
       (assoc :graph (merge-graphs graph (:graph to-merge)))))
 
-(defn associate [primary label {associated-primary :primary :as associated-build-graph}]
-  (-> (entity->build-graph primary)
+(defn associate [{:keys [primary] :as build-graph} label {associated-primary :primary :as associated-build-graph}]
+  (-> build-graph
       (merge-builds associated-build-graph)
-      (link (:uuid primary) label associated-primary)))
+      (link primary label associated-primary)))
 
 (defn path
   "Given a build graph and a path comprised of a sequence of labels. Starting at the 
    primary node, traverse edges with each label in turn, and return the node at the end of
    the path, if it exists. Or nil otherwise"
-  [{:keys [codex labels primary]} path]
+  [{:keys [codex labels primary] :as build-graph} path]
   (when-let [traversed-edges (labels/traverse-path labels primary path)]
     (get codex (-> traversed-edges last last))))

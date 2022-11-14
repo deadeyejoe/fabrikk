@@ -1,6 +1,6 @@
 (ns joe.scratch
   (:require [extrude.directive.interface :as directive]
-            [extrude.directive.interface.standard :refer [build build-list provide]]
+            [extrude.directive.interface.standard :refer [build build-list]]
             [extrude.entity.interface :as entity]
             [extrude.execution.interface :as execution]
             [extrude.execution-context.interface :as context]
@@ -58,4 +58,7 @@
      org-user
      group]
     (tap> (meta group)))
+  (let [org (execution/build organization {})
+        users (execution/build-list user 4 {:with {:org org}})]
+    (tap> [org users]))
   )

@@ -48,40 +48,13 @@
                       :number n
                       :build-opt-list build-opt-list})))
 
-(defn pad-with-last [n coll]
-  (let [last-element (last coll)]
-    (->> (concat coll (repeat last-element))
-         (take n))))
-
-(comment
-  (pad-with-last -1 [1 2 3])
-  (pad-with-last 1 [1 2 3])
-  (pad-with-last 2 [1 2 3])
-  (pad-with-last 3 [1 2 3])
-  (pad-with-last 10 [1 2 3])
-  (pad-with-last 3 [{}])
-  (pad-with-last 3 []))
-
-(defn populate-list [list-context number factory build-opt-list]
-  (->> (pad-with-last number build-opt-list)
-       (map-indexed (fn [index build-opts]
-                      [index (execution/build-context factory build-opts)]))
-       (reduce (fn [current-list [index built-context]]
-                 (-> (context/associate current-list index built-context)
-                     (context/update-value conj (context/->result-meta built-context))))
-               list-context)))
-
 (defmethod core/run ::build-list [context key
                                   {:keys [value number build-opt-list]
                                    :or {number 0}
                                    :as _directive}]
-  (let [list-context (-> (entity/create! value [])
-                         (context/entity->context))
-        populated-list-context (populate-list list-context
-                                              number
-                                              value
-                                              build-opt-list)]
-    (link-to-context context key populated-list-context)))
+  (link-to-context context 
+                   key
+                   (execution/build-list-context value number build-opt-list)))
 
 ;; =========== PROVIDE ===========
 

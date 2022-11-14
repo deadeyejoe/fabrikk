@@ -10,5 +10,14 @@
   ([factory opts]
    (core/build factory opts)))
 
+(defn build-list-context [factory n opt-list]
+  (core/build-list-context factory n opt-list))
+
+(defn build-list
+  ([factory n]
+   (core/build-list factory n [{}]))
+  ([factory n & opt-list]
+   (core/build-list factory n opt-list)))
+
 (defn create [factory opts]
   (core/create factory opts))

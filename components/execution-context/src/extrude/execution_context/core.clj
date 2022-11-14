@@ -2,6 +2,10 @@
   (:require [extrude.entity.interface :as entity]
             [extrude.build-graph.interface :as build-graph]))
 
+(defn ->list-context []
+  (-> (entity/create-list!)
+      (build-graph/entity->build-graph)))
+
 (defn update-value [{:keys [primary] :as build-graph} f args]
   (update-in build-graph
              [:codex primary]

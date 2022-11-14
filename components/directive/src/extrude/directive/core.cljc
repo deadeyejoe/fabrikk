@@ -26,7 +26,7 @@
                                (if (fn? value)
                                  (value)
                                  value))
-    (context/meta-result? value) (context/associate key value)))
+    (context/meta-result? value) (context/associate key (meta value))))
 
 (defprotocol Directive
   (evaluate [this build-context key]))
@@ -34,13 +34,12 @@
 (defn directive? [m]
   (or (contains? m directive-type-kw)
       (satisfies? m Directive)))
+
 (comment
   (defrecord Constant [value]
     Directive
     (evaluate [x build-context key]
       (context/assoc-value build-context key value)))
-
-
   (evaluate (->Constant 1) {} :foo))
 
 ;; =========== UTILS ===========

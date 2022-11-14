@@ -11,6 +11,9 @@
 (defn entity->context [entity]
   (build-graph/entity->build-graph entity))
 
+(defn ->list-context []
+  (core/->list-context))
+
 (defn associate [context label associated-context]
   (build-graph/associate context label associated-context))
 

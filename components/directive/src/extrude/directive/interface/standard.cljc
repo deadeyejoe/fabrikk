@@ -15,6 +15,3 @@
    (standard/build-list factory n))
   ([factory n & opts]
    (standard/build-list factory n opts)))
-
-(defn provide [build-context]
-  (standard/provide build-context))

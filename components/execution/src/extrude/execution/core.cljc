@@ -27,4 +27,30 @@
 (defn build [factory opts]
   (context/->result-meta (build-context factory opts)))
 
+(defn pad-with-last [n coll]
+  (let [last-element (last coll)]
+    (->> (concat coll (repeat last-element))
+         (take n))))
+
+(comment
+  (pad-with-last -1 [1 2 3])
+  (pad-with-last 1 [1 2 3])
+  (pad-with-last 2 [1 2 3])
+  (pad-with-last 3 [1 2 3])
+  (pad-with-last 10 [1 2 3])
+  (pad-with-last 3 [{}])
+  (pad-with-last 3 []))
+
+(defn build-list-context [factory number opt-list]
+  (->> (pad-with-last number opt-list)
+       (map-indexed (fn [index build-opts]
+                      [index (build-context factory build-opts)]))
+       (reduce (fn [current-list [index built-context]]
+                 (-> (context/associate current-list index built-context)
+                     (context/update-value conj (context/->result-meta built-context))))
+               (context/->list-context))))
+
+(defn build-list [factory n opt-list]
+  (context/->result-meta (build-list-context factory n opt-list)))
+
 (defn create [factory opts])

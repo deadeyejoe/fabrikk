@@ -22,3 +22,6 @@
 
 (defn ->result-meta [context]
   (core/->result-meta context))
+
+(defn meta-result? [x]
+  (core/meta-result? x))

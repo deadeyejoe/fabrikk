@@ -25,4 +25,7 @@
   (let [bare-entity (-> build-graph
                         (get-in [:codex primary])
                         (entity/value))]
-    (with-meta bare-entity build-graph)))
+    (with-meta bare-entity (assoc build-graph ::meta true))))
+
+(defn meta-result? [x]
+  (-> x meta ::meta))

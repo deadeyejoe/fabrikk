@@ -21,12 +21,12 @@
 (defn run-directive-dispatch [_ _ directive]
   (get directive directive-type-kw))
 (defmulti run #'run-directive-dispatch)
-(defmethod run :default [build-context key directive]
-  ; context ns manipulates a build graph initially
-  (context/assoc-value build-context key
-                       (if (fn? directive)
-                         (directive)
-                         directive)))
+(defmethod run :default [build-context key value]
+  (cond-> (context/assoc-value build-context key
+                               (if (fn? value)
+                                 (value)
+                                 value))
+    (context/meta-result? value) (context/associate key value)))
 
 (defprotocol Directive
   (evaluate [this build-context key]))

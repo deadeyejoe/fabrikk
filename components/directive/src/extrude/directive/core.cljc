@@ -7,6 +7,7 @@
 (s/def ::directive (s/keys :req [::type]
                            :opt-un [::value]))
 
+
 (def directive-type-kw ::type)
 
 (defn ->directive
@@ -17,9 +18,6 @@
   :args (s/cat :type-kw qualified-keyword? :opts (s/? map?))
   :ret ::directive)
 
-(defn directive? [m]
-  (contains? m directive-type-kw))
-
 (defn run-directive-dispatch [_ _ directive]
   (get directive directive-type-kw))
 (defmulti run #'run-directive-dispatch)
@@ -29,6 +27,21 @@
                        (if (fn? directive)
                          (directive)
                          directive)))
+
+(defprotocol Directive
+  (evaluate [this build-context key]))
+
+(defn directive? [m]
+  (or (contains? m directive-type-kw)
+      (satisfies? m Directive)))
+(comment
+  (defrecord Constant [value]
+    Directive
+    (evaluate [x build-context key]
+      (context/assoc-value build-context key value)))
+
+
+  (evaluate (->Constant 1) {} :foo))
 
 ;; =========== UTILS ===========
 

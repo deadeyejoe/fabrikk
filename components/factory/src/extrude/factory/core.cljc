@@ -1,16 +1,26 @@
 (ns extrude.factory.core
   (:require [extrude.specs.interface :as specs]
-            [clojure.spec.alpha :as s]))
+            [clojure.spec.alpha :as s])
+  (:refer-clojure :exclude [resolve]))
 
-(defn ->factory [factory]
-  (merge {:persistable true}
-         factory))
+(def directory (atom {}))
+
+(defn resolve [id]
+  (get @directory id))
+
+(defn ->factory [{:keys [id] :as description}]
+  (let [factory (merge {:persistable true}
+                       description)]
+    (swap! directory assoc id factory)
+    (with-meta factory {::factory true})))
 (s/fdef ->factory
   :ret ::specs/factory)
 
-(defn combine-traits-and-templates [{:keys [template traits id]}
+(defn factory? [x]
+  (::factory (meta x)))
+
+(defn combine-traits-and-templates [{:keys [template traits] :as factory}
                                     {:keys [with] selected-traits :traits :as opts}]
   (merge template
          (apply merge (-> traits (select-keys selected-traits) vals))
-         id
          with))

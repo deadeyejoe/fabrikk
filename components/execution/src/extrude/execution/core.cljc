@@ -8,11 +8,18 @@
 (defn remove-transients [entity transients]
   (apply dissoc entity (or (keys transients) [])))
 
+(defn resolve-factory [factory]
+  (cond
+    (factory/factory? factory) factory
+    (factory/resolve factory) (factory/resolve factory)
+    :else (throw (IllegalArgumentException. (str "Unrecognised factory: " factory)))))
+
 (defn build-entity [execution-context
                     {:as factory
                      :keys [before-build after-build transients]
                      :or {before-build identity after-build identity}}
                     opts]
+  (tap> [::build-entity factory])
   (let [effective-template (factory/combine-traits-and-templates factory opts)]
     (-> effective-template
         (before-build)
@@ -21,9 +28,10 @@
         (remove-transients transients))))
 
 (defn build-context [factory opts]
-  (let [context (-> (context/init)
-                    (context/set-primary! (entity/create! factory {})))]
-    (build-entity context factory opts)))
+  (let [resolved (resolve-factory factory)
+        context (-> (entity/create! resolved) 
+                    (context/init))]
+    (build-entity context resolved opts)))
 
 (defn build [factory opts]
   (context/->result-meta (build-context factory opts)))
@@ -39,9 +47,6 @@
 
 (defn build-list [factory n opt-list]
   (context/->result-meta (build-list-context factory n opt-list)))
-
-(defn persist-dispatch-fn [_context entity])
-(defmulti persist! #'persist-dispatch-fn)
 
 (defn persist-and-store! [context entity])
 

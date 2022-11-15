@@ -2,12 +2,6 @@
   (:require [extrude.entity.interface :as entity]
             [clojure.test :as test :refer :all]))
 
-(deftest primary-id
-  (let [entity (entity/create! {:factory-id :factory
-                              :primary-id :_id}
-                             {:_id :foo})]
-    (is (= :foo (:id entity)))))
-
 (deftest reflexive
   (let [instance (entity/create! {} {1 2})
         persisted (-> (entity/create! {} {1 2})

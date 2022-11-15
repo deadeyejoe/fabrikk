@@ -4,7 +4,8 @@
             [extrude.execution.interface :as execution]
             [extrude.execution-context.interface :as context]
             [extrude.specs.interface :as specs]
-            [clojure.spec.alpha :as s])
+            [clojure.spec.alpha :as s]
+            [extrude.factory.interface :as factory])
   (:refer-clojure :exclude [sequence]))
 
 (s/def ::directive map?)
@@ -56,11 +57,17 @@
 
 ;; =========== BUILD ===========
 
+(defn coerce-factory [factory]
+  (cond
+    (factory/factory? factory) (:id factory)
+    (factory/resolve factory) factory
+    :else (throw (IllegalArgumentException. (str "Unrecognised factory: " factory)))))
+
 (defn build
   ([factory] (build factory {}))
   ([factory build-opts]
    (core/->directive ::build
-                     {:value factory
+                     {:value (coerce-factory factory)
                       :build-opts build-opts})))
 
 (defn link-to-context [context key built-context]
@@ -79,7 +86,7 @@
   ([factory n] (build-list factory n [{}]))
   ([factory n build-opt-list]
    (core/->directive ::build-list
-                     {:value factory
+                     {:value (coerce-factory factory)
                       :number n
                       :build-opt-list build-opt-list})))
 

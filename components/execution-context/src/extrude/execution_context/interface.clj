@@ -2,8 +2,9 @@
   (:require [extrude.build-graph.interface :as build-graph]
             [extrude.execution-context.core :as core]))
 
-(defn init []
-  (build-graph/init))
+(defn init
+  ([] (build-graph/init))
+  ([entity] (build-graph/init entity)))
 
 (defn set-primary! [context entity]
   (build-graph/set-primary! context entity))

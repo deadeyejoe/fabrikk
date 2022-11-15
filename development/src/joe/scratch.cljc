@@ -18,7 +18,7 @@
 
 (def organization
   (factory/->factory
-   {:factory-id ::organization
+   {:id ::organization
     :primary-id :id
     :template {:id random-uuid
                :name "XCorp"
@@ -28,7 +28,7 @@
 
 (def user
   (factory/->factory
-   {:factory-id ::user
+   {:id ::user
     :primary-id :id
     :template {:id random-uuid
                :name (std-directives/sequence (partial str "User ") :context)
@@ -38,13 +38,14 @@
 
 (def group
   (factory/->factory
-   {:factory-id ::group
+   {:id ::group
     :primary-id :id
     :template {:id random-uuid
                :name "Normies"
                :users (build-list user 3)}}))
 
 (comment
+  (factory/factory? user)
   (execution/build user {:with {:name "Bob"}
                          :traits [ :admin]})
   (execution/build user)

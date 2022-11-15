@@ -5,8 +5,8 @@
 (s/def ::instance ::core/instance)
 (s/def ::uuid ::core/uuid)
 
-(defn create! [factory value]
-  (core/create! factory value))
+(defn create! [factory]
+  (core/create! factory))
 
 (defn create-list! []
   (core/create-list!))

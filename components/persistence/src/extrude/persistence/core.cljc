@@ -1,6 +1,7 @@
 (ns extrude.persistence.core
   (:require [extrude.entity.interface :as entity]))
 
+
 (defonce options (atom {:default-method :store}))
 
 (defn set-default-persistence [value]

@@ -3,23 +3,20 @@
             [clojure.spec.alpha :as s]))
 
 (s/def ::uuid uuid?)
-(s/def ::id any?)
 (s/def ::value any?)
 (s/def ::persisted boolean?)
-(s/def ::instance (s/keys :opt-un [::specs/factory-id
-                                   ::specs/factory
+(s/def ::instance (s/keys :opt-un [::specs/factory
                                    ::persisted
                                    ::uuid
-                                   ::id
                                    ::value]))
 
 
 
-(defn create! [factory value]
+(defn create! [factory]
   {:uuid (random-uuid)
    :factory factory
    :persisted false
-   :value value})
+   :value {}})
 
 (defn create-list! []
   {:uuid (random-uuid)
@@ -78,7 +75,7 @@
      (combine one two)]))
 
 (defn factory-id [entity]
-  (-> entity :factory :factory-id))
+  (-> entity :factory :id))
 
 (def value :value)
 

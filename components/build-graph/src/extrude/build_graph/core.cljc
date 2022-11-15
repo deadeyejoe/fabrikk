@@ -47,9 +47,14 @@
   (transpose [x]
     (throw (Exception. "Not implemented"))))
 
-(defn init []
-  (assoc (->BuildGraph {} {})
-         :primary nil))
+(declare set-primary!)
+
+(defn init
+  ([]
+   (assoc (->BuildGraph {} {})
+          :primary nil))
+  ([entity] (-> (init) 
+                (set-primary! entity))))
 
 (defn ensure-node [{:keys [codex] :as bg} {:keys [uuid] :as entity}]
   (if-let [existing (get codex uuid)]

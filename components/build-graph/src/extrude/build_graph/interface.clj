@@ -1,8 +1,9 @@
 (ns extrude.build-graph.interface
   (:require [extrude.build-graph.core :as core]))
 
-(defn init []
-  (core/init))
+(defn init
+  ([] (core/init))
+  ([entity] (core/init entity)))
 
 (defn set-primary! [bg entity]
   (core/set-primary! bg entity))

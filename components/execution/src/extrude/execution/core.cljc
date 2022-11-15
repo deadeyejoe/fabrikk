@@ -53,4 +53,17 @@
 (defn build-list [factory n opt-list]
   (context/->result-meta (build-list-context factory n opt-list)))
 
-(defn create [factory opts])
+(defn persist-dispatch-fn [_context entity])
+(defmulti persist! #'persist-dispatch-fn)
+
+(defn persist-and-store! [context entity])
+
+(defn create [factory opts]
+  (let [built-context (build-context factory opts)
+        entities-in-order (->> (context/entities-in-build-order built-context)
+                               (filter entity/needs-persist?))]
+    (reduce persist-and-store!
+            built-context
+            entities-in-order)))
+
+(defn create-list [factory opts opt-list])

@@ -11,6 +11,5 @@
     (tap> :TESTING)
     p))
 (comment
-  (refresh)
-  (open-portal)
-  )
+  (open-portal)) 
+(refresh)

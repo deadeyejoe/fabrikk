@@ -34,3 +34,6 @@
 
 (defn update-value [entity f & args]
   (core/update-value entity f args))
+
+(defn needs-persist? [entity]
+  (core/needs-persist? entity))

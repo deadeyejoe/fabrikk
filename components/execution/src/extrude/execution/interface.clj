@@ -21,3 +21,9 @@
 
 (defn create [factory opts]
   (core/create factory opts))
+
+(defn create-list
+  ([factory n]
+   (core/create-list factory n [{}]))
+  ([factory n & opt-list]
+   (core/create-list factory n opt-list)))

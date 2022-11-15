@@ -1,7 +1,9 @@
 (ns extrude.build-graph.core
-  (:require [extrude.entity.interface :as entity]
+  (:require [clojure.spec.alpha :as s]
             [extrude.build-graph.label-graph :as label-graph]
-            [clojure.spec.alpha :as s]))
+            [extrude.entity.interface :as entity]
+            [loom.graph :as graph]
+            [loom.alg :as graph-alg]))
 
 (s/def ::primary ::entity/instance)
 (s/def ::codex (s/map-of ::entity/uuid ::entity/instance))
@@ -9,10 +11,45 @@
                                    ::primary
                                    ::codex]))
 
+(defrecord BuildGraph [codex labels]
+  graph/Graph
+  (edges [x]
+    (mapcat (fn [[src label->dest]]
+              (map (partial vector src) (vals label->dest)))
+            labels))
+  (has-edge? [x src dest]
+    (->> (get labels src)
+         (vals)
+         (some (partial = dest))))
+  (nodes [x]
+    (keys codex))
+  (has-node? [x node]
+    (get codex node))
+  (out-degree [x src-node]
+    (count (get labels src-node)))
+  (out-edges [x src-node]
+    (->> (get labels src-node)
+         (vals)
+         (map (partial vector src-node))))
+  (successors* [x src-node]
+    (map second (graph/out-edges x src-node)))
+  graph/Digraph
+  (in-edges [x dest-node]
+    (keep (fn [[src label->dest]]
+            (when (some #{dest-node}
+                        (vals label->dest))
+              [src dest-node]))
+          labels))
+  (in-degree [x dest-node]
+    (count (graph/in-edges x dest-node)))
+  (predecessors* [x dest-node]
+    (map first (graph/out-edges x dest-node)))
+  (transpose [x]
+    (throw (Exception. "Not implemented"))))
+
 (defn init []
-  {:labels {}
-   :codex {}
-   :primary nil})
+  (assoc (->BuildGraph {} {})
+         :primary nil))
 
 (defn ensure-node [{:keys [codex] :as bg} {:keys [uuid] :as entity}]
   (if-let [existing (get codex uuid)]
@@ -50,3 +87,10 @@
    the path, if it exists. Or nil otherwise"
   [{:keys [codex labels primary] :as _build-graph} path]
   (get codex (label-graph/traverse-path labels primary path)))
+
+(defn entities-in-build-order [{:keys [codex] :as build-graph}]
+  (if-let [sorted (graph-alg/topsort build-graph)]
+    (->> sorted
+         (reverse)
+         (map codex))
+    (throw (IllegalArgumentException. "Build graph must be a DAG"))))

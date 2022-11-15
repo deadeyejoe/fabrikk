@@ -55,14 +55,3 @@
   (link-to-context context 
                    key
                    (execution/build-list-context value number build-opt-list)))
-
-;; =========== PROVIDE ===========
-
-(defn provide [build-context]
-  (core/->directive ::provide
-                    {:value build-context}))
-
-(defmethod core/run ::provide [context key {provided :value}]
-  (if-let [provided-context (meta provided)]
-    (link-to-context context key provided-context)
-    (context/assoc-value context key provided)))

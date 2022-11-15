@@ -13,5 +13,8 @@
 (defn associate [primary label associated-build-graph]
   (core/associate primary label associated-build-graph))
 
+(defn entities-in-build-order [bg]
+  (core/entities-in-build-order bg))
+
 (defn path [bg path]
   (core/path bg path))

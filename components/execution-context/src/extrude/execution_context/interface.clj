@@ -17,6 +17,12 @@
 (defn associate [context label associated-context]
   (build-graph/associate context label associated-context))
 
+(defn entities-in-build-order [context]
+  (build-graph/entities-in-build-order context))
+
+(defn path [context path]
+  (build-graph/path context path))
+
 (defn assoc-value [context key value]
   (core/assoc-value context key value))
 

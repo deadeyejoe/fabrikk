@@ -6,7 +6,8 @@
             [extrude.execution-context.interface :as context]
             [extrude.factory.interface :as factory]
             [extrude.directive.interface.standard :as standard]
-            [extrude.build-graph.interface :as build-graph]))
+            [extrude.build-graph.interface :as build-graph]
+            [loom.alg :as graph-alg]))
 
 (comment
   (directive/run (standard/constant "a"))
@@ -60,5 +61,6 @@
     (tap> (meta group)))
   (let [org (execution/build organization {})
         users (execution/build-list user 4 {:with {:org org}})]
-    (tap> [org users]))
+    (tap> [(meta users) 
+           (context/entities-in-build-order (meta users))]))
   )

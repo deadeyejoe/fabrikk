@@ -14,6 +14,7 @@
                                poly/execution {:local/root "components/execution"}
                                poly/execution-context {:local/root "components/execution-context"}
                                poly/factory {:local/root "components/factory"}
+                               poly/persistence {:local/root "components/persistence"}
                                poly/specs {:local/root "components/specs"}
                                poly/utils {:local/root "components/utils"}}}
 

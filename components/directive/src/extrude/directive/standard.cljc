@@ -70,15 +70,10 @@
                      {:value (coerce-factory factory)
                       :build-opts build-opts})))
 
-(defn link-to-context [context key built-context]
-  (-> context
-      (context/associate key built-context)
-      (context/assoc-value key (context/->result-meta built-context))))
-
 (defmethod core/run ::build [context key {:keys [value build-opts] :as _directive}]
-  (link-to-context context 
-                   key 
-                   (execution/build-context value build-opts)))
+  (context/associate context
+                     key
+                     (execution/build-context value build-opts)))
 
 ;; =========== BUILD LIST ===========
 
@@ -94,6 +89,6 @@
                                   {:keys [value number build-opt-list]
                                    :or {number 0}
                                    :as _directive}]
-  (link-to-context context 
-                   key
-                   (execution/build-list-context value number build-opt-list)))
+  (context/associate context
+                     key
+                     (execution/build-list-context value number build-opt-list)))

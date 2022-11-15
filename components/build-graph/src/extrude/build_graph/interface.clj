@@ -11,9 +11,6 @@
 (defn primary [bg]
   (core/primary bg))
 
-(defn entity->build-graph [entity]
-  (core/entity->build-graph entity))
-
 (defn associate [primary label associated-build-graph]
   (core/associate primary label associated-build-graph))
 

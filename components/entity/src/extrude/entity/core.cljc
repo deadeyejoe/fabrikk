@@ -67,12 +67,14 @@
   (combine entity other-entity))
 
 (comment
-  (let [one (create! {} {1 2})
+  (let [one (create! {})
         two (assoc one :persisted true)]
     [(uuid-match? one two)
      (persisted-match? one two)
      (value-match? one two)
      (combine one two)]))
+
+(def factory :factory)
 
 (defn factory-id [entity]
   (-> entity :factory :id))

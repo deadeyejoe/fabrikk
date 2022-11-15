@@ -19,7 +19,6 @@
                      :keys [before-build after-build transients]
                      :or {before-build identity after-build identity}}
                     opts]
-  (tap> [::build-entity factory])
   (let [effective-template (factory/combine-traits-and-templates factory opts)]
     (-> effective-template
         (before-build)
@@ -29,21 +28,19 @@
 
 (defn build-context [factory opts]
   (let [resolved (resolve-factory factory)
-        context (-> (entity/create! resolved) 
-                    (context/init))]
+        context (context/init (entity/create! resolved))]
     (build-entity context resolved opts)))
 
 (defn build [factory opts]
   (context/->result-meta (build-context factory opts)))
 
 (defn build-list-context [factory number opt-list]
-  (->> (utils/pad-with-last number opt-list)
-       (map-indexed (fn [index build-opts]
-                      [index (build-context factory build-opts)]))
-       (reduce (fn [current-list [index built-context]]
-                 (-> (context/associate current-list index built-context)
-                     (context/update-value conj (context/->result-meta built-context))))
-               (context/->list-context))))
+  (let [list-context (context/init (entity/create-list!))]
+    (->> (utils/pad-with-last number opt-list)
+         (map-indexed (fn [index build-opts]
+                        [index (build-context factory build-opts)]))
+         (reduce (partial apply context/associate)
+                 list-context))))
 
 (defn build-list [factory n opt-list]
   (context/->result-meta (build-list-context factory n opt-list)))

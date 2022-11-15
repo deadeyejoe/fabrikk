@@ -46,9 +46,11 @@
 
 (comment
   (factory/factory? user)
+  (factory/resolve ::user)
+
+(execution/build user)
   (execution/build user {:with {:name "Bob"}
                          :traits [ :admin]})
-  (execution/build user)
   (build-graph/path (execution/build-context user {}) [:org])
   (execution/build group)
   (let [org (execution/build organization)
@@ -58,7 +60,8 @@
                                                           {:with {:org org}})}})]
     [org
      org-user
-     group])
+     group
+     (tap> ( meta group))])
   (let [org (execution/build organization {})
         users (execution/build-list user 4 {:with {:org org}})]
     (tap> [(meta users) 

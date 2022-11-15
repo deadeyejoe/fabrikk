@@ -69,11 +69,6 @@
 (defn primary [{:keys [primary] :as bg}]
   (get-in bg [:codex primary]))
 
-(defn entity->build-graph [entity]
-  (-> (init)
-      (ensure-node entity)
-      (set-primary! entity)))
-
 (defn link [bg entity-id label other-entity-id] 
   (update bg :labels label-graph/link entity-id label other-entity-id))
 

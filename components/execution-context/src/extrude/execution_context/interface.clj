@@ -12,14 +12,8 @@
 (defn primary [context]
   (build-graph/primary context))
 
-(defn entity->context [entity]
-  (build-graph/entity->build-graph entity))
-
-(defn ->list-context []
-  (core/->list-context))
-
 (defn associate [context label associated-context]
-  (build-graph/associate context label associated-context))
+  (core/associate context label associated-context))
 
 (defn entities-in-build-order [context]
   (build-graph/entities-in-build-order context))
@@ -32,6 +26,9 @@
 
 (defn update-value [context f & args]
   (core/update-value context f args))
+
+(defn ->result [context]
+  (core/->result context))
 
 (defn ->result-meta [context]
   (core/->result-meta context))

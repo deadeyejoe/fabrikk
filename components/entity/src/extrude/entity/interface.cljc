@@ -5,8 +5,8 @@
 (s/def ::instance ::core/instance)
 (s/def ::uuid ::core/uuid)
 
-(defn create! [factory]
-  (core/create! factory))
+(defn create! [factory build-opts]
+  (core/create! factory build-opts))
 
 (defn create-list! []
   (core/create-list!))
@@ -34,6 +34,12 @@
 
 (defn factory-id [entity]
   (core/factory-id entity))
+
+(defn associate-as [entity]
+  (core/associate-as entity))
+
+(defn override-association [entity associate-as]
+  (core/override-association entity associate-as))
 
 (defn value [entity]
   (core/value entity))

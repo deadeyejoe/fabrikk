@@ -12,10 +12,11 @@
 
 
 
-(defn create! [factory]
+(defn create! [factory build-opts]
   {:uuid (random-uuid)
    :factory factory
    :persisted false
+   :build-opts build-opts
    :value {}})
 
 (defn create-list! []
@@ -67,7 +68,7 @@
   (combine entity other-entity))
 
 (comment
-  (let [one (create! {})
+  (let [one (create! {} {})
         two (assoc one :persisted true)]
     [(uuid-match? one two)
      (persisted-match? one two)
@@ -78,6 +79,14 @@
 
 (defn factory-id [entity]
   (-> entity :factory :id))
+
+(defn associate-as [entity]
+  (or (-> entity :associate-as)
+      (-> entity :build-opts :as)
+      (-> entity :factory :primary-id)))
+
+(defn override-association [entity associate-as]
+  (assoc entity :associate-as associate-as))
 
 (def value :value)
 

@@ -1,5 +1,5 @@
 (ns joe.scratch
-  (:require [extrude.directive.interface :as directive]
+  (:require [extrude.directive.interface :as directive :refer [as]]
             [extrude.directive.interface.standard :as std-directives :refer [build build-list]]
             [extrude.entity.interface :as entity]
             [extrude.execution.interface :as execution]
@@ -45,12 +45,17 @@
                :users (build-list user 3)}}))
 
 (comment
+  "Building"
   (factory/factory? user)
   (factory/resolve ::user)
 
-(execution/build user)
+  (execution/build user)
   (execution/build user {:with {:name "Bob"}
                          :traits [ :admin]})
+  (let [org (execution/build organization)
+        org-user (execution/build user {:with {:org (as :name org)}})]
+    [org-user])
+
   (build-graph/path (execution/build-context user {}) [:org])
   (execution/build group)
   (let [org (execution/build organization)
@@ -62,8 +67,14 @@
      org-user
      group
      (tap> ( meta group))])
+  )
+(comment
+  "Creation"
   (let [org (execution/build organization {})
         users (execution/build-list user 4 {:with {:org org}})]
     (tap> [(meta users) 
            (context/entities-in-build-order (meta users))]))
+  
+  (let [])
   )
+  

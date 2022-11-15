@@ -69,6 +69,9 @@
 (defn primary [{:keys [primary] :as bg}]
   (get-in bg [:codex primary]))
 
+(defn update-primary [{:keys [primary] :as bg} f args]
+  (apply update-in bg [:codex primary] f args))
+
 (defn link [bg entity-id label other-entity-id] 
   (update bg :labels label-graph/link entity-id label other-entity-id))
 

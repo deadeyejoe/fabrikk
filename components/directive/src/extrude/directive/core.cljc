@@ -1,6 +1,7 @@
 (ns extrude.directive.core
-  (:require [extrude.execution-context.interface :as context]
-            [clojure.spec.alpha :as s]))
+  (:require [clojure.spec.alpha :as s]
+            [extrude.entity.interface :as entity]
+            [extrude.execution-context.interface :as context]))
 
 (s/def ::type qualified-keyword?)
 (s/def ::value any?)
@@ -22,11 +23,11 @@
   (get directive directive-type-kw))
 (defmulti run #'run-directive-dispatch)
 (defmethod run :default [build-context key value]
-  (cond-> (context/assoc-value build-context key
-                               (if (fn? value)
-                                 (value)
-                                 value))
-    (context/meta-result? value) (context/associate key (meta value))))
+  (if (context/meta-result? value)
+    (context/associate build-context key (meta value))
+    (context/assoc-value build-context key (if (fn? value)
+                                             (value)
+                                             value))))
 
 (defprotocol Directive
   (evaluate [this build-context key]))
@@ -46,3 +47,12 @@
 
 (defn run-directives [context m]
   (reduce-kv run context m))
+
+
+;; =========== AS ===========
+
+(defn as [associate-as entity]
+  (if (context/meta-result? entity)
+    (vary-meta entity (fn [context]
+                        (context/update-primary context entity/override-association associate-as)))
+    entity))

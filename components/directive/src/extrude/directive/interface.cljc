@@ -14,3 +14,6 @@
 
 (defn run-directives [context m]
   (core/run-directives context m))
+
+(defn as [x associate-as]
+  (core/as x associate-as))

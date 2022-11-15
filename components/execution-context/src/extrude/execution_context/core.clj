@@ -29,10 +29,18 @@
 (defn meta-result? [x]
   (-> x meta ::meta))
 
+(def identity-association? #{:identity :itself})
+
 (defn associate [context key associated-context]
-  (let [{:keys [primary-id] :as _built-factory} (-> associated-context build-graph/primary entity/factory)
-        value-to-assoc (cond-> (->result-meta associated-context)
-                         primary-id (get primary-id))]
+  (let [associate-as (or (-> associated-context build-graph/primary entity/associate-as)
+                       :itself)
+        result (->result-meta associated-context)
+        value-to-assoc (cond 
+                         (identity-association? associate-as) result
+                         (fn? associate-as) (associate-as result)
+                         (keyword? associate-as) (get result associate-as)
+                         :else result)]
+    (tap> [associate-as result value-to-assoc])
     (-> context
         (build-graph/associate key associated-context)
         (assoc-value key value-to-assoc))))

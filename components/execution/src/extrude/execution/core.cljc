@@ -18,21 +18,21 @@
                     {:as factory
                      :keys [before-build after-build transients]
                      :or {before-build identity after-build identity}}
-                    opts]
-  (let [effective-template (factory/combine-traits-and-templates factory opts)]
+                    build-opts]
+  (let [effective-template (factory/combine-traits-and-templates factory build-opts)]
     (-> effective-template
         (before-build)
         ((partial directive/run-directives execution-context))
         (after-build)
         (remove-transients transients))))
 
-(defn build-context [factory opts]
+(defn build-context [factory build-opts]
   (let [resolved (resolve-factory factory)
-        context (context/init (entity/create! resolved))]
-    (build-entity context resolved opts)))
+        context (context/init (entity/create! resolved build-opts))]
+    (build-entity context resolved build-opts)))
 
-(defn build [factory opts]
-  (context/->result-meta (build-context factory opts)))
+(defn build [factory build-opts]
+  (context/->result-meta (build-context factory build-opts)))
 
 (defn build-list-context [factory number opt-list]
   (let [list-context (context/init (entity/create-list!))]

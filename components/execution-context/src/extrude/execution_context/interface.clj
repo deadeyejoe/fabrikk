@@ -6,11 +6,11 @@
   ([] (build-graph/init))
   ([entity] (build-graph/init entity)))
 
-(defn set-primary! [context entity]
-  (build-graph/set-primary! context entity))
-
 (defn primary [context]
   (build-graph/primary context))
+
+(defn update-primary [context f & args]
+  (apply build-graph/update-primary context f args))
 
 (defn associate [context label associated-context]
   (core/associate context label associated-context))

@@ -5,11 +5,12 @@
   ([] (core/init))
   ([entity] (core/init entity)))
 
-(defn set-primary! [bg entity]
-  (core/set-primary! bg entity))
-
 (defn primary [bg]
   (core/primary bg))
+
+(defn update-primary [bg f & args]
+  (tap> [::update bg f args])
+  (core/update-primary bg f args))
 
 (defn associate [primary label associated-build-graph]
   (core/associate primary label associated-build-graph))

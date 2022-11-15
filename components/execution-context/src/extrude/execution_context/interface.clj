@@ -8,6 +8,9 @@
 (defn set-primary! [context entity]
   (build-graph/set-primary! context entity))
 
+(defn primary [context]
+  (build-graph/primary context))
+
 (defn entity->context [entity]
   (build-graph/entity->build-graph entity))
 

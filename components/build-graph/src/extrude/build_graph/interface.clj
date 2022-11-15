@@ -7,6 +7,9 @@
 (defn set-primary! [bg entity]
   (core/set-primary! bg entity))
 
+(defn primary [bg]
+  (core/primary bg))
+
 (defn entity->build-graph [entity]
   (core/entity->build-graph entity))
 

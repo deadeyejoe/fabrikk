@@ -80,6 +80,9 @@
      (value-match? one two)
      (combine one two)]))
 
+(defn factory-id [entity]
+  (-> entity :factory :factory-id))
+
 (def value :value)
 
 (defn update-value [entity f args]

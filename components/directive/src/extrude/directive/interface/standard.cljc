@@ -1,8 +1,14 @@
 (ns extrude.directive.interface.standard
-  (:require [extrude.directive.standard :as standard]))
+  (:require [extrude.directive.standard :as standard])
+  (:refer-clojure :exclude [sequence]))
 
 (defn constant [x]
   (standard/constant x))
+ 
+(defn sequence
+  ([] (standard/sequence identity nil))
+  ([f] (standard/sequence f nil))
+  ([f identifier] (standard/sequence f identifier)))
 
 (defn build
   ([factory]

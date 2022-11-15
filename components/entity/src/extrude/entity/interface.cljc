@@ -29,6 +29,9 @@
 (defn combine-no-conflict [entity other-entity]
   (core/combine-no-conflict entity other-entity))
 
+(defn factory-id [entity]
+  (core/factory-id entity))
+
 (defn value [entity]
   (core/value entity))
 

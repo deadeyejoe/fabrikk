@@ -13,3 +13,6 @@
 (comment
   ((scoped-assoc :value) {} :foo :bar)
   ((scoped-update :value) {} :foo (fnil inc 0)))
+
+(defn copy-docs [sym other]
+  (alter-meta! sym assoc :doc (:doc (meta other))))

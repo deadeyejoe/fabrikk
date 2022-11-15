@@ -1,6 +1,6 @@
 (ns joe.scratch
   (:require [extrude.directive.interface :as directive]
-            [extrude.directive.interface.standard :refer [build build-list]]
+            [extrude.directive.interface.standard :as std-directives :refer [build build-list]]
             [extrude.entity.interface :as entity]
             [extrude.execution.interface :as execution]
             [extrude.execution-context.interface :as context]
@@ -31,7 +31,7 @@
    {:factory-id ::user
     :primary-id :id
     :template {:id random-uuid
-               :name "Joe"
+               :name (std-directives/sequence (partial str "User ") :context)
                :role "user"
                :org (build organization)}
     :traits {:admin {:role "admin"}}}))
@@ -57,8 +57,7 @@
                                                           {:with {:org org}})}})]
     [org
      org-user
-     group]
-    (tap> (meta group)))
+     group])
   (let [org (execution/build organization {})
         users (execution/build-list user 4 {:with {:org org}})]
     (tap> [(meta users) 

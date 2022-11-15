@@ -61,6 +61,9 @@
       (ensure-node entity)
       (assoc :primary uuid)))
 
+(defn primary [{:keys [primary] :as bg}]
+  (get-in bg [:codex primary]))
+
 (defn entity->build-graph [entity]
   (-> (init)
       (ensure-node entity)

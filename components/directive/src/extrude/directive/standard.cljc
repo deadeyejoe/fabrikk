@@ -3,7 +3,9 @@
             [extrude.entity.interface :as entity]
             [extrude.execution.interface :as execution]
             [extrude.execution-context.interface :as context]
-            [clojure.spec.alpha :as s]))
+            [extrude.specs.interface :as specs]
+            [clojure.spec.alpha :as s])
+  (:refer-clojure :exclude [sequence]))
 
 (s/def ::directive map?)
 
@@ -17,7 +19,40 @@
   :ret ::directive)
 
 (defmethod core/run ::constant [context key {:keys [value] :as _directive}]
-  value)
+  (context/assoc-value context key value))
+
+;; =========== SEQUENCE ===========
+
+(defonce sequence-cache (atom {}))
+
+(defn sequence
+  "Creates a directive that returns a sequence of numbers that may be transformed by
+   an optional function 'f'. The sequence is scoped to the primary factory by default.
+   
+   Passing an identifier allows the scope to be shared in multiple contexts. A nil identifier
+   or an unavailable factory result in a global scope"
+  ([f identifier]
+   (core/->directive ::sequence
+                     {:value f
+                      :identifier identifier})))
+(s/fdef sequence
+  :args (s/cat :f ::specs/transformer :identifier (s/nilable keyword?))
+  :ret ::core/directive)
+
+(defn increment-number [cache sequence-key]
+  (update cache sequence-key (fnil inc 0)))
+
+(defn get-number [cache sequence-key]
+  (get cache sequence-key))
+
+(defmethod core/run ::sequence [context key {:keys [value identifier]}]
+  (let [sequence-key (or identifier
+                         (-> (context/primary context)
+                             (entity/factory-id))
+                         :global)
+        next-number  (-> (swap! sequence-cache increment-number sequence-key)
+                         (get-number sequence-key))]
+    (context/assoc-value context key (value next-number))))
 
 ;; =========== BUILD ===========
 

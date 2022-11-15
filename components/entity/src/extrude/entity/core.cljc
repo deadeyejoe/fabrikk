@@ -1,7 +1,6 @@
 (ns extrude.entity.core
   (:require [extrude.specs.interface :as specs]
-            [clojure.spec.alpha :as s]
-            [extrude.utils.interface :as utils]))
+            [clojure.spec.alpha :as s]))
 
 (s/def ::uuid uuid?)
 (s/def ::id any?)
@@ -16,17 +15,15 @@
 
 
 
-(defn create! [{:keys [factory-id primary-id] :as factory} value]
-  {:factory-id factory-id
+(defn create! [factory value]
+  {:uuid (random-uuid)
    :factory factory
    :persisted false
-   :uuid (random-uuid)
-   :id (get value primary-id)
    :value value})
 
 (defn create-list! []
-  {:persistable false
-   :uuid (random-uuid)
+  {:uuid (random-uuid)
+   :persisted false
    :value []})
 
 (defn refresh-uuid [entity]
@@ -88,6 +85,11 @@
 (defn update-value [entity f args]
   (apply update entity :value f args))
 
-(defn needs-persist? [{:keys [persisted persistable] :as _entity}]
-  (and (persistable)
-       (not persisted)))
+(def persisted? :persisted)
+
+(defn persistable? [entity]
+  (-> entity :factory :persistable))
+
+(defn needs-persist? [entity]
+  (and (persistable? entity)
+       (persisted?)))

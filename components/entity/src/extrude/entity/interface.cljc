@@ -38,5 +38,11 @@
 (defn update-value [entity f & args]
   (core/update-value entity f args))
 
+(defn persistable? [entity]
+  (core/persistable? entity))
+
+(defn persisted? [entity]
+  (core/persisted? entity))
+
 (defn needs-persist? [entity]
   (core/needs-persist? entity))

@@ -2,7 +2,8 @@
   (:require [extrude.directive.interface :as directive]
             [extrude.entity.interface :as entity]
             [extrude.execution-context.interface :as context]
-            [extrude.factory.interface :as factory]))
+            [extrude.factory.interface :as factory]
+            [extrude.utils.interface :as utils]))
 
 (defn remove-transients [entity transients]
   (apply dissoc entity (or (keys transients) [])))
@@ -27,22 +28,8 @@
 (defn build [factory opts]
   (context/->result-meta (build-context factory opts)))
 
-(defn pad-with-last [n coll]
-  (let [last-element (last coll)]
-    (->> (concat coll (repeat last-element))
-         (take n))))
-
-(comment
-  (pad-with-last -1 [1 2 3])
-  (pad-with-last 1 [1 2 3])
-  (pad-with-last 2 [1 2 3])
-  (pad-with-last 3 [1 2 3])
-  (pad-with-last 10 [1 2 3])
-  (pad-with-last 3 [{}])
-  (pad-with-last 3 []))
-
 (defn build-list-context [factory number opt-list]
-  (->> (pad-with-last number opt-list)
+  (->> (utils/pad-with-last number opt-list)
        (map-indexed (fn [index build-opts]
                       [index (build-context factory build-opts)]))
        (reduce (fn [current-list [index built-context]]

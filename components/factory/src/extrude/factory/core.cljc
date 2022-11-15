@@ -2,7 +2,9 @@
   (:require [extrude.specs.interface :as specs]
             [clojure.spec.alpha :as s]))
 
-(defn ->factory [factory] factory)
+(defn ->factory [factory]
+  (merge {:persistable true}
+         factory))
 (s/fdef ->factory
   :ret ::specs/factory)
 

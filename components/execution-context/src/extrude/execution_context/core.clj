@@ -29,7 +29,7 @@
 (defn meta-result? [x]
   (-> x meta ::meta))
 
-(def identity-association? #{:identity :itself})
+(def identity-association? #{:identity :itself :list-item})
 
 (defn value-to-assoc [result associate-as]
   (cond

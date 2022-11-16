@@ -37,6 +37,17 @@
                :org (build organization)}
     :traits {:admin {:role "admin"}}}))
 
+(def post
+  (factory/->factory
+   {:id ::post
+    :primary-id :id
+    :template {:id (std-directives/sequence)
+               :title "Fabrikk of society"
+               :published false
+               :content ""
+               :author (build user)}
+    :traits {:published {:published true}}}))
+
 (def group
   (factory/->factory
    {:id ::group
@@ -62,6 +73,13 @@
   (let [org (execution/build organization)
         org-user (execution/build user {:with {:org (as :name org)}})]
     [org-user])
+  
+  (execution/build-list user 2)
+  
+  (execution/build post)
+
+(let [[u1 u2 u3] (execution/build-list user 3)]
+  (execution/build post {:with {:author u1}}))
 
   (build-graph/path (execution/build-context user {}) [:org])
   (execution/build group)
@@ -79,13 +97,28 @@
   "Creation"
   (let [org (execution/build organization {})
         users (execution/build-list user 4 {:with {:org org}})]
-    (tap> [(meta users) 
+    (tap> [(meta users)
            (context/entities-in-build-order (meta users))]))
+
   (do
     (persistence/reset-store!)
-    (let [user (execution/create user {})]
+    (let [user (execution/create user)]
       [user
        @persistence/store]))
-  
+
+  (do
+    (persistence/reset-store!)
+    (let [org (execution/build organization)
+          users (execution/create-list user 2 {:with {:org org}})]
+      [users
+       @persistence/store]))
+
+(do
+  (persistence/reset-store!)
+  (let [org (execution/build organization)
+        users (execution/build-list user 2 {:with {:org org}})
+        group (execution/create group {:with {:users users}})]
+    [group
+     @persistence/store]))
   )
   

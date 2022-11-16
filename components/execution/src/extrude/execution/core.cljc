@@ -35,16 +35,21 @@
 (defn build [factory build-opts]
   (context/->result-meta (build-context factory build-opts)))
 
-(defn build-list-context [factory number opt-list]
+(defn build-list-context [factory number build-opt-list]
   (let [list-context (context/init (entity/create-list!))]
-    (->> (utils/pad-with-last number opt-list)
+    (->> (utils/pad-with-last number build-opt-list)
          (map-indexed (fn [index build-opts]
                         [index (build-context factory build-opts)]))
          (reduce (partial apply context/associate)
                  list-context))))
 
-(defn build-list [factory n opt-list]
-  (context/->result-meta (build-list-context factory n opt-list)))
+(defn assoc-as-list-item [build-opts]
+  (assoc build-opts :as :list-item))
+
+(defn build-list [factory n build-opt-list]
+  (->> (map assoc-as-list-item build-opt-list)
+       (build-list-context factory n)
+       (context/->result-meta)))
 
 (defn unchanged? [entity persisted-entity]
   (= (entity/value entity) (entity/value persisted-entity)))
@@ -61,14 +66,18 @@
           context))
       context)))
 
-(defn create-context [factory opts]
-  (let [built-context (build-context factory opts)
-        ordered-entity-ids (context/entities-in-build-order built-context)]
-    (reduce persist-and-propagate!
-            built-context
-            ordered-entity-ids)))
+(defn persist-context [built-context]
+  (reduce persist-and-propagate!
+          built-context
+          (context/entities-in-build-order built-context)))
 
 (defn create [factory opts]
-  (context/->result-meta (create-context factory opts)))
+  (-> (build-context factory opts)
+      (persist-context)
+      (context/->result-meta)))
 
-(defn create-list [factory opts opt-list])
+(defn create-list [factory n build-opt-list]
+  (->> (map assoc-as-list-item build-opt-list)
+       (build-list-context factory n)
+       (persist-context)
+       (context/->result-meta)))

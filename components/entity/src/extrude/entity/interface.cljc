@@ -38,6 +38,9 @@
 (defn associate-as [entity]
   (core/associate-as entity))
 
+(defn suppress-list-association [entity]
+  (core/suppress-list-association entity))
+
 (defn override-association [entity associate-as]
   (core/override-association entity associate-as))
 

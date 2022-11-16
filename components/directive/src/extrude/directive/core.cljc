@@ -8,6 +8,7 @@
 (s/def ::directive (s/keys :req [::type]
                            :opt-un [::value]))
 
+;; =========== CREATION ===========
 
 (def directive-type-kw ::type)
 
@@ -19,15 +20,27 @@
   :args (s/cat :type-kw qualified-keyword? :opts (s/? map?))
   :ret ::directive)
 
+;; =========== RUN ===========
+
 (defn run-directive-dispatch [_ _ directive]
   (get directive directive-type-kw))
+
 (defmulti run #'run-directive-dispatch)
+
+(defn handle-meta [build-context key value]
+  (let [context-to-associate (context/update-primary (meta value)
+                                                     entity/suppress-list-association)]
+    (tap> [::handle-meta (context/primary (meta value))])
+    (context/associate build-context key context-to-associate)))
+
 (defmethod run :default [build-context key value]
   (if (context/meta-result? value)
-    (context/associate build-context key (meta value))
+    (handle-meta build-context key value)
     (context/assoc-value build-context key (if (fn? value)
                                              (value)
                                              value))))
+
+;; =========== DIRECTIVE ===========
 
 (defprotocol Directive
   (evaluate [this build-context key]))

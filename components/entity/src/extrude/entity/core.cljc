@@ -85,6 +85,11 @@
       (-> entity :build-opts :as)
       (-> entity :factory :primary-id)))
 
+(defn suppress-list-association [entity]
+  (if (= :list-item (-> entity :build-opts :as))
+    (update entity :build-opts dissoc :as)
+    entity))
+
 (defn override-association [entity associate-as]
   (assoc entity :associate-as associate-as))
 

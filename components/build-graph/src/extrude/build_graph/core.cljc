@@ -76,7 +76,7 @@
   (entity bg primary))
 
 (defn update-primary [{:keys [primary] :as bg} f args]
-  (apply update-entity bg primary f args))
+  (update-entity bg primary f args))
 
 (defn link [bg entity-id label other-entity-id] 
   (update bg :labels label-graph/link entity-id label other-entity-id))

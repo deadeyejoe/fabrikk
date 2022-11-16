@@ -7,7 +7,8 @@
             [extrude.factory.interface :as factory]
             [extrude.directive.interface.standard :as standard]
             [extrude.build-graph.interface :as build-graph]
-            [loom.alg :as graph-alg]))
+            [loom.alg :as graph-alg]
+            [extrude.persistence.interface :as persistence]))
 
 (comment
   (directive/run (standard/constant "a"))
@@ -44,6 +45,12 @@
                :name "Normies"
                :users (build-list user 3)}}))
 
+(defmethod persistence/persist! :store [entity]
+  (persistence/store!
+   (-> entity
+       (assoc-in [:value :id] (random-uuid))
+       (assoc :persisted true))))
+
 (comment
   "Building"
   (factory/factory? user)
@@ -74,7 +81,11 @@
         users (execution/build-list user 4 {:with {:org org}})]
     (tap> [(meta users) 
            (context/entities-in-build-order (meta users))]))
+  (do
+    (persistence/reset-store!)
+    (let [user (execution/create user {})]
+      [user
+       @persistence/store]))
   
-  (let [])
   )
   

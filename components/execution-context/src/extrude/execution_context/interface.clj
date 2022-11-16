@@ -12,11 +12,23 @@
 (defn update-primary [context f & args]
   (apply build-graph/update-primary context f args))
 
+(defn entity [context id]
+  (build-graph/entity context id))
+
+(defn set-entity [context entity]
+  (build-graph/set-entity context entity))
+
+(defn update-entity [context id f & args]
+  (apply build-graph/update-entity context id f args))
+
 (defn associate [context label associated-context]
   (core/associate context label associated-context))
 
 (defn entities-in-build-order [context]
   (build-graph/entities-in-build-order context))
+
+(defn propagate [context entity]
+  (core/propagate context entity))
 
 (defn path [context path]
   (build-graph/path context path))

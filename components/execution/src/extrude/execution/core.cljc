@@ -3,6 +3,7 @@
             [extrude.entity.interface :as entity]
             [extrude.execution-context.interface :as context]
             [extrude.factory.interface :as factory]
+            [extrude.persistence.interface :as persistence]
             [extrude.utils.interface :as utils]))
 
 (defn remove-transients [entity transients]
@@ -45,14 +46,29 @@
 (defn build-list [factory n opt-list]
   (context/->result-meta (build-list-context factory n opt-list)))
 
-(defn persist-and-store! [context entity])
+(defn unchanged? [entity persisted-entity]
+  (= (entity/value entity) (entity/value persisted-entity)))
+(def changed? (complement unchanged?))
+
+(defn persist-and-propagate! [context entity-id]
+  (let [entity (context/entity context entity-id)]
+    (if (entity/needs-persist? entity)
+      (let [persisted-entity (persistence/persist! entity)]
+        (if (changed? entity persisted-entity)
+          (-> context
+              (context/set-entity persisted-entity)
+              (context/propagate persisted-entity))
+          context))
+      context)))
+
+(defn create-context [factory opts]
+  (let [built-context (build-context factory opts)
+        ordered-entity-ids (context/entities-in-build-order built-context)]
+    (reduce persist-and-propagate!
+            built-context
+            ordered-entity-ids)))
 
 (defn create [factory opts]
-  (let [built-context (build-context factory opts)
-        entities-in-order (->> (context/entities-in-build-order built-context)
-                               (filter entity/needs-persist?))]
-    (reduce persist-and-store!
-            built-context
-            entities-in-order)))
+  (context/->result-meta (create-context factory opts)))
 
 (defn create-list [factory opts opt-list])

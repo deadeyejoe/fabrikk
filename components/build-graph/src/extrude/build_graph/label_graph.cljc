@@ -16,16 +16,27 @@
 (defn merge [graph other-graph]
   (merge-with clojure.core/merge graph other-graph))
 
+(defn in-edges [lg node]
+  (mapcat (fn [[source label->dest]]
+            (keep (fn [[label dest]]
+                    (when (= node dest)
+                      [source label dest]))
+                  label->dest))
+          lg))
+
 (comment
   (link {} 1 :org 2)
   (link {} 1 :org 1)
   (link-no-conflict! {1 {:org 2}} 1 :org 2)
-  (merge (-> {}
-             (link 1 :user 2)
-             (link 2 :org 3)
-             (link 1 :org-domain 3))
-         (-> {}
-             (link 2 :group 4))))
+  (->> (in-edges (merge (-> {}
+                            (link 1 :user 2)
+                            (link 2 :org 3)
+                            (link 1 :org-domain 3))
+                        (-> {}
+                            (link 2 :group 4)))
+                 3)
+       (map (juxt first last)))
+  )
 
 (defn traverse-label [lg source label]
   (get-in lg [source label]))

@@ -100,4 +100,4 @@
 
 (defn needs-persist? [entity]
   (and (persistable? entity)
-       (persisted?)))
+       (not (persisted? entity))))

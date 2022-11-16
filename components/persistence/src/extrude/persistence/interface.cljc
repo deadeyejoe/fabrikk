@@ -11,5 +11,8 @@
 
 (def store core/store)
 
+(defn store! [entity]
+  (core/store! entity))
+
 (defn reset-store! []
   (core/reset-store!))

@@ -35,12 +35,15 @@
 
 (defonce store (atom {}))
 
-(defn reset-store! []
-  (reset! store {}))
-
 (def collect-entity (fnil conj []))
 
-(defmethod persist! :store [entity]
+(defn store! [entity]
   (let [factory-id (entity/factory-id entity)]
     (swap! store update factory-id collect-entity (entity/value entity))
     entity))
+
+(defn reset-store! []
+  (reset! store {}))
+
+(defmethod persist! :store [entity]
+  (store! entity))

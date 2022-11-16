@@ -13,39 +13,39 @@
 
 (defrecord BuildGraph [codex labels]
   graph/Graph
-  (edges [x]
+  (edges [_]
     (mapcat (fn [[src label->dest]]
               (map (partial vector src) (vals label->dest)))
             labels))
-  (has-edge? [x src dest]
+  (has-edge? [_ src dest]
     (->> (get labels src)
          (vals)
          (some (partial = dest))))
-  (nodes [x]
+  (nodes [_]
     (keys codex))
-  (has-node? [x node]
+  (has-node? [_ node]
     (get codex node))
-  (out-degree [x src-node]
+  (out-degree [_ src-node]
     (count (get labels src-node)))
-  (out-edges [x src-node]
+  (out-edges [_ src-node]
     (->> (get labels src-node)
          (vals)
          (map (partial vector src-node))))
   (successors* [x src-node]
     (map second (graph/out-edges x src-node)))
   graph/Digraph
-  (in-edges [x dest-node]
-    (keep (fn [[src label->dest]]
-            (when (some #{dest-node}
-                        (vals label->dest))
-              [src dest-node]))
-          labels))
+  (in-edges [_ dest-node]
+            (map (juxt first last)
+                 (label-graph/in-edges labels dest-node)))
   (in-degree [x dest-node]
     (count (graph/in-edges x dest-node)))
   (predecessors* [x dest-node]
     (map first (graph/out-edges x dest-node)))
-  (transpose [x]
+  (transpose [_]
     (throw (Exception. "Not implemented"))))
+
+(defn in-edges [{:keys [labels] :as bg} node]
+  (label-graph/in-edges labels node))
 
 (declare set-primary!)
 
@@ -66,11 +66,17 @@
       (ensure-node entity)
       (assoc :primary uuid)))
 
+(defn entity [bg id]
+  (get-in bg [:codex id]))
+
+(defn update-entity [bg id f args]
+  (apply update-in bg [:codex id] f args))
+
 (defn primary [{:keys [primary] :as bg}]
-  (get-in bg [:codex primary]))
+  (entity bg primary))
 
 (defn update-primary [{:keys [primary] :as bg} f args]
-  (apply update-in bg [:codex primary] f args))
+  (apply update-entity bg primary f args))
 
 (defn link [bg entity-id label other-entity-id] 
   (update bg :labels label-graph/link entity-id label other-entity-id))
@@ -96,7 +102,10 @@
 
 (defn entities-in-build-order [{:keys [codex] :as build-graph}]
   (if-let [sorted (graph-alg/topsort build-graph)]
-    (->> sorted
-         (reverse)
-         (map codex))
+    (reverse sorted)
     (throw (IllegalArgumentException. "Build graph must be a DAG"))))
+
+(comment
+  (-> (->BuildGraph {1 :one 2 :two}
+                    {1 {:org 2}})
+      (graph-alg/topsort)))

@@ -31,6 +31,13 @@
 
 (def identity-association? #{:identity :itself})
 
+(defn value-to-assoc [result associate-as]
+  (cond
+    (identity-association? associate-as) result
+    (fn? associate-as) (associate-as result)
+    (keyword? associate-as) (get result associate-as)
+    :else result))
+
 (defn associate [context key associated-context]
   (let [associate-as (or (-> associated-context build-graph/primary entity/associate-as)
                        :itself)
@@ -40,7 +47,19 @@
                          (fn? associate-as) (associate-as result)
                          (keyword? associate-as) (get result associate-as)
                          :else result)]
-    (tap> [associate-as result value-to-assoc])
     (-> context
         (build-graph/associate key associated-context)
         (assoc-value key value-to-assoc))))
+
+(defn propagate-edge [build-graph [source label _dest] entity]
+  (let [associate-as (or (entity/associate-as entity)
+                         :itself)]
+    (assoc-in build-graph [:codex source :value label] (value-to-assoc (:value entity) associate-as))))
+
+(defn propagate [{:keys [primary] :as build-graph} {:keys [uuid] :as entity}]
+  (if (= primary uuid)
+    build-graph ;; The primary is the top of the dag, shouldn't need to propagate any changes
+    (reduce (fn [build-graph edge]
+              (propagate-edge build-graph edge entity))
+            build-graph
+            (build-graph/in-edges-with-labels build-graph uuid))))

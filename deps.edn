@@ -9,7 +9,8 @@
                                aysylu/loom {:mvn/version "1.0.2"}
 
                                poly/build-graph {:local/root "components/build-graph"}
-                               poly/directive {:local/root "components/directive"}
+                               poly/directive-core {:local/root "components/directive-core"}
+                               poly/directives {:local/root "components/directives"}
                                poly/entity {:local/root "components/entity"}
                                poly/execution {:local/root "components/execution"}
                                poly/execution-context {:local/root "components/execution-context"}

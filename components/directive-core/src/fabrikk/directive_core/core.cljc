@@ -1,4 +1,4 @@
-(ns fabrikk.directive.core
+(ns fabrikk.directive-core.core
   (:require [clojure.spec.alpha :as s]
             [fabrikk.entity.interface :as entity]
             [fabrikk.execution-context.interface :as context]))

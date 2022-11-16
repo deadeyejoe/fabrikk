@@ -1,5 +1,5 @@
 (ns fabrikk.execution.core
-  (:require [fabrikk.directive.interface :as directive]
+  (:require [fabrikk.directive-core.interface :as directive-core]
             [fabrikk.entity.interface :as entity]
             [fabrikk.execution-context.interface :as context]
             [fabrikk.factory.interface :as factory]
@@ -23,7 +23,7 @@
   (let [effective-template (factory/combine-traits-and-templates factory build-opts)]
     (-> effective-template
         (before-build)
-        ((partial directive/run-directives execution-context))
+        ((partial directive-core/run-directives execution-context))
         (after-build)
         (remove-transients transients))))
 

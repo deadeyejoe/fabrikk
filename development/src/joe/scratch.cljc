@@ -1,21 +1,20 @@
 (ns joe.scratch
-  (:require [fabrikk.directive.interface :as directive :refer [as]]
-            [fabrikk.directive.interface.standard :as std-directives :refer [build build-list]]
+  (:require [fabrikk.directives.interface :as directives :refer [build build-list]]
+            [fabrikk.directive-core.interface :as directive-core :refer [as]]
             [fabrikk.entity.interface :as entity]
             [fabrikk.execution.interface :as execution]
             [fabrikk.execution-context.interface :as context]
             [fabrikk.factory.interface :as factory]
-            [fabrikk.directive.interface.standard :as standard]
             [fabrikk.build-graph.interface :as build-graph]
             [loom.alg :as graph-alg]
             [fabrikk.persistence.interface :as persistence]))
 
 (comment
-  (directive/run (standard/constant "a"))
+  (directive-core/run (standard/constant "a"))
   
-  (defmethod directive/run ::foo [_]
+  (defmethod directive-core/run ::foo [_]
     :foo)
-  (directive/run (directive/->directive ::foo)))
+  (directive-core/run (directive-core/->directive ::foo)))
 
 (def organization
   (factory/->factory
@@ -32,7 +31,7 @@
    {:id ::user
     :primary-id :id
     :template {:id random-uuid
-               :name (std-directives/sequence (partial str "User ") :context)
+               :name (directives/sequence (partial str "User ") :context)
                :role "user"
                :org (build organization)}
     :traits {:admin {:role "admin"}}}))
@@ -41,7 +40,7 @@
   (factory/->factory
    {:id ::post
     :primary-id :id
-    :template {:id (std-directives/sequence)
+    :template {:id (directives/sequence)
                :title "Fabrikk of society"
                :published false
                :content ""

@@ -1,5 +1,5 @@
-(ns fabrikk.directive.standard
-  (:require [fabrikk.directive.core :as core]
+(ns fabrikk.directives.core
+  (:require [fabrikk.directive-core.interface :as core]
             [fabrikk.entity.interface :as entity]
             [fabrikk.execution.interface :as execution]
             [fabrikk.execution-context.interface :as context]
@@ -17,7 +17,7 @@
                     {:value x}))
 (s/fdef constant
   :args (s/cat :x any?)
-  :ret ::directive)
+  :ret ::core/directive)
 
 (defmethod core/run ::constant [context key {:keys [value] :as _directive}]
   (context/assoc-value context key value))

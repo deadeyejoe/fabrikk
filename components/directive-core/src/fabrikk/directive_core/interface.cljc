@@ -1,5 +1,8 @@
-(ns fabrikk.directive.interface
-  (:require [fabrikk.directive.core :as core]))
+(ns fabrikk.directive-core.interface
+  (:require [clojure.spec.alpha :as s]
+            [fabrikk.directive-core.core :as core]))
+
+(s/def ::directive ::core/directive)
 
 (def type-kw core/directive-type-kw)
 

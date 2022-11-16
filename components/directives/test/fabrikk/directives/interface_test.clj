@@ -1,4 +1,4 @@
-(ns fabrikk.directive.interface-test
+(ns fabrikk.directives.interface-test
   (:require [clojure.test :as test :refer :all]
             [fabrikk.directive.interface :as directive]))
 

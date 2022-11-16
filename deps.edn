@@ -17,7 +17,9 @@
                                poly/factory {:local/root "components/factory"}
                                poly/persistence {:local/root "components/persistence"}
                                poly/specs {:local/root "components/specs"}
-                               poly/utils {:local/root "components/utils"}}}
+                               poly/utils {:local/root "components/utils"}
+                               
+                               poly/library {:local/root "bases/library"}}}
 
             :test {:extra-paths []}
 

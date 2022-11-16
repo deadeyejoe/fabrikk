@@ -1,11 +1,11 @@
-(ns extrude.directive.standard
-  (:require [extrude.directive.core :as core]
-            [extrude.entity.interface :as entity]
-            [extrude.execution.interface :as execution]
-            [extrude.execution-context.interface :as context]
-            [extrude.specs.interface :as specs]
+(ns fabrikk.directive.standard
+  (:require [fabrikk.directive.core :as core]
+            [fabrikk.entity.interface :as entity]
+            [fabrikk.execution.interface :as execution]
+            [fabrikk.execution-context.interface :as context]
+            [fabrikk.specs.interface :as specs]
             [clojure.spec.alpha :as s]
-            [extrude.factory.interface :as factory])
+            [fabrikk.factory.interface :as factory])
   (:refer-clojure :exclude [sequence]))
 
 (s/def ::directive map?)

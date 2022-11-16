@@ -1,4 +1,4 @@
-{:top-namespace "extrude"
+{:top-namespace "fabrikk"
  :interface-ns "interface"
  :default-profile-name "default"
  :compact-views #{}

@@ -1,5 +1,5 @@
-(ns extrude.directive.interface
-  (:require [extrude.directive.core :as core]))
+(ns fabrikk.directive.interface
+  (:require [fabrikk.directive.core :as core]))
 
 (def type-kw core/directive-type-kw)
 

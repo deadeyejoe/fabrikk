@@ -1,7 +1,7 @@
-(ns extrude.directive.core
+(ns fabrikk.directive.core
   (:require [clojure.spec.alpha :as s]
-            [extrude.entity.interface :as entity]
-            [extrude.execution-context.interface :as context]))
+            [fabrikk.entity.interface :as entity]
+            [fabrikk.execution-context.interface :as context]))
 
 (s/def ::type qualified-keyword?)
 (s/def ::value any?)

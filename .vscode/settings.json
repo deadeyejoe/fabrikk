@@ -1,12 +1,12 @@
 {
     "calva.replConnectSequences": [
         {
-            "projectType": "deps.edn",
-            "name": "extrude",
-            "cljsType": "none",
-            "menuSelections": {
-                "cljAliases": ["dev", "test", "+default"]
-            }
+          "projectType": "deps.edn",
+          "name": "fabrikk",
+          "cljsType": "none",
+          "menuSelections": {
+            "cljAliases": ["dev", "test", "+default"]
+          }
         }
     ]
 }

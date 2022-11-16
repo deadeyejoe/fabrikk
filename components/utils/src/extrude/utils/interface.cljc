@@ -1,5 +1,5 @@
-(ns extrude.utils.interface
-  (:require [extrude.utils.core :as core]))
+(ns fabrikk.utils.interface
+  (:require [fabrikk.utils.core :as core]))
 
 (defn scoped-assoc [& path]
   (apply core/scoped-assoc path))

@@ -1,4 +1,4 @@
-(ns extrude.utils.core)
+(ns fabrikk.utils.core)
 
 (defn scoped-assoc [& path]
   (let [pathv (vec path)]

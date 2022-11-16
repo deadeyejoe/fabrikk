@@ -1,14 +1,14 @@
 (ns joe.scratch
-  (:require [extrude.directive.interface :as directive :refer [as]]
-            [extrude.directive.interface.standard :as std-directives :refer [build build-list]]
-            [extrude.entity.interface :as entity]
-            [extrude.execution.interface :as execution]
-            [extrude.execution-context.interface :as context]
-            [extrude.factory.interface :as factory]
-            [extrude.directive.interface.standard :as standard]
-            [extrude.build-graph.interface :as build-graph]
+  (:require [fabrikk.directive.interface :as directive :refer [as]]
+            [fabrikk.directive.interface.standard :as std-directives :refer [build build-list]]
+            [fabrikk.entity.interface :as entity]
+            [fabrikk.execution.interface :as execution]
+            [fabrikk.execution-context.interface :as context]
+            [fabrikk.factory.interface :as factory]
+            [fabrikk.directive.interface.standard :as standard]
+            [fabrikk.build-graph.interface :as build-graph]
             [loom.alg :as graph-alg]
-            [extrude.persistence.interface :as persistence]))
+            [fabrikk.persistence.interface :as persistence]))
 
 (comment
   (directive/run (standard/constant "a"))
@@ -69,17 +69,17 @@
 
   (execution/build user)
   (execution/build user {:with {:name "Bob"}
-                         :traits [ :admin]})
+                         :traits [:admin]})
   (let [org (execution/build organization)
         org-user (execution/build user {:with {:org (as :name org)}})]
     [org-user])
-  
+
   (execution/build-list user 2)
-  
+
   (execution/build post)
 
-(let [[u1 u2 u3] (execution/build-list user 3)]
-  (execution/build post {:with {:author u1}}))
+  (let [[u1 u2 u3] (execution/build-list user 3)]
+    (execution/build post {:with {:author u1}}))
 
   (build-graph/path (execution/build-context user {}) [:org])
   (execution/build group)
@@ -91,7 +91,7 @@
     [org
      org-user
      group
-     (tap> ( meta group))])
+     (tap> (meta group))])
   )
 (comment
   "Creation"
@@ -113,12 +113,21 @@
       [users
        @persistence/store]))
 
-(do
-  (persistence/reset-store!)
-  (let [org (execution/build organization)
-        users (execution/build-list user 2 {:with {:org org}})
-        group (execution/create group {:with {:users users}})]
-    [group
-     @persistence/store]))
+  (do
+    (persistence/reset-store!)
+    (let [org (execution/build organization)
+          users (execution/build-list user 2 {:with {:org org}})
+          group (execution/create group {:with {:users users}})]
+      [group
+       @persistence/store]))
+  
+  (do
+    (persistence/reset-store!)
+    (let [org (execution/build organization)
+          users (execution/create-list user 2 {:with {:org org}})]
+      [users
+       @persistence/store]))
+
+
   )
   

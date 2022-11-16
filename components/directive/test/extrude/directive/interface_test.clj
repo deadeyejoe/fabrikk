@@ -1,6 +1,6 @@
-(ns extrude.directive.interface-test
+(ns fabrikk.directive.interface-test
   (:require [clojure.test :as test :refer :all]
-            [extrude.directive.interface :as directive]))
+            [fabrikk.directive.interface :as directive]))
 
 (deftest dummy-test
   (is (= 1 1)))

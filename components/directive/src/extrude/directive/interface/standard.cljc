@@ -1,5 +1,5 @@
-(ns extrude.directive.interface.standard
-  (:require [extrude.directive.standard :as standard])
+(ns fabrikk.directive.interface.standard
+  (:require [fabrikk.directive.standard :as standard])
   (:refer-clojure :exclude [sequence]))
 
 (defn constant [x]

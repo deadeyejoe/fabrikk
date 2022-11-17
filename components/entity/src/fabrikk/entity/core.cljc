@@ -106,3 +106,6 @@
 (defn needs-persist? [entity]
   (and (persistable? entity)
        (not (persisted? entity))))
+
+(defn persist-with [entity]
+  (-> entity :build-opts :persist-with))

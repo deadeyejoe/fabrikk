@@ -34,7 +34,11 @@
                :name (directives/sequence (partial str "User ") :context)
                :role "user"
                :org (build organization)}
-    :traits {:admin {:role "admin"}}}))
+    :traits {:admin {:role "admin"}}
+    :transients [:foo]
+    :after-build (fn [& args] 
+                   (tap> [::after-build args])
+                   (first args))}))
 
 (def post
   (factory/->factory
@@ -66,7 +70,7 @@
   (factory/factory? user)
   (factory/resolve ::user)
 
-  (execution/build user)
+  (execution/build user {:with {:foo :bar :baz 1}})
   (execution/build user {:with {:name "Bob"}
                          :traits [:admin]})
   (let [org (execution/build organization)

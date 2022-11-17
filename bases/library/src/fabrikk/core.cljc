@@ -1,8 +1,12 @@
 (ns fabrikk.core
   (:require [fabrikk.directives.interface :as directives]
             [fabrikk.execution.interface :as execution]
-            [fabrikk.factory.interface :as factory])
+            [fabrikk.factory.interface :as factory]
+            [fabrikk.persistence.interface :as persistence])
   (:refer-clojure :exclude [sequence]))
+
+(defn set-default-persistence [key]
+  (persistence/set-default-persistence key))
 
 (defn ->factory [description]
   (factory/->factory description))
@@ -15,9 +19,9 @@
 
 (defn build-list
   ([factory n]
-   (execution/build-list factory n [{}]))
+   (execution/build-list factory n {}))
   ([factory n & opt-list]
-   (execution/build-list factory n opt-list)))
+   (apply execution/build-list factory n opt-list)))
 
 (defn create
   ([factory]
@@ -29,7 +33,9 @@
   ([factory n]
    (execution/create-list factory n [{}]))
   ([factory n & opt-list]
-   (execution/create-list factory n opt-list)))
+   (apply execution/create-list factory n opt-list)))
+
+(def persist! persistence/persist!)
 
 (defn constant [x]
   (directives/constant x))
@@ -49,4 +55,4 @@
   ([factory n]
    (directives/build-list factory n))
   ([factory n & opts]
-   (directives/build-list factory n opts)))
+   (apply directives/build-list factory n opts)))

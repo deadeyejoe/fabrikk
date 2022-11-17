@@ -6,8 +6,9 @@
             [fabrikk.persistence.interface :as persistence]
             [fabrikk.utils.interface :as utils]))
 
-(defn remove-transients [entity transients]
-  (apply dissoc entity (or (keys transients) [])))
+(defn remove-transients [context transients]
+  (cond-> context
+    (seq transients) (context/update-primary entity/update-value #(apply dissoc % transients))))
 
 (defn resolve-factory [factory]
   (cond
@@ -15,16 +16,22 @@
     (factory/resolve factory) (factory/resolve factory)
     :else (throw (IllegalArgumentException. (str "Unrecognised factory: " factory)))))
 
+(defn after-build-fn [after-build-config]
+  (if after-build-config
+    (fn [context] (context/update-primary context entity/update-value after-build-config))
+    identity))
+
 (defn build-entity [execution-context
                     {:as factory
                      :keys [before-build after-build transients]
-                     :or {before-build identity after-build identity}}
+                     :or {before-build identity }}
                     build-opts]
-  (let [effective-template (factory/combine-traits-and-templates factory build-opts)]
+  (let [effective-template (factory/combine-traits-and-templates factory build-opts)
+        after (after-build-fn after-build)]
     (-> effective-template
         (before-build)
         ((partial directive-core/run-directives execution-context))
-        (after-build)
+        (after)
         (remove-transients transients))))
 
 (defn build-context [factory build-opts]
@@ -58,7 +65,7 @@
 (defn persist-and-propagate! [context entity-id]
   (let [entity (context/entity context entity-id)]
     (if (entity/needs-persist? entity)
-      (let [persisted-entity (persistence/persist! entity)]
+      (let [persisted-entity (persistence/persist! entity (entity/value entity))]
         (if (changed? entity persisted-entity)
           (-> context
               (context/set-entity persisted-entity)

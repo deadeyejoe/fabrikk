@@ -58,3 +58,6 @@
 
 (defn needs-persist? [entity]
   (core/needs-persist? entity))
+
+(defn persist-with [entity]
+  (core/persist-with entity))

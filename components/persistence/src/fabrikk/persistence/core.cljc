@@ -12,12 +12,14 @@
 
 ;; ============ PERSIST! ============
 
-(defn persist-dispatch-fn [{:keys [persist-with] :as entity}]
+(defn persist-dispatch-fn [entity _value]
   (assert (entity/factory-id entity) "Cannot persist without a factory id!")
-  (let [method (or persist-with (default-persistence-method))]
-    (if (= :store method)
-      :store
-      [method (entity/factory-id entity)])))
+  (let [method (or (entity/persist-with entity)
+                   (default-persistence-method))]
+    (cond
+      (= :store method) :store
+      method [method (entity/factory-id entity)]
+      :else (entity/factory-id entity))))
 
 (defmulti persist!
   "Persists an entity. Uses the persistence method under the `:persist-with` key
@@ -28,7 +30,7 @@
    in a vectory keyed to their factory-id"
   #'persist-dispatch-fn)
 
-(defmethod persist! :default [_entity]
+(defmethod persist! :default [_entity _value]
   (throw (IllegalArgumentException. "No default persistence method found")))
 
 ;; ============ DEFAULT STORE ============

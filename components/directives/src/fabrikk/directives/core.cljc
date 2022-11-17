@@ -6,7 +6,7 @@
             [fabrikk.specs.interface :as specs]
             [clojure.spec.alpha :as s]
             [fabrikk.factory.interface :as factory])
-  (:refer-clojure :exclude [sequence]))
+  (:refer-clojure :exclude [sequence derive]))
 
 (s/def ::directive map?)
 
@@ -92,3 +92,30 @@
   (context/associate context
                      key
                      (execution/build-list-context value number build-opt-list)))
+
+;; =========== DERIVE ===========
+
+(defn derive
+  ([key-or-path f]
+   (core/->directive ::derive
+                     {:value key-or-path
+                      :transform f
+                      :post true})))
+
+(defn derive-from-primary [context key {:keys [transform] derive-from :value :as _directive}]
+  (let [primary-value (-> context
+                          context/primary
+                          entity/value)
+        source-value (get primary-value derive-from)]
+    (assert source-value (str "Could not find " derive-from " in " primary-value))
+    (context/update-primary context entity/update-value assoc key (transform source-value))))
+
+(defn derive-from-path [context key {:keys [transform] derive-from :value :as _directive}]
+  (let [pathed-entity (context/path context derive-from)]
+    (assert pathed-entity (str "Could not find an entity at path " derive-from))
+    (context/associate-entity context key (entity/override-association pathed-entity transform))))
+
+(defmethod core/run ::derive [context key {derive-from :value :as directive}]
+  (if (list? derive-from)
+    (derive-from-path context key directive)
+    (derive-from-primary context key directive)))

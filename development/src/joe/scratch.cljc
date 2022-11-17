@@ -42,7 +42,8 @@
                {:id (fab/sequence)
                 :title "Fabrikk of society"
                 :published false
-                :content ""}]
+                :content "Content"
+                :content-length (fab/derive :content count)}]
     :traits {:published {:published true}}}))
 
 (def group

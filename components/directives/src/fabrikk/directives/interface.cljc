@@ -13,3 +13,6 @@
 
 (defn build-list [factory n opts]
   (core/build-list factory n opts))
+
+(defn derive [key-or-path f]
+  (core/derive key-or-path f))

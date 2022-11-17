@@ -20,8 +20,11 @@
 (defn update-entity [bg id f & args]
   (core/update-entity bg id f args))
 
-(defn associate [primary label associated-build-graph]
-  (core/associate primary label associated-build-graph))
+(defn associate [build-graph label associated-build-graph]
+  (core/associate build-graph label associated-build-graph))
+
+(defn add-link [build-graph label entity]
+  (core/add-link build-graph label entity))
 
 (defn entities-in-build-order [bg]
   (core/entities-in-build-order bg))

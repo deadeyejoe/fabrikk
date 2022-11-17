@@ -4,7 +4,7 @@
             [fabrikk.factory.interface :as factory]
             [fabrikk.persistence.interface :as persistence]
             [fabrikk.template.interface :as template])
-  (:refer-clojure :exclude [sequence]))
+  (:refer-clojure :exclude [sequence derive]))
 
 (defn set-default-persistence [key]
   (persistence/set-default-persistence key))
@@ -64,3 +64,9 @@
    (directives/build-list factory n {}))
   ([factory n one+-build-opts]
    (directives/build-list factory n one+-build-opts)))
+
+(defn derive
+  ([key-or-path]
+   (directives/derive key-or-path identity))
+  ([key-or-path f]
+   (directives/derive key-or-path f)))

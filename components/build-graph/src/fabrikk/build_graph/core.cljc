@@ -61,6 +61,9 @@
     (assoc-in bg [:codex uuid] (entity/combine-no-conflict existing entity))
     (assoc-in bg [:codex uuid] entity)))
 
+(defn assert-node [{:keys [codex] :as bg} {:keys [uuid] :as entity}]
+  (assert (get codex uuid) "Entity was not found in the graph!"))
+
 (defn set-primary! [bg {:keys [uuid] :as entity}]
   (-> bg
       (ensure-node entity)
@@ -92,6 +95,12 @@
   (-> build-graph
       (merge-builds associated-build-graph)
       (link primary label associated-primary)))
+
+(defn add-link [{:keys [primary] :as build-graph}
+                label
+                entity]
+  (assert-node build-graph entity)
+  (link build-graph primary label entity))
 
 (defn path
   "Given a build graph and a path comprised of a sequence of labels. Starting at the 

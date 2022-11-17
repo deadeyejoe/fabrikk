@@ -24,6 +24,9 @@
 (defn associate [context label associated-context]
   (core/associate context label associated-context))
 
+(defn associate-entity [context label entity]
+  (core/associate-entity context label entity))
+
 (defn entities-in-build-order [context]
   (build-graph/entities-in-build-order context))
 

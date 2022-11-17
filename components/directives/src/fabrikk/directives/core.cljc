@@ -68,7 +68,8 @@
   ([factory build-opts]
    (core/->directive ::build
                      {:value (coerce-factory factory)
-                      :build-opts build-opts})))
+                      :build-opts build-opts
+                      :ordering :pre})))
 
 (defmethod core/run ::build [context key {:keys [value build-opts] :as _directive}]
   (context/associate context
@@ -83,7 +84,8 @@
    (core/->directive ::build-list
                      {:value (coerce-factory factory)
                       :number n
-                      :build-opt-list build-opt-list})))
+                      :build-opt-list build-opt-list
+                      :ordering :pre})))
 
 (defmethod core/run ::build-list [context key
                                   {:keys [value number build-opt-list]
@@ -100,7 +102,7 @@
    (core/->directive ::derive
                      {:value key-or-path
                       :transform f
-                      :post true})))
+                      :ordering :post})))
 
 (defn derive-from-primary [context key {:keys [transform] derive-from :value :as _directive}]
   (let [primary-value (-> context
@@ -116,6 +118,7 @@
     (context/associate-entity context key (entity/override-association pathed-entity transform))))
 
 (defmethod core/run ::derive [context key {derive-from :value :as directive}]
-  (if (list? derive-from)
+  (tap> [::derive directive])
+  (if (sequential? derive-from)
     (derive-from-path context key directive)
     (derive-from-primary context key directive)))

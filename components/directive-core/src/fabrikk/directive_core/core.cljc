@@ -45,10 +45,12 @@
   (evaluate [this build-context key]))
 
 (defn directive? [m]
-  (or (contains? m directive-type-kw)
-      (satisfies? m Directive)))
+  (or (and (map? m)
+           (contains? m directive-type-kw))
+      (satisfies? Directive m)))
 
 (comment
+  (directive? nil)
   (defrecord Constant [value]
     Directive
     (evaluate [x build-context key]

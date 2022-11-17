@@ -1,6 +1,7 @@
 (ns fabrikk.template.core
-  (:require [clojure.spec.alpha :as s])
-  (:refer-clojure :exclude [compile]))
+  (:require [clojure.spec.alpha :as s]
+            [fabrikk.directive-core.interface :as directive-core])
+  (:refer-clojure :exclude [compile exists?]))
 
 (s/def ::field keyword?)
 (s/def ::value any?)
@@ -13,7 +14,9 @@
                         :list (s/coll-of ::fragment)))
 
 (defn init []
-  {:ordering []
+  {:pre-ordering []
+   :ordering []
+   :post-ordering []
    :field->tuple {}})
 
 (defn coerce-to-tuples [fragment]
@@ -29,10 +32,26 @@
     (s/valid? ::fragment-list description) description
     :else (throw (IllegalArgumentException. (str "Invalid template " description)))))
 
-(defn add-tuple [{:keys [ordering] :as template} [field _value :as tuple]]
-  (let [new? (= -1 (.indexOf ordering field))]
+(defn exists? [{:keys [pre-ordering ordering post-ordering] :as _template} field]
+  (or (= -1 (.indexOf pre-ordering field))
+      (= -1 (.indexOf ordering field))
+      (= -1 (.indexOf post-ordering field))))
+
+(defn ordering-collection [[_field value :as tuple]]
+  (or
+   (when (directive-core/directive? value)
+     (tap> [::ordering value])
+     (case (:ordering value)
+       :pre :pre-ordering
+       :post :post-ordering
+       nil))
+   :ordering))
+
+(defn add-tuple [template [field _value :as tuple]]
+  (let [new? (exists? template field)
+        collection-to-update (ordering-collection tuple)]
     (cond-> (assoc-in template [:field->tuple field] tuple)
-      new? (update :ordering conj field))))
+      new? (update collection-to-update conj field))))
 
 (defn combine [tuples]
   (reduce add-tuple (init) tuples))
@@ -43,8 +62,10 @@
        (mapcat coerce-to-tuples)
        (combine)))
 
-(defn execute [{:keys [ordering field->tuple] :as _template} f init-ctx]
+(defn execute [{:keys [pre-ordering ordering post-ordering field->tuple] :as _template} f init-ctx]
   (reduce (fn [ctx field]
             (apply f ctx (get field->tuple field)))
           init-ctx
-          ordering))
+          (concat pre-ordering
+                  ordering
+                  post-ordering)))

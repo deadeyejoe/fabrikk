@@ -38,12 +38,13 @@
   (factory/->factory
    {:id ::post
     :primary-id :id
-    :template [{:author (fab/one user)}
+    :template [
+               {:author (fab/one user)}
+               [:content-length (fab/derive :content count)]
                {:id (fab/sequence)
                 :title "Fabrikk of society"
                 :published false
-                :content "Content"
-                :content-length (fab/derive :content count)}]
+                :content "Content"}]
     :traits {:published {:published true}}}))
 
 (def group
@@ -61,15 +62,25 @@
 (defmethod persistence/persist! [:foo ::user] [value]
   (tap> ::foo!)
   (persistence/store! (assoc value :id (random-uuid))))
+(comment
+  "Factory"
+  (factory/factory? user)
+  (factory/resolve ::user)
+  (factory/compile-template post {}))
+
+(comment
+  "Derive"
+  (fab/build post {:with  {:author-name (fab/derive [:author] :name)}
+                   :traits [:published]}))
 
 (comment
   "Building"
-  (factory/factory? user)
-  (factory/resolve ::user)
+
+
 
   (fab/build user {:with {:foo :bar :baz 1}})
   (fab/build user {:with {:name "Bob"}
-                         :traits [:admin]})
+                   :traits [:admin]})
   (let [org (fab/build organization)
         org-user (fab/build user {:with {:org (as :name org)}})]
     [org-user])
@@ -89,8 +100,8 @@
   (let [org (fab/build organization)
         org-user (fab/build user {:with {:org org}})
         group (fab/build group
-                               {:with {:users (fab/many user 3
-                                                          {:with {:org org}})}})]
+                         {:with {:users (fab/many user 3
+                                                  {:with {:org org}})}})]
     [org
      org-user
      group

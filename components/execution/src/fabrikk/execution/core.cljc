@@ -57,7 +57,7 @@
 (defn coerce-to-list [build-opt-list]
   (cond
     (map? build-opt-list) [build-opt-list]
-    (list? build-opt-list) build-opt-list
+    (coll? build-opt-list) (vec build-opt-list)
     :else [{}]))
 
 (defn build-list [factory n build-opt-list]

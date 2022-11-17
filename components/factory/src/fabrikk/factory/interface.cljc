@@ -11,5 +11,5 @@
 (defn factory? [x]
   (core/factory? x))
 
-(defn combine-traits-and-templates [factory opts]
-  (core/combine-traits-and-templates factory opts))
+(defn compile-template [factory opts]
+  (core/compile-template factory opts))

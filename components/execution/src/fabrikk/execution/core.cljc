@@ -4,7 +4,8 @@
             [fabrikk.execution-context.interface :as context]
             [fabrikk.factory.interface :as factory]
             [fabrikk.persistence.interface :as persistence]
-            [fabrikk.utils.interface :as utils]))
+            [fabrikk.utils.interface :as utils]
+            [fabrikk.template.interface :as template]))
 
 (defn remove-transients [context transients]
   (cond-> context
@@ -26,11 +27,11 @@
                      :keys [before-build after-build transients]
                      :or {before-build identity }}
                     build-opts]
-  (let [effective-template (factory/combine-traits-and-templates factory build-opts)
+  (let [effective-template (factory/compile-template factory build-opts)
         after (after-build-fn after-build)]
     (-> effective-template
         (before-build)
-        ((partial directive-core/run-directives execution-context))
+        (template/execute directive-core/run execution-context)
         (after)
         (remove-transients transients))))
 

@@ -1,5 +1,6 @@
 (ns fabrikk.factory.core
   (:require [fabrikk.specs.interface :as specs]
+            [fabrikk.template.interface :as template]
             [clojure.spec.alpha :as s])
   (:refer-clojure :exclude [resolve]))
 
@@ -19,8 +20,8 @@
 (defn factory? [x]
   (::factory (meta x)))
 
-(defn combine-traits-and-templates [{:keys [template traits] :as factory}
-                                    {:keys [with] selected-traits :traits :as opts}]
-  (merge template
-         (apply merge (-> traits (select-keys selected-traits) vals))
-         with))
+(defn compile-template [{:keys [template traits] :as factory}
+                        {:keys [with] selected-traits :traits :as opts}]
+  (template/compile (-> [template]
+                        (into (map traits selected-traits))
+                        (into (if with [with] [])))))

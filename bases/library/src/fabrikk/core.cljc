@@ -2,7 +2,8 @@
   (:require [fabrikk.directives.interface :as directives]
             [fabrikk.execution.interface :as execution]
             [fabrikk.factory.interface :as factory]
-            [fabrikk.persistence.interface :as persistence])
+            [fabrikk.persistence.interface :as persistence]
+            [fabrikk.template.interface :as template])
   (:refer-clojure :exclude [sequence]))
 
 (defn set-default-persistence [key]
@@ -10,6 +11,9 @@
 
 (defn ->factory [description]
   (factory/->factory description))
+
+(defn update-template [template field value]
+  (template/update template field value))
 
 (defn build
   ([factory]

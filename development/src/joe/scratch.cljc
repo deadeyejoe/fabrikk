@@ -38,11 +38,11 @@
   (factory/->factory
    {:id ::post
     :primary-id :id
-    :template {:id (fab/sequence)
-               :title "Fabrikk of society"
-               :published false
-               :content ""
-               :author (fab/one user)}
+    :template [{:author (fab/one user)}
+               {:id (fab/sequence)
+                :title "Fabrikk of society"
+                :published false
+                :content ""}]
     :traits {:published {:published true}}}))
 
 (def group
@@ -75,7 +75,10 @@
 
   (fab/build-list user 2)
 
-  (fab/build post)
+  (fab/build post {:with [[:name "TEMPLATEZZZZ"]
+                          [:foo :bar]
+                          {:baz :quux}]
+                   :traits [:published]})
 
   (let [[u1 u2 u3] (fab/build-list user 3)]
     (fab/build post {:with {:author u1}}))

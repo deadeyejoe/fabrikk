@@ -109,9 +109,9 @@
   [{:keys [codex labels primary] :as _build-graph} path]
   (get codex (label-graph/traverse-path labels primary path)))
 
-(defn entities-in-build-order [{:keys [_codex] :as build-graph}]
-  (if-let [sorted (graph-alg/topsort build-graph)]
-    (reverse sorted)
+(defn entities-in-build-order [{:keys [codex] :as build-graph}]
+  (if-let [sorted-ids (graph-alg/topsort build-graph)]
+    (map codex (reverse sorted-ids))
     (throw (IllegalArgumentException. "Build graph must be a DAG"))))
 
 (comment

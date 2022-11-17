@@ -17,31 +17,35 @@
 
 (defn build
   ([factory]
-   (execution/build factory {}))
+   (execution/build factory {} {}))
   ([factory build-opts]
-   (execution/build factory build-opts)))
+   (execution/build factory build-opts {}))
+  ([factory build-opts output-opts]
+   (execution/build factory build-opts output-opts)))
 
 (defn build-list
   ([factory n]
-   (execution/build-list factory n {}))
+   (execution/build-list factory n {} {}))
   ([factory n one+-build-opts]
-   (execution/build-list factory n one+-build-opts)))
+   (execution/build-list factory n one+-build-opts {}))
+  ([factory n one+-build-opts output-opts]
+   (execution/build-list factory n one+-build-opts output-opts)))
 
 (defn create
   ([factory]
    (execution/create factory {} {}))
   ([factory build-opts]
    (execution/create factory build-opts {}))
-  ([factory build-opts create-opts]
-   (execution/create factory build-opts create-opts)))
+  ([factory build-opts output-opts]
+   (execution/create factory build-opts output-opts)))
 
 (defn create-list
   ([factory n]
    (execution/create-list factory n {} {}))
   ([factory n one+-build-opts]
    (execution/create-list factory n one+-build-opts {}))
-  ([factory n one+-build-opts create-opts]
-   (execution/create-list factory n one+-build-opts create-opts)))
+  ([factory n one+-build-opts output-opts]
+   (execution/create-list factory n one+-build-opts output-opts)))
 
 (def persist! persistence/persist!)
 

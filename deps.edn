@@ -5,7 +5,7 @@
                                org.clojure/tools.namespace {:mvn/version "1.3.0"}
                                orchestra/orchestra {:mvn/version "2021.01.01-1"}
                                expound/expound {:mvn/version "0.9.0"}
-                               djblue/portal {:mvn/version "0.29.1"}
+                               djblue/portal {:mvn/version "0.34.2"}
                                aysylu/loom {:mvn/version "1.0.2"}
 
                                poly/build-graph {:local/root "components/build-graph"}
@@ -15,6 +15,7 @@
                                poly/execution {:local/root "components/execution"}
                                poly/execution-context {:local/root "components/execution-context"}
                                poly/factory {:local/root "components/factory"}
+                               poly/output {:local/root "components/output"}
                                poly/persistence {:local/root "components/persistence"}
                                poly/specs {:local/root "components/specs"}
                                poly/template {:local/root "components/template"}

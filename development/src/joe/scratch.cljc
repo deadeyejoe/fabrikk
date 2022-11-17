@@ -8,7 +8,8 @@
             [fabrikk.build-graph.interface :as build-graph]
             [loom.alg :as graph-alg]
             [fabrikk.persistence.interface :as persistence]
-            [fabrikk.core :as fab]))
+            [fabrikk.core :as fab]
+            [fabrikk.output.interface :as output]))
 
 (def organization
   (factory/->factory
@@ -62,6 +63,7 @@
 (defmethod persistence/persist! [:foo ::user] [value]
   (tap> ::foo!)
   (persistence/store! (assoc value :id (random-uuid))))
+
 (comment
   "Factory"
   (factory/factory? user)
@@ -76,8 +78,6 @@
 (comment
   "Building"
 
-
-
   (fab/build user {:with {:foo :bar :baz 1}})
   (fab/build user {:with {:name "Bob"}
                    :traits [:admin]})
@@ -91,6 +91,8 @@
                           [:foo :bar]
                           {:baz :quux}]
                    :traits [:published]})
+  (fab/build post)
+(fab/build post {} (output/as-collection))
 
   (let [[u1 u2 u3] (fab/build-list user 3)]
     (fab/build post {:with {:author u1}}))
@@ -107,6 +109,13 @@
      group
      (tap> (meta group))])
   )
+(comment
+  "Output"
+  (fab/build post)
+  (fab/build post {} (output/as-collection))
+  (fab/build post {} (output/as-tuple :author))
+  (fab/build post {} (output/as-value :content)))
+
 (comment
   "Creation"
   (let [org (fab/build organization {})

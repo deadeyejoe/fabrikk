@@ -3,9 +3,10 @@
             [fabrikk.entity.interface :as entity]
             [fabrikk.execution-context.interface :as context]
             [fabrikk.factory.interface :as factory]
+            [fabrikk.output.interface :as output]
             [fabrikk.persistence.interface :as persistence]
-            [fabrikk.utils.interface :as utils]
-            [fabrikk.template.interface :as template]))
+            [fabrikk.template.interface :as template]
+            [fabrikk.utils.interface :as utils]))
 
 (defn remove-transients [context transients]
   (cond-> context
@@ -40,8 +41,8 @@
         context (context/init (entity/create! resolved build-opts))]
     (build-entity context resolved build-opts)))
 
-(defn build [factory build-opts]
-  (context/->result-meta (build-context factory build-opts)))
+(defn build [factory build-opts output-opts]
+  (output/build (build-context factory build-opts) output-opts))
 
 (defn build-list-context [factory number build-opt-list]
   (let [list-context (context/init (entity/create-list!))]
@@ -60,42 +61,44 @@
     (coll? build-opt-list) (vec build-opt-list)
     :else [{}]))
 
-(defn build-list [factory n build-opt-list]
-  (->> (coerce-to-list build-opt-list)
-       (map assoc-as-list-item)
-       (build-list-context factory n)
-       (context/->result-meta)))
+(defn build-list [factory n build-opt-list output-opts]
+  (output/build
+   (->> (coerce-to-list build-opt-list)
+        (map assoc-as-list-item)
+        (build-list-context factory n))
+   output-opts))
 
 (defn unchanged? [entity persisted-entity]
   (= (entity/value entity) (entity/value persisted-entity)))
 (def changed? (complement unchanged?))
 
-(defn persist-and-propagate! [create-opts context entity-id]
-  (let [entity (context/entity context entity-id)]
-    (if (entity/needs-persist? entity)
-      (let [value-with-dispatch (persistence/value-with-dispatch-meta entity create-opts) 
-            persisted-value (persistence/persist! value-with-dispatch)
-            persisted-entity (entity/set-persisted-value entity persisted-value)]
-        (if (changed? entity persisted-entity)
-          (-> context
-              (context/set-entity persisted-entity)
-              (context/propagate persisted-entity))
-          context))
-      context)))
+(defn persist-and-propagate! [output-opts context entity]
+  (if (entity/needs-persist? entity)
+    (let [value-with-dispatch (persistence/value-with-dispatch-meta entity output-opts)
+          persisted-value (persistence/persist! value-with-dispatch)
+          persisted-entity (entity/set-persisted-value entity persisted-value)]
+      (if (changed? entity persisted-entity)
+        (-> context
+            (context/set-entity persisted-entity)
+            (context/propagate persisted-entity))
+        context))
+    context))
 
-(defn persist-context [create-opts built-context]
-  (reduce (partial persist-and-propagate! create-opts)
+(defn persist-context [output-opts built-context]
+  (reduce (partial persist-and-propagate! output-opts)
           built-context
           (context/entities-in-build-order built-context)))
 
-(defn create [factory build-opts create-opts]
-  (->> (build-context factory build-opts)
-       (persist-context create-opts)
-       (context/->result-meta)))
+(defn create [factory build-opts output-opts]
+  (output/build
+   (->> (build-context factory build-opts)
+        (persist-context output-opts))
+   output-opts))
 
-(defn create-list [factory n build-opt-list create-opts]
-  (->> (coerce-to-list build-opt-list)
-       (map assoc-as-list-item)
-       (build-list-context factory n)
-       (persist-context create-opts)
-       (context/->result-meta)))
+(defn create-list [factory n build-opt-list output-opts]
+  (output/build
+   (->> (coerce-to-list build-opt-list)
+        (map assoc-as-list-item)
+        (build-list-context factory n)
+        (persist-context output-opts))
+   output-opts))

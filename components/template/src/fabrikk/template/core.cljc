@@ -37,10 +37,9 @@
       (= -1 (.indexOf ordering field))
       (= -1 (.indexOf post-ordering field))))
 
-(defn ordering-collection [[_field value :as tuple]]
+(defn ordering-collection [[_field value :as _tuple]]
   (or
    (when (directive-core/directive? value)
-     (tap> [::ordering value])
      (case (:ordering value)
        :pre :pre-ordering
        :post :post-ordering

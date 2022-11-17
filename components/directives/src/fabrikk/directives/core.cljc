@@ -118,7 +118,6 @@
     (context/associate-entity context key (entity/override-association pathed-entity transform))))
 
 (defmethod core/run ::derive [context key {derive-from :value :as directive}]
-  (tap> [::derive directive])
   (if (sequential? derive-from)
     (derive-from-path context key directive)
     (derive-from-primary context key directive)))

@@ -20,8 +20,8 @@
 (defn factory? [x]
   (::factory (meta x)))
 
-(defn compile-template [{:keys [template traits] :as factory}
-                        {:keys [with] selected-traits :traits :as opts}]
+(defn compile-template [{:keys [template traits] :as _factory}
+                        {:keys [with] selected-traits :traits :as _opts}]
   (template/compile (-> [template]
                         (into (map traits selected-traits))
                         (into (if with [with] [])))))

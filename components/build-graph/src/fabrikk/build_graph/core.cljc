@@ -44,7 +44,7 @@
   (transpose [_]
     (throw (Exception. "Not implemented"))))
 
-(defn in-edges [{:keys [labels] :as bg} node]
+(defn in-edges [{:keys [labels] :as _bg} node]
   (label-graph/in-edges labels node))
 
 (declare set-primary!)
@@ -61,7 +61,7 @@
     (assoc-in bg [:codex uuid] (entity/combine-no-conflict existing entity))
     (assoc-in bg [:codex uuid] entity)))
 
-(defn assert-node [{:keys [codex] :as bg} {:keys [uuid] :as entity}]
+(defn assert-node [{:keys [codex] :as _bg} {:keys [uuid] :as _entity}]
   (assert (get codex uuid) "Entity was not found in the graph!"))
 
 (defn set-primary! [bg {:keys [uuid] :as entity}]
@@ -109,7 +109,7 @@
   [{:keys [codex labels primary] :as _build-graph} path]
   (get codex (label-graph/traverse-path labels primary path)))
 
-(defn entities-in-build-order [{:keys [codex] :as build-graph}]
+(defn entities-in-build-order [{:keys [_codex] :as build-graph}]
   (if-let [sorted (graph-alg/topsort build-graph)]
     (reverse sorted)
     (throw (IllegalArgumentException. "Build graph must be a DAG"))))

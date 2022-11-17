@@ -14,26 +14,30 @@
 (defn build
   ([factory]
    (execution/build factory {}))
-  ([factory opts]
-   (execution/build factory opts)))
+  ([factory build-opts]
+   (execution/build factory build-opts)))
 
 (defn build-list
   ([factory n]
    (execution/build-list factory n {}))
-  ([factory n & opt-list]
-   (apply execution/build-list factory n opt-list)))
+  ([factory n one+-build-opts]
+   (execution/build-list factory n one+-build-opts)))
 
 (defn create
   ([factory]
-   (execution/create factory {}))
-  ([factory opts]
-   (execution/create factory opts)))
+   (execution/create factory {} {}))
+  ([factory build-opts]
+   (execution/create factory build-opts {}))
+  ([factory build-opts create-opts]
+   (execution/create factory build-opts create-opts)))
 
 (defn create-list
   ([factory n]
-   (execution/create-list factory n [{}]))
-  ([factory n & opt-list]
-   (apply execution/create-list factory n opt-list)))
+   (execution/create-list factory n {} {}))
+  ([factory n one+-build-opts]
+   (execution/create-list factory n one+-build-opts {}))
+  ([factory n one+-build-opts create-opts]
+   (execution/create-list factory n one+-build-opts create-opts)))
 
 (def persist! persistence/persist!)
 
@@ -47,12 +51,12 @@
 
 (defn one
   ([factory]
-   (directives/build factory))
-  ([factory opts]
-   (directives/build factory opts)))
+   (directives/build factory {}))
+  ([factory build-opts]
+   (directives/build factory build-opts)))
 
 (defn many
   ([factory n]
-   (directives/build-list factory n))
-  ([factory n & opts]
-   (apply directives/build-list factory n opts)))
+   (directives/build-list factory n {}))
+  ([factory n one+-build-opts]
+   (directives/build-list factory n one+-build-opts)))

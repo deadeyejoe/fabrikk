@@ -53,8 +53,15 @@
 (defn assoc-as-list-item [build-opts]
   (assoc build-opts :as :list-item))
 
+(defn coerce-to-list [build-opt-list]
+  (cond
+    (map? build-opt-list) [build-opt-list]
+    (list? build-opt-list) build-opt-list
+    :else [{}]))
+
 (defn build-list [factory n build-opt-list]
-  (->> (map assoc-as-list-item build-opt-list)
+  (->> (coerce-to-list build-opt-list)
+       (map assoc-as-list-item)
        (build-list-context factory n)
        (context/->result-meta)))
 
@@ -78,13 +85,14 @@
           built-context
           (context/entities-in-build-order built-context)))
 
-(defn create [factory opts]
-  (-> (build-context factory opts)
+(defn create [factory build-opts create-opts]
+  (-> (build-context factory build-opts)
       (persist-context)
       (context/->result-meta)))
 
-(defn create-list [factory n build-opt-list]
-  (->> (map assoc-as-list-item build-opt-list)
+(defn create-list [factory n build-opt-list create-opts]
+  (->> (coerce-to-list build-opt-list)
+       (map assoc-as-list-item)
        (build-list-context factory n)
        (persist-context)
        (context/->result-meta)))

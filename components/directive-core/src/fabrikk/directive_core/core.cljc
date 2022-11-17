@@ -30,7 +30,6 @@
 (defn handle-meta [build-context key value]
   (let [context-to-associate (context/update-primary (meta value)
                                                      entity/suppress-list-association)]
-    (tap> [::handle-meta (context/primary (meta value))])
     (context/associate build-context key context-to-associate)))
 
 (defmethod run :default [build-context key value]

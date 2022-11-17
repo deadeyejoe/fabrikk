@@ -30,9 +30,9 @@
                :org (fab/one organization)}
     :traits {:admin {:role "admin"}}
     :transients [:foo]
-    :after-build (fn [& args] 
-                   (tap> [::after-build args])
-                   (first args))}))
+    :after-build (fn [value] 
+                   (tap> [::after-build value])
+                   value)}))
 
 (def post
   (factory/->factory
@@ -53,11 +53,13 @@
                :name "Normies"
                :users (fab/many user 3)}}))
 
-(defmethod persistence/persist! :store [entity value]
-  (persistence/store!
-   (-> entity
-       (assoc-in [:value :id] (random-uuid))
-       (assoc :persisted true))))
+(defmethod persistence/persist! :store [value]
+  (tap> ::store!)
+  (persistence/store! (assoc value :id (random-uuid))))
+
+(defmethod persistence/persist! [:foo ::user] [value]
+  (tap> ::foo!)
+  (persistence/store! (assoc value :id (random-uuid))))
 
 (comment
   "Building"
@@ -99,9 +101,17 @@
 
   (do
     (persistence/reset-store!)
-    (let [user (fab/create user)]
+    (let [user (fab/create user {:persist-with :foo})]
       [user
        @persistence/store]))
+  
+  (do
+    (persistence/reset-store!)
+    (let [user (fab/build user)
+          context (meta user)
+          primary (context/primary context)]
+      [(persistence/value-with-dispatch-meta primary {})
+       (meta (persistence/value-with-dispatch-meta primary {}))]))
 
   (do
     (persistence/reset-store!)
@@ -124,7 +134,5 @@
           users (fab/create-list user 2 {:with {:org org}})]
       [users
        @persistence/store]))
-
-
-  )
+)
   

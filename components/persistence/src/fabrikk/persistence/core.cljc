@@ -12,14 +12,29 @@
 
 ;; ============ PERSIST! ============
 
-(defn persist-dispatch-fn [entity _value]
+(defn persist-dispatch-value [entity {:keys [persist-with] :as _create-opts}]
   (assert (entity/factory-id entity) "Cannot persist without a factory id!")
-  (let [method (or (entity/persist-with entity)
+  (let [method (or persist-with
+                   (entity/persist-with entity)
                    (default-persistence-method))]
     (cond
       (= :store method) :store
       method [method (entity/factory-id entity)]
       :else (entity/factory-id entity))))
+
+(defn value-with-dispatch-meta [entity create-opts]
+  (with-meta (entity/value entity) {::dispatch (persist-dispatch-value entity create-opts)
+                                    ::factory-id (entity/factory-id entity)}))
+
+(defn dispatch-from-meta
+  "Don't want to have to pass the entire entity to consumers of persist!, just the value
+   So prior to calling persist! we'll add the actual dispatch value as metadata
+   
+   This feels a little janky, but we're in control of invocation of persist!, can add the
+   meta just prior to calling it and discard the value immediately, and it's not required 
+   for any further logic since we'll have the full entity in our code."
+  [value]
+  (-> value meta ::dispatch))
 
 (defmulti persist!
   "Persists an entity. Uses the persistence method under the `:persist-with` key
@@ -28,9 +43,9 @@
    
    There is a default persistence method that stores entities in an atom see `store`
    in a vectory keyed to their factory-id"
-  #'persist-dispatch-fn)
+  #'dispatch-from-meta)
 
-(defmethod persist! :default [_entity _value]
+(defmethod persist! :default [_entity]
   (throw (IllegalArgumentException. "No default persistence method found")))
 
 ;; ============ DEFAULT STORE ============
@@ -39,10 +54,10 @@
 
 (def collect-entity (fnil conj []))
 
-(defn store! [entity]
-  (let [factory-id (entity/factory-id entity)]
-    (swap! store update factory-id collect-entity (entity/value entity))
-    entity))
+(defn store! [value]
+  (let [factory-id (-> value meta ::factory-id)]
+    (swap! store update factory-id collect-entity value)
+    value))
 
 (defn reset-store! []
   (reset! store {}))

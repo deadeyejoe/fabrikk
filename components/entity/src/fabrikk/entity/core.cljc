@@ -98,6 +98,11 @@
 (defn update-value [entity f args]
   (apply update entity :value f args))
 
+(defn set-persisted-value [entity value]
+  (assoc entity
+         :value value
+         :persisted true))
+
 (def persisted? :persisted)
 
 (defn persistable? [entity]

@@ -50,6 +50,9 @@
 (defn update-value [entity f & args]
   (core/update-value entity f args))
 
+(defn set-persisted-value [entity value]
+  (core/set-persisted-value entity value))
+
 (defn persistable? [entity]
   (core/persistable? entity))
 

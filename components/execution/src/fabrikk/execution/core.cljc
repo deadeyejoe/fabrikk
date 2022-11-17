@@ -69,10 +69,12 @@
   (= (entity/value entity) (entity/value persisted-entity)))
 (def changed? (complement unchanged?))
 
-(defn persist-and-propagate! [context entity-id]
+(defn persist-and-propagate! [create-opts context entity-id]
   (let [entity (context/entity context entity-id)]
     (if (entity/needs-persist? entity)
-      (let [persisted-entity (persistence/persist! entity (entity/value entity))]
+      (let [value-with-dispatch (persistence/value-with-dispatch-meta entity create-opts) 
+            persisted-value (persistence/persist! value-with-dispatch)
+            persisted-entity (entity/set-persisted-value entity persisted-value)]
         (if (changed? entity persisted-entity)
           (-> context
               (context/set-entity persisted-entity)
@@ -80,19 +82,19 @@
           context))
       context)))
 
-(defn persist-context [built-context]
-  (reduce persist-and-propagate!
+(defn persist-context [create-opts built-context]
+  (reduce (partial persist-and-propagate! create-opts)
           built-context
           (context/entities-in-build-order built-context)))
 
 (defn create [factory build-opts create-opts]
-  (-> (build-context factory build-opts)
-      (persist-context)
-      (context/->result-meta)))
+  (->> (build-context factory build-opts)
+       (persist-context create-opts)
+       (context/->result-meta)))
 
 (defn create-list [factory n build-opt-list create-opts]
   (->> (coerce-to-list build-opt-list)
        (map assoc-as-list-item)
        (build-list-context factory n)
-       (persist-context)
+       (persist-context create-opts)
        (context/->result-meta)))

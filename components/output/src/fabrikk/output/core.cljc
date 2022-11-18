@@ -35,6 +35,12 @@
        (reduce (partial apply collect-value)
                {})))
 
+(defmethod build :path [context {:keys [paths]}]
+  (map (fn [path]
+         ;; TODO result meta etc.
+         (entity/value (context/path context path)))
+       paths))
+
 (defn as-meta []
   {:output-as :meta})
 

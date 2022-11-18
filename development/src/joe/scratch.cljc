@@ -85,30 +85,17 @@
                    :traits [:admin]})
   (let [org (fab/build organization)]
     (fab/build user {:with {:org (as :name org)}}))
+  
+  (fab/build user)
 
   (fab/build-list user 2)
-
-  (fab/build post {:with [[:name "TEMPLATEZZZZ"]
-                          [:foo :bar]
-                          {:baz :quux}]
-                   :traits [:published]})
-  (fab/build post)
-  (fab/build post {} (output/as-collection))
-
-  (let [[u1 u2 u3] (fab/build-list user 3)]
-    (fab/build post {:with {:author u1}}))
-
-  (build-graph/path (execution/build-context user {}) [:org])
-  (fab/build group)
-  (let [org (fab/build organization)
-        org-user (fab/build user {:with {:org org}})
-        group (fab/build group
-                         {:with {:users (fab/many user 3
-                                                  {:with {:org org}})}})]
+  
+  (let [org (fab/build organization)]
     [org
-     org-user
-     group
-     (tap> (meta group))])
+     (fab/build group
+                {:with {:users (fab/many user 3
+                                         {:with {:org org}})}})])
+
   )
 (comment
   "Output"

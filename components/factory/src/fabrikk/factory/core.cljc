@@ -21,7 +21,8 @@
   (::factory (meta x)))
 
 (defn compile-template [{:keys [template traits] :as _factory}
-                        {:keys [with] selected-traits :traits :as _opts}]
-  (template/compile (-> [template]
-                        (into (map traits selected-traits))
-                        (into (if with [with] [])))))
+                        {:keys [with without] selected-traits :traits :as _opts}]
+  (cond-> (template/compile (-> [template]
+                                (into (map traits selected-traits))
+                                (into (if with [with] []))))
+    without (template/without without)))

@@ -8,5 +8,8 @@
 (defn compile [descriptions]
   (template/compile descriptions))
 
+(defn without [template attributes]
+  (template/without template attributes))
+
 (defn execute [template f init-ctx]
   (template/execute template f init-ctx))

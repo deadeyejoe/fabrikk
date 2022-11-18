@@ -61,6 +61,16 @@
        (mapcat coerce-to-tuples)
        (combine)))
 
+(defn filter-ordering [attributes ordering]
+  (remove (set attributes) ordering))
+
+(defn without [template attributes]
+  (-> template
+      (update :field->tuple #(apply dissoc % attributes))
+      (update :pre-ordering (partial filter-ordering attributes))
+      (update :ordering (partial filter-ordering attributes))
+      (update :post-ordering (partial filter-ordering attributes))))
+
 (defn execute [{:keys [pre-ordering ordering post-ordering field->tuple] :as _template} f init-ctx]
   (reduce (fn [ctx field]
             (apply f ctx (get field->tuple field)))

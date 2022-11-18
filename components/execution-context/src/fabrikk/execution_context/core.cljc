@@ -40,9 +40,6 @@
         (assoc-primary-value attribute value-to-assoc))))
 
 (defn associate-entity [context attribute entity]
-  (tap> [::associate entity 
-         (entity/associate-as entity)
-         (value-to-assoc (entity/value entity) :role)])
   (let [associate-as (or (entity/associate-as entity) :itself)
         ;; TODO: we should probably use a 'result-meta' here rather than the entity
         ;; value. If it gets assoc'ed as itself it would be nice to be able to then 

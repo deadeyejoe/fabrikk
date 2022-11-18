@@ -23,7 +23,9 @@
 
 (defn collect-value [context factory-id value]
   (update context
-          (-> factory-id name keyword)
+          (or
+           (some-> factory-id name keyword)
+           factory-id)
           (fnil conj []) value))
 
 (defmethod build :collection [context _output-opts]

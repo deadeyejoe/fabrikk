@@ -1,5 +1,7 @@
 (ns fabrikk.core
   (:require [fabrikk.directives.interface :as directives]
+            [fabrikk.entity.interface :as entity]
+[fabrikk.execution-context.interface :as context]
             [fabrikk.execution.interface :as execution]
             [fabrikk.factory.interface :as factory]
             [fabrikk.persistence.interface :as persistence]
@@ -14,6 +16,9 @@
 
 (defn update-template [template field value]
   (template/update template field value))
+
+(defn path [context path]
+  (entity/value (context/path context path)))
 
 (defn build
   ([factory]

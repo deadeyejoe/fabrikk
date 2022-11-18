@@ -23,8 +23,9 @@
       :else (entity/factory-id entity))))
 
 (defn value-with-dispatch-meta [entity create-opts]
-  (with-meta (entity/value entity) {::dispatch (persist-dispatch-value entity create-opts)
-                                    ::factory-id (entity/factory-id entity)}))
+  (let [dispatch-value (persist-dispatch-value entity create-opts)]
+    (with-meta (entity/value entity) {::dispatch dispatch-value
+                                      ::factory-id (entity/factory-id entity)})))
 
 (defn dispatch-from-meta
   "Don't want to have to pass the entire entity to consumers of persist!, just the value

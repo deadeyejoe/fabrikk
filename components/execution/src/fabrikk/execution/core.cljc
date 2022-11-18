@@ -20,7 +20,9 @@
 
 (defn after-build-fn [after-build-config]
   (if after-build-config
-    (fn [context] (context/update-primary context entity/update-value after-build-config))
+    (fn [context]
+      (context/update-primary context
+                              entity/update-value (partial after-build-config context)))
     identity))
 
 (defn build-entity [execution-context

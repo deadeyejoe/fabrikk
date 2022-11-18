@@ -31,8 +31,8 @@
                :org (fab/one organization)}
     :traits {:admin {:role "admin"}}
     :transients [:foo]
-    :after-build (fn [value] 
-                   (tap> [::after-build value])
+    :after-build (fn [ctx value] 
+                   (tap> [::after-build ctx value])
                    value)}))
 
 (def post

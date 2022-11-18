@@ -56,8 +56,9 @@
 
 (defn store! [value]
   (let [factory-id (-> value meta ::factory-id)]
-    (swap! store update factory-id collect-entity value)
-    value))
+    (-> (swap! store update factory-id collect-entity value)
+        factory-id
+        last)))
 
 (defn reset-store! []
   (reset! store {}))

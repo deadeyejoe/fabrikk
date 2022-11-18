@@ -104,20 +104,11 @@
                       :transform f
                       :ordering :post})))
 
-(defn derive-from-primary [context key {:keys [transform] derive-from :value :as _directive}]
-  (let [primary-value (-> context
-                          context/primary
-                          entity/value)
-        source-value (get primary-value derive-from)]
-    (assert source-value (str "Could not find " derive-from " in " primary-value))
-    (context/update-primary context entity/update-value assoc key (transform source-value))))
-
-(defn derive-from-path [context key {:keys [transform] derive-from :value :as _directive}]
-  (let [pathed-entity (context/path context derive-from)]
-    (assert pathed-entity (str "Could not find an entity at path " derive-from))
-    (context/associate-entity context key (entity/override-association pathed-entity transform))))
-
-(defmethod core/run ::derive [context key {derive-from :value :as directive}]
-  (if (sequential? derive-from)
-    (derive-from-path context key directive)
-    (derive-from-primary context key directive)))
+(defmethod core/run ::derive [context key {:keys [transform] derive-from :value :as directive}]
+  (let [source-entity (if (sequential? derive-from)
+                        (context/path context derive-from)
+                        (context/primary context))
+        assoc-as (if (sequential? derive-from)
+                   transform
+                   (comp transform derive-from))]
+    (context/associate-entity context key (entity/override-association source-entity assoc-as))))

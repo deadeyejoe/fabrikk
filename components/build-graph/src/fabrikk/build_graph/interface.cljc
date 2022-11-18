@@ -11,6 +11,9 @@
 (defn update-primary [bg f & args]
   (core/update-primary bg f args))
 
+(defn update-primary-value [bg f & args]
+  (core/update-primary-value bg f args))
+
 (defn entity [bg id]
   (core/entity bg id))
 
@@ -20,17 +23,20 @@
 (defn update-entity [bg id f & args]
   (core/update-entity bg id f args))
 
-(defn associate [build-graph label associated-build-graph]
-  (core/associate build-graph label associated-build-graph))
+(defn update-entity-value [bg id f & args]
+  (core/update-entity-value bg id f args))
 
-(defn add-link [build-graph label entity]
-  (core/add-link build-graph label entity))
+(defn associate [build-graph link associated-build-graph]
+  (core/associate build-graph link associated-build-graph))
+
+(defn add-link [build-graph link entity]
+  (core/add-link build-graph link entity))
 
 (defn entities-in-build-order [bg]
   (core/entities-in-build-order bg))
 
-(defn in-edges-with-labels [bg node]
-  (core/in-edges bg node))
+(defn in-edges-with-links [bg node]
+  (core/in-edges-with-links bg node))
 
 (defn path [bg path]
   (core/path bg path))

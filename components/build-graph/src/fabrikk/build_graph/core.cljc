@@ -1,6 +1,6 @@
 (ns fabrikk.build-graph.core
   (:require [clojure.spec.alpha :as s]
-            [fabrikk.build-graph.label-graph :as label-graph]
+            [fabrikk.build-graph.link-graph :as link-graph]
             [fabrikk.entity.interface :as entity]
             [loom.graph :as graph]
             [loom.alg :as graph-alg]))
@@ -36,7 +36,7 @@
   graph/Digraph
   (in-edges [_ dest-node]
     (map (juxt first last)
-         (label-graph/in-edges labels dest-node)))
+         (link-graph/inward-links labels dest-node)))
   (in-degree [x dest-node]
     (count (graph/in-edges x dest-node)))
   (predecessors* [x dest-node]
@@ -44,8 +44,8 @@
   (transpose [_]
     (throw (Exception. "Not implemented"))))
 
-(defn in-edges [{:keys [labels] :as _bg} node]
-  (label-graph/in-edges labels node))
+(defn in-edges-with-links [{:keys [labels] :as _bg} node]
+  (link-graph/inward-links labels node))
 
 (declare set-primary!)
 
@@ -56,58 +56,64 @@
   ([entity] (-> (init)
                 (set-primary! entity))))
 
-(defn ensure-node [{:keys [codex] :as bg} {:keys [uuid] :as entity}]
+(defn ensure-node [{:keys [codex] :as build-graph} {:keys [uuid] :as entity}]
   (if-let [existing (get codex uuid)]
-    (assoc-in bg [:codex uuid] (entity/combine-no-conflict existing entity))
-    (assoc-in bg [:codex uuid] entity)))
+    (assoc-in build-graph [:codex uuid] (entity/combine-no-conflict existing entity))
+    (assoc-in build-graph [:codex uuid] entity)))
 
 (defn assert-node [{:keys [codex] :as _bg} {:keys [uuid] :as _entity}]
   (assert (get codex uuid) "Entity was not found in the graph!"))
 
-(defn set-primary! [bg {:keys [uuid] :as entity}]
-  (-> bg
+(defn set-primary! [build-graph {:keys [uuid] :as entity}]
+  (-> build-graph
       (ensure-node entity)
       (assoc :primary uuid)))
 
-(defn entity [bg id]
-  (get-in bg [:codex id]))
+(defn entity [build-graph id]
+  (get-in build-graph [:codex id]))
 
-(defn update-entity [bg id f args]
-  (apply update-in bg [:codex id] f args))
+(defn update-entity [build-graph id f args]
+  (apply update-in build-graph [:codex id] f args))
 
-(defn primary [{:keys [primary] :as bg}]
-  (entity bg primary))
+(defn update-entity-value [build-graph id f args]
+  (apply update-in build-graph [:codex id :value] f args))
 
-(defn update-primary [{:keys [primary] :as bg} f args]
-  (update-entity bg primary f args))
+(defn primary [{:keys [primary] :as build-graph}]
+  (entity build-graph primary))
 
-(defn link [bg entity-id label other-entity-id]
-  (update bg :labels label-graph/link entity-id label other-entity-id))
+(defn update-primary [{:keys [primary] :as build-graph} f args]
+  (update-entity build-graph primary f args))
+
+(defn update-primary-value [{:keys [primary] :as build-graph} f args]
+  (update-entity-value build-graph primary f args))
 
 (defn merge-builds [{:keys [labels codex] :as primary} to-merge]
   (-> primary
       (assoc :codex (merge-with entity/combine-no-conflict codex (:codex to-merge)))
-      (assoc :labels (label-graph/merge labels (:labels to-merge)))))
+      (assoc :labels (link-graph/merge labels (:labels to-merge)))))
+
+(defn link-entities [build-graph entity-id [_label _associate :as link] other-entity-id]
+  (update build-graph :labels link-graph/link entity-id link other-entity-id))
 
 (defn associate [{:keys [primary] :as build-graph}
-                 label
+                 link
                  {associated-primary :primary :as associated-build-graph}]
   (-> build-graph
       (merge-builds associated-build-graph)
-      (link primary label associated-primary)))
+      (link-entities primary link associated-primary)))
 
 (defn add-link [{:keys [primary] :as build-graph}
-                label
-                entity]
+                link
+                {:keys [uuid] :as entity}]
   (assert-node build-graph entity)
-  (link build-graph primary label entity))
+  (link-entities build-graph primary link uuid))
 
 (defn path
   "Given a build graph and a path comprised of a sequence of labels. Starting at the 
    primary node, traverse edges with each label in turn, and return the node at the end of
    the path, if it exists. Or nil otherwise"
   [{:keys [codex labels primary] :as _build-graph} path]
-  (get codex (label-graph/traverse-path labels primary path)))
+  (get codex (link-graph/traverse-path labels primary path)))
 
 (defn entities-in-build-order [{:keys [codex] :as build-graph}]
   (if-let [sorted-ids (graph-alg/topsort build-graph)]

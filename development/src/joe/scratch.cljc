@@ -58,11 +58,13 @@
 
 (defmethod persistence/persist! :store [value]
   (tap> ::store!)
-  (persistence/store! (assoc value :id (random-uuid))))
+  (persistence/store! (assoc value :id (random-uuid)
+                             :content "Some content or other")))
 
 (defmethod persistence/persist! [:foo ::user] [value]
   (tap> ::foo!)
-  (persistence/store! (assoc value :id (random-uuid))))
+  (persistence/store! (assoc value :id (random-uuid)
+                             )))
 
 (comment
   "Factory"
@@ -78,12 +80,11 @@
 (comment
   "Building"
 
-  (fab/build user {:with {:foo :bar :baz 1}})
+  (fab/build user)
   (fab/build user {:with {:name "Bob"}
                    :traits [:admin]})
-  (let [org (fab/build organization)
-        org-user (fab/build user {:with {:org (as :name org)}})]
-    [org-user])
+  (let [org (fab/build organization)]
+    (fab/build user {:with {:org (as :name org)}}))
 
   (fab/build-list user 2)
 
@@ -92,7 +93,7 @@
                           {:baz :quux}]
                    :traits [:published]})
   (fab/build post)
-(fab/build post {} (output/as-collection))
+  (fab/build post {} (output/as-collection))
 
   (let [[u1 u2 u3] (fab/build-list user 3)]
     (fab/build post {:with {:author u1}}))
@@ -112,30 +113,20 @@
 (comment
   "Output"
   (fab/build post)
+  (fab/build post
+             {:with {:author-role (fab/derive [:author] :role)}}
+             (output/as-context))
   (fab/build post {} (output/as-collection))
-  (fab/build post {} (output/as-tuple :author))
+  (fab/build post {} (output/as-tuple))
   (fab/build post {} (output/as-value :content)))
 
 (comment
   "Creation"
-  (let [org (fab/build organization {})
-        users (fab/build-list user 4 {:with {:org org}})]
-    (tap> [(meta users)
-           (context/entities-in-build-order (meta users))]))
-
   (do
     (persistence/reset-store!)
     (let [user (fab/create user {:persist-with :foo})]
       [user
-       @persistence/store]))
-  
-  (do
-    (persistence/reset-store!)
-    (let [user (fab/build user)
-          context (meta user)
-          primary (context/primary context)]
-      [(persistence/value-with-dispatch-meta primary {})
-       (meta (persistence/value-with-dispatch-meta primary {}))]))
+       @persistence/store])) 
 
   (do
     (persistence/reset-store!)
@@ -154,9 +145,8 @@
   
   (do
     (persistence/reset-store!)
-    (let [org (fab/build organization)
-          users (fab/create-list user 2 {:with {:org org}})]
-      [users
+    (let [post (fab/create post)]
+      [post
        @persistence/store]))
-)
+  )
   

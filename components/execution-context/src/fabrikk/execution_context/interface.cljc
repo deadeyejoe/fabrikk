@@ -37,10 +37,7 @@
   (build-graph/path context path))
 
 (defn assoc-value [context key value]
-  (core/assoc-value context key value))
-
-(defn update-value [context f & args]
-  (core/update-value context f args))
+  (core/assoc-primary-value context key value))
 
 (defn ->result [context]
   (core/->result context))

@@ -47,3 +47,6 @@
 
 (defn meta-result? [x]
   (core/meta-result? x))
+
+(defn identity-association? [x]
+  (core/identity-association? x))

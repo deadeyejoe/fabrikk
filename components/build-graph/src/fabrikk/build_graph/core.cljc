@@ -11,15 +11,26 @@
                                    ::primary
                                    ::codex]))
 
+(defn self-loop? [[src dest :as edge]]
+  ;; TODO: This is a hack, clean this up
+  (= src dest))
+
+(def not-self-loop? (complement self-loop?))
+
 (defrecord BuildGraph [codex labels]
+  ;; TODO: clean this shit up. Either delegate to link graph implementation, or change link graph implementation
   graph/Graph
   (edges [_]
     (mapcat (fn [[src label->dest]]
-              (map (partial vector src) (vals label->dest)))
+              (->> label->dest
+                   (map second)
+                   (map (partial vector src))
+                   (filterv not-self-loop?)))
             labels))
   (has-edge? [_ src dest]
     (->> (get labels src)
          (vals)
+         (map second)
          (some (partial = dest))))
   (nodes [_]
     (keys codex))
@@ -30,13 +41,17 @@
   (out-edges [_ src-node]
     (->> (get labels src-node)
          (vals)
-         (map (partial vector src-node))))
+         (map second)
+         (map (partial vector src-node))
+         (filterv not-self-loop?)))
   (successors* [x src-node]
     (map second (graph/out-edges x src-node)))
   graph/Digraph
   (in-edges [_ dest-node]
-    (map (juxt first last)
-         (link-graph/inward-links labels dest-node)))
+            (->>
+             (link-graph/inward-links labels dest-node)
+             (map (juxt first last))
+             (filterv not-self-loop?)))
   (in-degree [x dest-node]
     (count (graph/in-edges x dest-node)))
   (predecessors* [x dest-node]
@@ -115,8 +130,8 @@
   [{:keys [codex labels primary] :as _build-graph} path]
   (get codex (link-graph/traverse-path labels primary path)))
 
-(defn entities-in-build-order [{:keys [codex] :as build-graph}]
-  (if-let [sorted-ids (graph-alg/topsort build-graph)]
+(defn entities-in-build-order [{:keys [codex primary] :as build-graph}]
+  (if-let [sorted-ids (graph-alg/topsort build-graph primary)]
     (map codex (reverse sorted-ids))
     (throw (IllegalArgumentException. "Build graph must be a DAG"))))
 

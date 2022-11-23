@@ -9,7 +9,8 @@
             [loom.alg :as graph-alg]
             [fabrikk.persistence.interface :as persistence]
             [fabrikk.core :as fab]
-            [fabrikk.output.interface :as output]))
+            [fabrikk.output.interface :as output]
+            [loom.graph :as graph]))
 
 (def organization
   (factory/->factory
@@ -75,7 +76,15 @@
 (comment
   "Derive"
   (fab/build post {:with  {:author-name (fab/derive [:author] :name)}
-                   :traits [:published]}))
+                   :traits [:published]}
+             {:output-as :build-order})
+  (let [[post context] (fab/build post {:with  {:author-name (fab/derive [:author] :name)}
+                                        :traits [:published]}
+                                  {:output-as :tuple})
+        prim-node (context/primary context)]
+    [(:uuid prim-node)
+     (graph/out-edges context (:uuid prim-node))])
+  )
 
 (comment
   "Building"

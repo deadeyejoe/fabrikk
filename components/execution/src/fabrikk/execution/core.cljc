@@ -74,22 +74,25 @@
   (= (entity/value entity) (entity/value persisted-entity)))
 (def changed? (complement unchanged?))
 
-(defn persist-and-propagate! [output-opts context entity]
-  (if (entity/needs-persist? entity)
-    (let [value-with-dispatch (persistence/value-with-dispatch-meta entity output-opts)
-          persisted-value (persistence/persist! value-with-dispatch)
-          persisted-entity (entity/set-persisted-value entity persisted-value)]
-      (if (changed? entity persisted-entity)
-        (-> context
-            (context/set-entity persisted-entity)
-            (context/propagate persisted-entity))
-        context))
-    context))
+(defn persist-and-propagate! [output-opts context entity-id]
+  (let [current-entity (context/entity context entity-id)]
+    (if (entity/needs-persist? current-entity)
+      (let [value-with-dispatch (persistence/value-with-dispatch-meta current-entity output-opts)
+            persisted-value (persistence/persist! value-with-dispatch)
+            persisted-entity (entity/set-persisted-value current-entity persisted-value)]
+        (if (changed? current-entity persisted-entity)
+          (-> context
+              (context/set-entity persisted-entity)
+              (context/propagate persisted-entity))
+          context))
+      context)))
 
 (defn persist-context [output-opts built-context]
   (reduce (partial persist-and-propagate! output-opts)
           built-context
-          (context/entities-in-build-order built-context)))
+
+          (->> (context/entities-in-build-order built-context)
+               (map :uuid))))
 
 (defn create [factory build-opts output-opts]
   (output/build

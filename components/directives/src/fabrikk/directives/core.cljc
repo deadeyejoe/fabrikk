@@ -87,13 +87,19 @@
                       :build-opt-list build-opt-list
                       :ordering :pre})))
 
+(defn coerce-to-list [build-opt-list]
+  (cond
+    (map? build-opt-list) [build-opt-list]
+    (coll? build-opt-list) (vec build-opt-list)
+    :else [{}]))
+
 (defmethod core/run ::build-list [context key
                                   {:keys [value number build-opt-list]
                                    :or {number 0}
                                    :as _directive}]
   (context/associate context
                      key
-                     (execution/build-list-context value number build-opt-list)))
+                     (execution/build-list-context value number (coerce-to-list build-opt-list))))
 
 ;; =========== DERIVE ===========
 

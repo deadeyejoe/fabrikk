@@ -35,11 +35,19 @@
        (reduce (partial apply collect-value)
                {})))
 
-(defmethod build :path [context {:keys [paths]}]
+(defmethod build :path [context {:keys [paths] :as output-opts}]
   (map (fn [path]
          ;; TODO result meta etc.
-         (entity/value (context/path context path)))
+         (let [entity (if (context/identity-association? path)
+                        (context/primary context)
+                        (context/path context path))]
+           (entity/value entity)))
        paths))
+
+(defmethod build :build-order [context _output-opts]
+  (->> (context/entities-in-build-order context)
+       (filter entity/persistable?)
+       (map entity/value)))
 
 (defn as-meta []
   {:output-as :meta})

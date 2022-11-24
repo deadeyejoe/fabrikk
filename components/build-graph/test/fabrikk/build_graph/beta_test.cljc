@@ -31,14 +31,14 @@
 (comment (lio/view large-graph))
 
 (deftest test-subgraph
-  (let [subgraph (build-graph/subgraph large-graph 3)]
+  (let [subgraph (build-graph/successor-graph large-graph 3)]
     (is (= #{3 4 5} (graph/nodes subgraph)))
     (is (= 3 (count (graph/edges subgraph)))))
   (testing "Multi edges"
-    (let [subgraph (build-graph/subgraph large-graph 6)]
+    (let [subgraph (build-graph/successor-graph large-graph 6)]
       (is (= #{6 7} (graph/nodes subgraph)))
       (is (= [[6 7] [6 7]] (graph/edges subgraph)))))
   (testing "Self loops"
-    (let [subgraph (build-graph/subgraph large-graph 8)]
+    (let [subgraph (build-graph/successor-graph large-graph 8)]
       (is (= #{8} (graph/nodes subgraph)))
       (is (= [[8 8]] (graph/edges subgraph))))))

@@ -83,7 +83,17 @@
 (defn associate-as [entity]
   (or (-> entity :associate-as)
       (-> entity :build-opts :as)
-      (-> entity :factory :primary-id)))
+      (-> entity :factory :primary-id)
+      :identity))
+
+(def identity-association? #{:identity :itself :list-item})
+
+(defn value-to-assoc [{:keys [value] :as entity} associate-as]
+  (cond
+    (identity-association? associate-as) value
+    (fn? associate-as) (associate-as value)
+    (keyword? associate-as) (get value associate-as)
+    :else value))
 
 (defn suppress-list-association [entity]
   (if (= :list-item (-> entity :build-opts :as))

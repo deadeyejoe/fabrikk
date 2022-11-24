@@ -2,6 +2,9 @@
   (:require [fabrikk.build-graph.beta.core :as build-graph])
   (:refer-clojure :exclude [merge]))
 
+(defn add-node [build-graph node]
+  (build-graph/add-node build-graph node))
+
 (defn add-edge [build-graph source target]
   (build-graph/add-edge build-graph source target))
 
@@ -14,5 +17,5 @@
 (defn init [& edges]
   (apply build-graph/init edges))
 
-(defn subgraph [build-graph node]
-  (build-graph/subgraph build-graph node))
+(defn successor-graph [build-graph node]
+  (build-graph/successor-graph build-graph node))

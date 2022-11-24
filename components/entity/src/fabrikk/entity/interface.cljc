@@ -5,6 +5,8 @@
 (s/def ::instance ::core/instance)
 (s/def ::uuid ::core/uuid)
 
+(def id :uuid)
+
 (defn create! [factory build-opts]
   (core/create! factory build-opts))
 
@@ -37,6 +39,9 @@
 
 (defn associate-as [entity]
   (core/associate-as entity))
+
+(defn value-to-assoc [entity associate-as]
+  (core/value-to-assoc entity associate-as))
 
 (defn suppress-list-association [entity]
   (core/suppress-list-association entity))

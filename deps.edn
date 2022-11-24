@@ -8,6 +8,7 @@
                                djblue/portal {:mvn/version "0.34.2"}
                                aysylu/loom {:mvn/version "1.0.2"}
 
+                               poly/build-context {:local/root "components/build-context"}
                                poly/build-graph {:local/root "components/build-graph"}
                                poly/directive-core {:local/root "components/directive-core"}
                                poly/directives {:local/root "components/directives"}

@@ -8,18 +8,26 @@
 
 (def collect-set (fnil conj #{}))
 
+(defn add-node [{:keys [nodeset] :as build-graph} node]
+  (if (contains? nodeset node)
+    build-graph
+    (update build-graph :nodeset collect-set node)))
+
 (defn import-edge [build-graph edge-id source target]
   (-> build-graph
+      (add-node source)
+(add-node target)
       (update-in [:source->edgeset source] collect-set edge-id)
       (update-in [:target->edgeset target] collect-set edge-id)
       (assoc-in [:id->edge edge-id] [source target])))
 
 (defn add-edge [build-graph source target]
   (let [edge-id (random-uuid)]
-    (import-edge build-graph edge-id source target)))
+    [(import-edge build-graph edge-id source target) edge-id]))
 
 (defn merge [build-graph other]
   (-> build-graph
+      (update :nodeset set/union (:nodeset other))
       (update :source->edgeset (partial merge-with set/union) (:source->edgeset other))
       (update :target->edgeset (partial merge-with set/union) (:target->edgeset other))
       (update :id->edge clojure.core/merge (:id->edge other))))
@@ -39,15 +47,13 @@
   (->> (edge-ids-between build-graph source target)
        (map id->edge)))
 
-(defrecord BuildGraph [source->edgeset target->edgeset id->edge]
+(defrecord BuildGraph [nodeset source->edgeset target->edgeset id->edge]
   graph/Graph
   (edges [_]
     (vals id->edge))
   (has-edge? [build-graph source target]
     (not-empty (edge-ids-between build-graph source target)))
-  (nodes [_]
-    (set/union (set (keys source->edgeset))
-               (set (keys target->edgeset))))
+  (nodes [_] nodeset)
   (has-node? [_ node]
     (or (contains? source->edgeset node)
         (contains? target->edgeset node)))
@@ -81,7 +87,7 @@
                             :id->edge {}})
           edges))
 
-(defn subgraph [{:keys [id->edge] :as build-graph} node]
+(defn successor-graph [{:keys [id->edge] :as build-graph} node]
   (let [successor-set (set (graph-alg/post-traverse build-graph node))]
     (reduce-kv (fn [new-graph edge-id [source target]]
                  (if (and (contains? successor-set source)

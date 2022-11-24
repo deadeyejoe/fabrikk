@@ -54,8 +54,15 @@
          (reduce (partial apply context/associate)
                  list-context))))
 
-(defn assoc-as-list-item [build-opts]
-  (assoc build-opts :as :list-item))
+(defn assoc-as-list-item
+  "When calling `build-list` with no 'as' build-option we want to override 
+   the usual default behaviour of referencing by primary id, and return 
+   the entities themselves. If these entities are passed to further builds, 
+   this special value can be overidden."
+  [build-opts]
+  (if (:as build-opts)
+    build-opts
+    (assoc build-opts :as entity/list-item-kw)))
 
 (defn coerce-to-list [build-opt-list]
   (cond

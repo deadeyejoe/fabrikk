@@ -1,4 +1,23 @@
 (ns fabrikk.entity.core
+  "Entities represent the domain entities being created during factory execution.
+   
+   They provide a concept of identity that links pending and persisted versions
+   of an entity. To motivate this imagine a post that refers to a user by id: 
+   `post->user`.
+   
+   When we `build` this post, we're aiming to create consistent production-like 
+   data; the post should refer to the user by its' id. When we persist these
+   entities, the persistence layer will likely change the id of the user, so we'd
+   like to be able to propagate this change to the post before persisting it in 
+   turn. 
+   
+   The same applies to other attributes on the user that may change during 
+   persistence, since these may also be referenced in the post.
+   
+   Entities provide an identity separate from the identity of the domain enitity
+   they represent. So that references between them are 'static'. They provide 
+   conflict and combine semantics to capture the following fact: the value of an 
+   entity should change only when the entity is persisted."
   (:require [fabrikk.specs.interface :as specs]
             [clojure.spec.alpha :as s]))
 
@@ -86,7 +105,8 @@
       (-> entity :factory :primary-id)
       :identity))
 
-(def identity-association? #{:identity :itself :list-item})
+(def list-item-kw :list-item)
+(def identity-association? #{:identity :itself list-item-kw})
 
 (defn value-to-assoc [{:keys [value] :as entity} associate-as]
   (cond
@@ -96,7 +116,7 @@
     :else value))
 
 (defn suppress-list-association [entity]
-  (if (= :list-item (-> entity :build-opts :as))
+  (if (= list-item-kw (-> entity :build-opts :as))
     (update entity :build-opts dissoc :as)
     entity))
 
@@ -115,12 +135,14 @@
 
 (def persisted? :persisted)
 
+(def pending? (complement persisted?))
+
 (defn persistable? [entity]
   (-> entity :factory :persistable))
 
 (defn needs-persist? [entity]
   (and (persistable? entity)
-       (not (persisted? entity))))
+       (pending? entity)))
 
 (defn persist-with [entity]
   (-> entity :build-opts :persist-with))

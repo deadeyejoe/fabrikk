@@ -43,6 +43,9 @@
 (defn value-to-assoc [entity associate-as]
   (core/value-to-assoc entity associate-as))
 
+(def list-item-kw
+  core/list-item-kw)
+
 (defn suppress-list-association [entity]
   (core/suppress-list-association entity))
 
@@ -63,6 +66,9 @@
 
 (defn persisted? [entity]
   (core/persisted? entity))
+
+(defn pending? [entity]
+  (core/pending? entity))
 
 (defn needs-persist? [entity]
   (core/needs-persist? entity))

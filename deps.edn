@@ -22,7 +22,7 @@
                                poly/template {:local/root "components/template"}
                                poly/utils {:local/root "components/utils"}
                                
-                               poly/library {:local/root "bases/library"}}}
+                               poly/library {:local/root "bases/alpha"}}}
 
             :test {:extra-paths ["components/build-context/test"
                                  "components/build-graph/test"
@@ -36,7 +36,9 @@
                                  "components/persistence/test"
                                  "components/specs/test"
                                  "components/template/test"
-                                 "components/utils/test"]}
+                                 "components/utils/test"
+                                 
+                                 "bases/alpha/test"]}
 
             :poly {:main-opts ["-m" "polylith.clj.core.poly-cli.core"]
                    :extra-deps {polyfy/polylith

@@ -26,6 +26,9 @@
 
 (defonce sequence-cache (atom {}))
 
+(defn reset-sequence! []
+  (reset! sequence-cache {}))
+
 (defn sequence
   "Creates a directive that returns a sequence of numbers that may be transformed by
    an optional function 'f'. The sequence is scoped to the primary factory by default.

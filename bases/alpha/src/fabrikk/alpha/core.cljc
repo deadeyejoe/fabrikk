@@ -1,7 +1,7 @@
-(ns fabrikk.core
+(ns fabrikk.alpha.core
   (:require [fabrikk.directives.interface :as directives]
             [fabrikk.entity.interface :as entity]
-[fabrikk.execution-context.interface :as context]
+            [fabrikk.execution-context.interface :as context]
             [fabrikk.execution.interface :as execution]
             [fabrikk.factory.interface :as factory]
             [fabrikk.persistence.interface :as persistence]

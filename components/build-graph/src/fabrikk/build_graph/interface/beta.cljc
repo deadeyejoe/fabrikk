@@ -14,6 +14,9 @@
 (defn edge-ids-between [build-graph source target]
   (build-graph/edge-ids-between  build-graph source target))
 
+(defn id->edge [build-graph edge-id]
+  (build-graph/id->edge build-graph edge-id))
+
 (defn init [& edges]
   (apply build-graph/init edges))
 

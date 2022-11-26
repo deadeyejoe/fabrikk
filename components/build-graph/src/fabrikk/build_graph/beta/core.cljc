@@ -16,7 +16,7 @@
 (defn import-edge [build-graph edge-id source target]
   (-> build-graph
       (add-node source)
-(add-node target)
+      (add-node target)
       (update-in [:source->edgeset source] collect-set edge-id)
       (update-in [:target->edgeset target] collect-set edge-id)
       (assoc-in [:id->edge edge-id] [source target])))
@@ -81,7 +81,8 @@
                                                  id->edge)})))
 
 (defn init [& edges]
-  (reduce (partial apply add-edge)
+  (reduce (fn [graph [source target :as _edge]]
+            (first (add-edge graph source target)))
           (map->BuildGraph {:source->edgeset {}
                             :target->edgeset {}
                             :id->edge {}})
@@ -96,7 +97,3 @@
                    new-graph))
                (init)
                id->edge)))
-
-(comment
-  (let [g (init [1 6] [6 7] [6 7])]
-    (subgraph g 6)))

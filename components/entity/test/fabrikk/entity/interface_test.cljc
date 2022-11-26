@@ -37,6 +37,13 @@
       (is (= two (entity/combine one two)))
       (is (= two (entity/combine two one))))))
 
+(deftest combine-nil
+  (let [one (entity/create! {} {1 2})]
+    (is (entity/no-conflict? one nil))
+    (is (entity/no-conflict? nil one))
+    (is (= one (entity/combine one nil)))
+    (is (= one (entity/combine nil one)))))
+
 (deftest test-associate-as
   (let [with-no-factory (entity/create! {} {})
         with-factory (entity/create! {:primary-id ::factory} {})

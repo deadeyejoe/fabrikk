@@ -1,5 +1,13 @@
 (ns fabrikk.utils.core)
 
+(defn tapout> [x label]
+  (tap> [label x])
+  x)
+
+(defn tapout>> [label x]
+  (tap> [label x])
+  x)
+
 (defn scoped-assoc [& path]
   (let [pathv (vec path)]
     (fn [m k v]

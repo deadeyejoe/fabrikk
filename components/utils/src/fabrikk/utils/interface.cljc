@@ -1,6 +1,12 @@
 (ns fabrikk.utils.interface
   (:require [fabrikk.utils.core :as core]))
 
+(defn tapout> [x label]
+  (core/tapout> x label))
+
+(defn tapout>> [label x]
+  (core/tapout>> label x))
+
 (defn scoped-assoc [& path]
   (apply core/scoped-assoc path))
 

@@ -16,8 +16,9 @@
    
    Entities provide an identity separate from the identity of the domain enitity
    they represent. So that references between them are 'static'. They provide 
-   conflict and combine semantics to capture the following fact: the value of an 
-   entity should change only when the entity is persisted."
+   conflict and combine semantics to capture the following fact: from the perspective
+   of the executor of build/create the value of an entity should change only when the
+   entity is persisted."
   (:require [fabrikk.specs.interface :as specs]
             [clojure.spec.alpha :as s]))
 
@@ -76,11 +77,13 @@
     other-entity))
 
 (defn combine [entity other-entity]
-  (when (uuid-match? entity other-entity)
-    (if (persisted-match? entity other-entity)
-      (when (value-match? entity other-entity)
-        other-entity)
-      (pick-persisted entity other-entity))))
+  (if (and entity other-entity)
+    (when (uuid-match? entity other-entity)
+      (if (persisted-match? entity other-entity)
+        (when (value-match? entity other-entity)
+          other-entity)
+        (pick-persisted entity other-entity)))
+    (or entity other-entity)))
 
 (defn combine-no-conflict [entity other-entity]
   (assert-no-conflict entity other-entity)

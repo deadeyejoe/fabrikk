@@ -24,7 +24,19 @@
                                
                                poly/library {:local/root "bases/library"}}}
 
-            :test {:extra-paths []}
+            :test {:extra-paths ["components/build-context/test"
+                                 "components/build-graph/test"
+                                 "components/directive-core/test"
+                                 "components/directives/test"
+                                 "components/entity/test"
+                                 "components/execution/test"
+                                 "components/execution-context/test"
+                                 "components/factory/test"
+                                 "components/output/test"
+                                 "components/persistence/test"
+                                 "components/specs/test"
+                                 "components/template/test"
+                                 "components/utils/test"]}
 
             :poly {:main-opts ["-m" "polylith.clj.core.poly-cli.core"]
                    :extra-deps {polyfy/polylith

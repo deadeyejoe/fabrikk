@@ -13,6 +13,9 @@
 (defn create-list! []
   (core/create-list!))
 
+(defn id-match? [entity other-entity]
+  (core/uuid-match? entity other-entity))
+
 (defn refresh-uuid [entity]
   (core/refresh-uuid entity))
 

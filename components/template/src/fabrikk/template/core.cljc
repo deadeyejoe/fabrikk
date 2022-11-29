@@ -75,6 +75,6 @@
   (reduce (fn [ctx field]
             (apply f ctx (get field->tuple field)))
           init-ctx
-          (concat pre-ordering
-                  ordering
-                  post-ordering)))
+          (concat (distinct pre-ordering)
+                  (distinct ordering)
+                  (distinct post-ordering))))

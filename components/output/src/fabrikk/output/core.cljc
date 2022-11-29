@@ -22,11 +22,9 @@
   [(-> context context/primary entity/value transform) context])
 
 (defn collect-value [context factory-id value]
-  (update context
-          (or
-           (some-> factory-id name keyword)
-           factory-id)
-          (fnil conj []) value))
+  (if-let [coll-name (some-> factory-id name keyword)] ;;un-namespace
+    (update context coll-name (fnil conj []) value)
+    context)) ;; if factory is nil, don't record it 
 
 (defmethod build :collection [context _output-opts]
   (->> (context/entities-in-build-order context)

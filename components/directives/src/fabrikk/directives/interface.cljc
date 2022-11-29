@@ -8,6 +8,9 @@
 (defn sequence [f identifier]
   (core/sequence f identifier))
 
+(defn reset-sequence! []
+  (core/reset-sequence!))
+
 (defn build [factory opts]
   (core/build factory opts))
 

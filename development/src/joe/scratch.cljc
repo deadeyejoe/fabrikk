@@ -8,9 +8,10 @@
             [fabrikk.build-graph.interface :as build-graph]
             [loom.alg :as graph-alg]
             [fabrikk.persistence.interface :as persistence]
-            [fabrikk.core :as fab]
+            [fabrikk.alpha.core :as fab]
             [fabrikk.output.interface :as output]
-            [loom.graph :as graph]))
+            [loom.graph :as graph]
+            [fabrikk.template.interface :as template]))
 
 (def organization
   (factory/->factory
@@ -85,6 +86,10 @@
     [(:uuid prim-node)
      (graph/out-edges context (:uuid prim-node))])
   )
+
+(comment
+  "Template"
+  (factory/compile-template user {:with {:id :one}}))
 
 (comment
   "Building"

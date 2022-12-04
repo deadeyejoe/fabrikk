@@ -39,10 +39,10 @@
    :build-opts build-opts
    :value {}})
 
-(defn create-list! []
+(defn create-list! [value]
   {:uuid (random-uuid)
    :persisted false
-   :value []})
+   :value value})
 
 (defn refresh-uuid [entity]
   (assoc entity :uuid (random-uuid)))

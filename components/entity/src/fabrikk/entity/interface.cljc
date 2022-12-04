@@ -10,8 +10,9 @@
 (defn create! [factory build-opts]
   (core/create! factory build-opts))
 
-(defn create-list! []
-  (core/create-list!))
+(defn create-list!
+  ([] (core/create-list! []))
+  ([list] (core/create-list! list)))
 
 (defn id-match? [entity other-entity]
   (core/uuid-match? entity other-entity))

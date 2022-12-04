@@ -46,36 +46,41 @@
 (defn build [factory build-opts output-opts]
   (output/build (build-context factory build-opts) output-opts))
 
-(defn build-list-context [factory number build-opt-list]
-  (let [list-context (context/init (entity/create-list!))]
-    (->> (utils/pad-with-last number build-opt-list)
-         (map-indexed (fn [index build-opts]
-                        [index (build-context factory build-opts)]))
-         (reduce (partial apply context/associate)
-                 list-context))))
-
-(defn assoc-as-list-item
-  "When calling `build-list` with no 'as' build-option we want to override 
-   the usual default behaviour of referencing by primary id, and return 
-   the entities themselves. If these entities are passed to further builds, 
-   this special value can be overidden."
-  [build-opts]
-  (if (:as build-opts)
-    build-opts
-    (assoc build-opts :as entity/list-item-kw)))
-
-(defn coerce-to-list [build-opt-list]
+(defn coerce-to-list [build-opt-list+]
   (cond
-    (map? build-opt-list) [build-opt-list]
-    (coll? build-opt-list) (vec build-opt-list)
+    (map? build-opt-list+) [build-opt-list+]
+    (coll? build-opt-list+) (vec build-opt-list+)
     :else [{}]))
 
-(defn build-list [factory n build-opt-list output-opts]
-  (output/build
-   (->> (coerce-to-list build-opt-list)
-        (map assoc-as-list-item)
-        (build-list-context factory n))
-   output-opts))
+(defn build-many [factory number build-opt+]
+  (->> (coerce-to-list build-opt+)
+       (utils/pad-with-last number)
+       (map (partial build-context factory))))
+
+(defn build-list-context [factory number build-opt+]
+  (let [contexts (build-many factory number build-opt+)
+        list-value  (mapv context/->result-meta contexts)
+        list-context (reduce (partial apply context/associate)
+                             (context/init (entity/create-list!))
+                             (map-indexed vector contexts))]
+     ;;update the value after the context/associate calls, overwriting the list of assoc-as values
+    (context/update-primary list-context entity/update-value (constantly list-value))))
+
+(defn build-list 
+  "The output of this should be:
+   
+   First: an inspectable list of entities (i.e. not just their primary id or assoc-as values).
+   
+   Second: a list that can be passed to other builds. The directives code can handle replacing
+   the list entries with the correct assoc-as value.
+   
+   Third: a list that can be destructured into contextful entities. These entities can in turn
+   be passed as dependents in other builds.
+   
+   With this in mind we do something weird looking: the primary value of the context that's
+   passed to `output/build` is a list of contextful entities."
+  [factory n build-opt+ output-opts]
+  (output/build (build-list-context factory n build-opt+) output-opts))
 
 (defn unchanged? [entity persisted-entity]
   (= (entity/value entity) (entity/value persisted-entity)))
@@ -109,8 +114,6 @@
 
 (defn create-list [factory n build-opt-list output-opts]
   (output/build
-   (->> (coerce-to-list build-opt-list)
-        (map assoc-as-list-item)
-        (build-list-context factory n)
+   (->> (build-list-context factory n build-opt-list)
         (persist-context output-opts))
    output-opts))

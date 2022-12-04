@@ -83,26 +83,22 @@
 
 (defn build-list
   ([factory n] (build-list factory n [{}]))
-  ([factory n build-opt-list]
+  ([factory n build-opt+]
    (core/->directive ::build-list
                      {:value (coerce-factory factory)
                       :number n
-                      :build-opt-list build-opt-list
+                      :build-opt+ build-opt+
                       :ordering :pre})))
 
-(defn coerce-to-list [build-opt-list]
-  (cond
-    (map? build-opt-list) [build-opt-list]
-    (coll? build-opt-list) (vec build-opt-list)
-    :else [{}]))
-
 (defmethod core/run ::build-list [context key
-                                  {:keys [value number build-opt-list]
+                                  {:keys [value number build-opt+]
                                    :or {number 0}
                                    :as _directive}]
-  (context/associate context
-                     key
-                     (execution/build-list-context value number (coerce-to-list build-opt-list))))
+  (let [list-values (execution/build-many value number build-opt+)
+        list-context (reduce (partial apply context/associate)
+                             (context/init (entity/create-list!))
+                             (map-indexed vector list-values))]
+    (context/associate context key list-context)))
 
 ;; =========== DERIVE ===========
 

@@ -33,9 +33,11 @@
     :else (throw (IllegalArgumentException. (str "Invalid template " description)))))
 
 (defn exists? [{:keys [pre-ordering ordering post-ordering] :as _template} field]
-  (or (= -1 (.indexOf pre-ordering field))
-      (= -1 (.indexOf ordering field))
-      (= -1 (.indexOf post-ordering field))))
+  (or (< -1 (.indexOf pre-ordering field))
+      (< -1 (.indexOf ordering field))
+      (< -1 (.indexOf post-ordering field))))
+
+(def new? (complement exists?))
 
 (defn ordering-collection [[_field value :as _tuple]]
   (or
@@ -47,7 +49,7 @@
    :ordering))
 
 (defn add-tuple [template [field _value :as tuple]]
-  (let [new? (exists? template field)
+  (let [new? (new? template field)
         collection-to-update (ordering-collection tuple)]
     (cond-> (assoc-in template [:field->tuple field] tuple)
       new? (update collection-to-update conj field))))

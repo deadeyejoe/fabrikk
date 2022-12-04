@@ -27,14 +27,18 @@
 
 (defmulti run #'run-directive-dispatch)
 
-(defn handle-meta [build-context key value]
-  (let [context-to-associate (context/update-primary (meta value)
-                                                     entity/suppress-list-association)]
-    (context/associate build-context key context-to-associate)))
+(defn meta->context [value]
+  (if (sequential? value)
+    (->> value
+         (map meta)
+         (map-indexed vector)
+         (reduce (partial apply context/associate)
+                 (context/init (entity/create-list!))))
+    (meta value)))
 
 (defmethod run :default [build-context key value]
   (if (context/meta-result? value)
-    (handle-meta build-context key value)
+    (context/associate build-context key (meta->context value))
     (context/assoc-value build-context key (if (fn? value)
                                              (value)
                                              value))))

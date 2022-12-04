@@ -7,8 +7,8 @@
 (defn build [factory build-opts output-opts]
   (core/build factory build-opts output-opts))
 
-(defn build-list-context [factory n build-opt-list]
-  (core/build-list-context factory n build-opt-list))
+(defn build-many [factory n build-opts+]
+  (core/build-many factory n build-opts+))
 
 (defn build-list [factory n build-opt-list output-opts]
   (core/build-list factory n build-opt-list output-opts))

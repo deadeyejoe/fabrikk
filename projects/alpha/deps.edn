@@ -1,6 +1,4 @@
-{:paths ["src" "resources"]
- :deps {org.clojure/clojure {:mvn/version "1.11.1"}
-        medley/medley {:mvn/version "1.3.0"}
+{:deps {polylith/alpha {:local/root "../../bases/alpha"}
 
         poly/build-context {:local/root "../../components/build-context"}
         poly/build-graph {:local/root "../../components/build-graph"}
@@ -15,5 +13,8 @@
         poly/specs {:local/root "../../components/specs"}
         poly/template {:local/root "../../components/template"}
         poly/utils {:local/root "../../components/utils"}}
- :aliases {:test {:extra-paths ["test"]
-                  :extra-deps {}}}}
+
+ :aliases {:test {:extra-paths []
+                  :extra-deps  {}}
+           :build {:extra-deps {io.github.seancorfield/build-clj {:git/tag "v0.8.5" :git/sha "de693d0"}}
+                   :default-ns build}}}

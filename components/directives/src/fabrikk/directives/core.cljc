@@ -2,13 +2,16 @@
   (:require [fabrikk.directive-core.interface :as core]
             [fabrikk.entity.interface :as entity]
             [fabrikk.execution.interface :as execution]
-            [fabrikk.execution-context.interface :as context]
+            [fabrikk.build-context.interface :as context]
             [fabrikk.specs.interface :as specs]
             [clojure.spec.alpha :as s]
             [fabrikk.factory.interface :as factory])
   (:refer-clojure :exclude [sequence derive]))
 
 (s/def ::directive map?)
+
+(defn assoc-value [context key value]
+  (context/update-primary context entity/update-value assoc key value))
 
 ;; =========== CONSTANT ===========
 
@@ -20,7 +23,7 @@
   :ret ::core/directive)
 
 (defmethod core/run ::constant [context key {:keys [value] :as _directive}]
-  (context/assoc-value context key value))
+  (assoc-value context key value))
 
 ;; =========== SEQUENCE ===========
 
@@ -56,7 +59,7 @@
                          :global)
         next-number  (-> (swap! sequence-cache increment-number sequence-key)
                          (get-number sequence-key))]
-    (context/assoc-value context key (value next-number))))
+    (assoc-value context key (value next-number))))
 
 ;; =========== BUILD ===========
 
@@ -75,9 +78,9 @@
                       :ordering :pre})))
 
 (defmethod core/run ::build [context key {:keys [value build-opts] :as _directive}]
-  (context/associate context
-                     key
-                     (execution/build-context value build-opts)))
+  (context/associate-context context
+                             key
+                             (execution/build-context value build-opts)))
 
 ;; =========== BUILD LIST ===========
 
@@ -95,10 +98,10 @@
                                    :or {number 0}
                                    :as _directive}]
   (let [list-values (execution/build-many value number build-opt+)
-        list-context (reduce (partial apply context/associate)
+        list-context (reduce (partial apply context/associate-context)
                              (context/init (entity/create-list!))
                              (map-indexed vector list-values))]
-    (context/associate context key list-context)))
+    (context/associate-context context key list-context)))
 
 ;; =========== DERIVE ===========
 
@@ -109,11 +112,12 @@
                       :transform f
                       :ordering :post})))
 
-(defmethod core/run ::derive [context key {:keys [transform] derive-from :value :as directive}]
+(defmethod core/run ::derive [context key {:keys [transform] derive-from :value :as _directive}]
   (let [source-entity (if (sequential? derive-from)
-                        (context/path context derive-from)
+                        (context/traverse-path context derive-from)
                         (context/primary context))
         assoc-as (if (sequential? derive-from)
                    transform
                    (comp transform derive-from))]
+    (tap> [derive-from source-entity assoc-as])
     (context/associate-entity context key (entity/override-association source-entity assoc-as))))

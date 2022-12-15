@@ -1,5 +1,5 @@
-(ns fabrikk.build-graph.gamma-test
-  (:require [fabrikk.build-graph.gamma.core :as value-graph]
+(ns fabrikk.build-graph.interface-test
+  (:require [fabrikk.build-graph.core :as value-graph]
             [clojure.spec.alpha :as s]
             [clojure.spec.gen.alpha :as gen]
             [clojure.set :as set]

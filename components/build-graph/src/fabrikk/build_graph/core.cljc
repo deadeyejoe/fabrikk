@@ -1,141 +1,128 @@
 (ns fabrikk.build-graph.core
-  (:require [clojure.spec.alpha :as s]
-            [fabrikk.build-graph.link-graph :as link-graph]
-            [fabrikk.entity.interface :as entity]
-            [loom.graph :as graph]
-            [loom.alg :as graph-alg]))
+  (:require [loom.graph :as graph]
+            [medley.core :as medley]
+            [clojure.set :as set])
+  (:refer-clojure :exclude [merge]))
 
-(s/def ::primary ::entity/instance)
-(s/def ::codex (s/map-of ::entity/uuid ::entity/instance))
-(s/def ::instance (s/keys :opt-un [::graph
-                                   ::primary
-                                   ::codex]))
+(def collect-set (fnil conj #{}))
 
-(defn self-loop? [[src dest :as edge]]
-  ;; TODO: This is a hack, clean this up
-  (= src dest))
+(defn reverse-adjacency [node->nodeset]
+  (->> node->nodeset
+       (mapcat (fn [[node nodeset]] (map #(vector % node) nodeset)))
+       (reduce (fn [acc [from to]]
+                 (update acc from collect-set to))
+               {})))
 
-(def not-self-loop? (complement self-loop?))
-
-(defrecord BuildGraph [codex labels]
-  ;; TODO: clean this shit up. Either delegate to link graph implementation, or change link graph implementation
+(defrecord ValueGraph [node-id->value edge-id->value source->target-set target->source-set]
   graph/Graph
   (edges [_]
-    (mapcat (fn [[src label->dest]]
-              (->> label->dest
-                   (map second)
-                   (map (partial vector src))
-                   (filterv not-self-loop?)))
-            labels))
-  (has-edge? [_ src dest]
-    (->> (get labels src)
-         (vals)
-         (map second)
-         (some (partial = dest))))
+    (keys edge-id->value))
+  (has-edge? [_ source target]
+    (contains? (get source->target-set source) target))
   (nodes [_]
-    (keys codex))
+    (keys node-id->value))
   (has-node? [_ node]
-    (get codex node))
-  (out-degree [_ src-node]
-    (count (get labels src-node)))
-  (out-edges [_ src-node]
-    (->> (get labels src-node)
-         (vals)
-         (map second)
-         (map (partial vector src-node))
-         (filterv not-self-loop?)))
-  (successors* [x src-node]
-    (map second (graph/out-edges x src-node)))
+    (contains? node-id->value node))
+  (out-degree [_ source]
+    (count (get source->target-set source)))
+  (out-edges [_ source]
+    (->> (get source->target-set source)
+         (map (partial vector source))))
+  (successors* [_ source]
+    (get source->target-set source))
+
   graph/Digraph
-  (in-edges [_ dest-node]
-            (->>
-             (link-graph/inward-links labels dest-node)
-             (map (juxt first last))
-             (filterv not-self-loop?)))
-  (in-degree [x dest-node]
-    (count (graph/in-edges x dest-node)))
-  (predecessors* [x dest-node]
-    (map first (graph/out-edges x dest-node)))
-  (transpose [_]
-    (throw (Exception. "Not implemented"))))
+  (in-edges [_ target]
+    (->> (get target->source-set target)
+         (map #(vector % target))))
+  (in-degree [_ target]
+    (count (get target->source-set target)))
+  (predecessors* [_ target]
+    (get target->source-set target))
+  (transpose [value-graph]
+    (-> value-graph
+        (update :edge-id->value (partial medley/map-keys reverse))
+        (update :source->target-set reverse-adjacency)
+        (update :target->source-set reverse-adjacency))))
 
-(defn in-edges-with-links [{:keys [labels] :as _bg} node]
-  (link-graph/inward-links labels node))
+(defn build []
+  (->ValueGraph {} {} {} {}))
 
-(declare set-primary!)
+(defn insert-node [value-graph id value]
+  (assoc-in value-graph [:node-id->value id] value))
 
-(defn init
-  ([]
-   (assoc (->BuildGraph {} {})
-          :primary nil))
-  ([entity] (-> (init)
-                (set-primary! entity))))
+(defn add-node
+  "Add a node if it's not already there"
+  [value-graph id value]
+  (assert (not (graph/has-node? value-graph id)))
+  (insert-node value-graph id value))
 
-(defn ensure-node [{:keys [codex] :as build-graph} {:keys [uuid] :as entity}]
-  (if-let [existing (get codex uuid)]
-    (assoc-in build-graph [:codex uuid] (entity/combine-no-conflict existing entity))
-    (assoc-in build-graph [:codex uuid] entity)))
+(defn set-node
+  "Set the value of an existing node"
+  [value-graph id value]
+  (assert (graph/has-node? value-graph id))
+  (insert-node value-graph id value))
 
-(defn assert-node [{:keys [codex] :as _bg} {:keys [uuid] :as _entity}]
-  (assert (get codex uuid) "Entity was not found in the graph!"))
+(defn update-node
+  "Update the value of an existing node"
+  [value-graph id f args]
+  (assert (graph/has-node? value-graph id))
+  (apply update-in value-graph [:node-id->value id] f args))
 
-(defn set-primary! [build-graph {:keys [uuid] :as entity}]
-  (-> build-graph
-      (ensure-node entity)
-      (assoc :primary uuid)))
+(defn node-value [value-graph id]
+  (get-in value-graph [:node-id->value id]))
 
-(defn entity [build-graph id]
-  (get-in build-graph [:codex id]))
+(defn collect-edge [value-graph source-id target-id]
+  (-> value-graph
+      (update-in [:source->target-set source-id] collect-set target-id)
+      (update-in [:target->source-set target-id] collect-set source-id)))
 
-(defn update-entity [build-graph id f args]
-  (apply update-in build-graph [:codex id] f args))
+(defn add-edge [value-graph source-id target-id value]
+  (assert (and (graph/has-node? value-graph source-id)
+               (graph/has-node? value-graph target-id)
+               (not (graph/has-edge? value-graph source-id target-id))))
+  (-> value-graph
+      (collect-edge source-id target-id)
+      (assoc-in [:edge-id->value [source-id target-id]] value)))
 
-(defn update-entity-value [build-graph id f args]
-  (apply update-in build-graph [:codex id :value] f args))
+(defn set-edge [value-graph source-id target-id value]
+  (assert (graph/has-edge? value-graph source-id target-id))
+  (assoc-in value-graph [:edge-id->value [source-id target-id]] value))
 
-(defn primary [{:keys [primary] :as build-graph}]
-  (entity build-graph primary))
+(defn update-edge [value-graph source-id target-id f args]
+  (-> value-graph
+      (collect-edge source-id target-id)
+      (update-in [:edge-id->value [source-id target-id]] #(apply f % args))))
 
-(defn update-primary [{:keys [primary] :as build-graph} f args]
-  (update-entity build-graph primary f args))
+(defn edge-value [value-graph source-id target-id]
+  (get-in value-graph [:edge-id->value [source-id target-id]]))
 
-(defn update-primary-value [{:keys [primary] :as build-graph} f args]
-  (update-entity-value build-graph primary f args))
+(defn merge [value-graph other-graph combine-node combine-edge]
+  (-> value-graph
+      (update :node-id->value #(merge-with combine-node % (:node-id->value other-graph)))
+      (update :edge-id->value #(merge-with combine-edge % (:edge-id->value other-graph)))
+      (update :source->target-set #(merge-with set/union % (:source->target-set other-graph)))
+      (update :target->source-set #(merge-with set/union % (:target->source-set other-graph)))))
 
-(defn merge-builds [{:keys [labels codex] :as primary} to-merge]
-  (-> primary
-      (assoc :codex (merge-with entity/combine-no-conflict codex (:codex to-merge)))
-      (assoc :labels (link-graph/merge labels (:labels to-merge)))))
+(defn successor-edges [value-graph node]
+  (loop [edges #{}
+         visited #{}
+         [current-node & rest :as nodes] [node]]
+    (cond
+      (empty? nodes) edges
+      (contains? visited current-node) (recur edges visited rest)
+      :else (let [outward (set (graph/out-edges value-graph current-node))]
+              (recur (apply conj edges outward)
+                     (conj visited current-node)
+                     (apply conj rest (map second outward)))))))
 
-(defn link-entities [build-graph entity-id [_label _associate :as link] other-entity-id]
-  (update build-graph :labels link-graph/link entity-id link other-entity-id))
-
-(defn associate [{:keys [primary] :as build-graph}
-                 link
-                 {associated-primary :primary :as associated-build-graph}]
-  (-> build-graph
-      (merge-builds associated-build-graph)
-      (link-entities primary link associated-primary)))
-
-(defn add-link [{:keys [primary] :as build-graph}
-                link
-                {:keys [uuid] :as entity}]
-  (assert-node build-graph entity)
-  (link-entities build-graph primary link uuid))
-
-(defn path
-  "Given a build graph and a path comprised of a sequence of labels. Starting at the 
-   primary node, traverse edges with each label in turn, and return the node at the end of
-   the path, if it exists. Or nil otherwise"
-  [{:keys [codex labels primary] :as _build-graph} path]
-  (get codex (link-graph/traverse-path labels primary path)))
-
-(defn entities-in-build-order [{:keys [codex primary] :as build-graph}]
-  (if-let [sorted-ids (graph-alg/topsort build-graph primary)]
-    (map codex (reverse sorted-ids))
-    (throw (IllegalArgumentException. "Build graph must be a DAG"))))
-
-(comment
-  (-> (->BuildGraph {1 :one 2 :two}
-                    {1 {:org 2}})
-      (graph-alg/topsort)))
+(defn successor-graph [value-graph node]
+  (when (graph/has-node? value-graph node)
+    (let [edges (successor-edges value-graph node)
+          nodes (-> edges vec flatten set (conj node))
+          new-graph-with-edges (reduce (partial apply collect-edge)
+                                       (build)
+                                       edges)]
+      (-> new-graph-with-edges
+          (assoc :node-id->value (select-keys (:node-id->value value-graph) nodes))
+          (assoc :edge-id->value (select-keys (:edge-id->value value-graph) edges))))))

@@ -1,42 +1,41 @@
 (ns fabrikk.build-graph.interface
-  (:require [fabrikk.build-graph.core :as core]))
+  (:require [fabrikk.build-graph.core :as value-graph])
+  (:refer-clojure :exclude [merge]))
 
-(defn init
-  ([] (core/init))
-  ([entity] (core/init entity)))
+(defn build []
+  (value-graph/build))
 
-(defn primary [bg]
-  (core/primary bg))
+(defn insert-node [value-graph id value]
+  (value-graph/insert-node value-graph id value))
 
-(defn update-primary [bg f & args]
-  (core/update-primary bg f args))
+(defn add-node [value-graph id value]
+  (value-graph/add-node value-graph id value))
 
-(defn update-primary-value [bg f & args]
-  (core/update-primary-value bg f args))
+(defn set-node [value-graph id value]
+  (value-graph/set-node value-graph id value))
 
-(defn entity [bg id]
-  (core/entity bg id))
+(defn update-node [value-graph id f & args]
+  (value-graph/update-node value-graph id f args))
 
-(defn set-entity [bg entity]
-  (core/ensure-node bg entity))
+(defn node-value [value-graph id]
+  (value-graph/node-value value-graph id))
 
-(defn update-entity [bg id f & args]
-  (core/update-entity bg id f args))
+(defn add-edge [value-graph source-id target-id value]
+  (value-graph/add-edge value-graph source-id target-id value))
 
-(defn update-entity-value [bg id f & args]
-  (core/update-entity-value bg id f args))
+(defn set-edge [value-graph source-id target-id value]
+  (value-graph/set-edge value-graph source-id target-id value))
 
-(defn associate [build-graph link associated-build-graph]
-  (core/associate build-graph link associated-build-graph))
+(defn update-edge [value-graph source-id target-id f & args]
+  (value-graph/update-edge value-graph source-id target-id f args))
 
-(defn add-link [build-graph link entity]
-  (core/add-link build-graph link entity))
+(defn edge-value [value-graph source-id target-id]
+  (value-graph/edge-value value-graph source-id target-id))
 
-(defn entities-in-build-order [bg]
-  (core/entities-in-build-order bg))
+(defn merge [value-graph other-value-graph & {:keys [combine-node combine-edge]
+                                              :or {combine-node (some-fn identity)
+                                                   combine-edge (some-fn identity)}}]
+  (value-graph/merge value-graph other-value-graph combine-node combine-edge))
 
-(defn in-edges-with-links [bg node]
-  (core/in-edges-with-links bg node))
-
-(defn path [bg path]
-  (core/path bg path))
+(defn successor-graph [value-graph node]
+  (value-graph/successor-graph value-graph node))

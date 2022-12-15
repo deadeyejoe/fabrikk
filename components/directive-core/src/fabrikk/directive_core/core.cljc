@@ -1,7 +1,8 @@
 (ns fabrikk.directive-core.core
-  (:require [clojure.spec.alpha :as s]
+  (:require [fabrikk.build-context.interface :as context]
             [fabrikk.entity.interface :as entity]
-            [fabrikk.execution-context.interface :as context]))
+            [fabrikk.output.interface :as output]
+            [clojure.spec.alpha :as s]))
 
 (s/def ::type qualified-keyword?)
 (s/def ::value any?)
@@ -22,6 +23,10 @@
 
 ;; =========== RUN ===========
 
+(defn assoc-value [build-context k v]
+  (context/update-primary build-context
+                          entity/update-value assoc k v))
+
 (defn run-directive-dispatch [_ _ directive]
   (get directive directive-type-kw))
 
@@ -32,16 +37,16 @@
     (->> value
          (map meta)
          (map-indexed vector)
-         (reduce (partial apply context/associate)
+         (reduce (partial apply context/associate-context)
                  (context/init (entity/create-list!))))
     (meta value)))
 
 (defmethod run :default [build-context key value]
-  (if (context/meta-result? value)
-    (context/associate build-context key (meta->context value))
-    (context/assoc-value build-context key (if (fn? value)
-                                             (value)
-                                             value))))
+  (if (output/meta-result? value)
+    (context/associate-context build-context key (meta->context value))
+    (assoc-value build-context key (if (fn? value)
+                                     (value)
+                                     value))))
 
 ;; =========== DIRECTIVE ===========
 
@@ -58,7 +63,7 @@
   (defrecord Constant [value]
     Directive
     (evaluate [x build-context key]
-      (context/assoc-value build-context key value)))
+      (assoc-value build-context key value)))
   (evaluate (->Constant 1) {} :foo))
 
 ;; =========== UTILS ===========
@@ -70,7 +75,7 @@
 ;; =========== AS ===========
 
 (defn as [associate-as entity]
-  (if (context/meta-result? entity)
+  (if (output/meta-result? entity)
     (vary-meta entity (fn [context]
                         (context/update-primary context entity/override-association associate-as)))
     entity))

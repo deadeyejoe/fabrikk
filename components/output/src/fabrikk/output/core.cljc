@@ -1,6 +1,16 @@
 (ns fabrikk.output.core
-  (:require [fabrikk.execution-context.interface :as context]
+  (:require [fabrikk.build-context.interface :as context]
             [fabrikk.entity.interface :as entity]))
+
+(defn ->result [context]
+  (-> context context/primary entity/value))
+
+(defn ->result-meta [context]
+  (let [bare-entity (->result context)]
+    (with-meta bare-entity (assoc context ::meta true))))
+
+(defn meta-result? [x]
+  (-> x meta ::meta))
 
 (defn build-dispatch-fn [context output-opts]
   (or (:output-as output-opts)
@@ -10,7 +20,7 @@
 (defmulti build #'build-dispatch-fn)
 
 (defmethod build :meta [context _output-opts]
-  (context/->result-meta context))
+  (->result-meta context))
 
 (defmethod build :value [context {:keys [transform] :or {transform identity} :as _output-opts}]
   (-> context context/primary entity/value transform))
@@ -34,13 +44,7 @@
                {})))
 
 (defmethod build :path [context {:keys [paths] :as output-opts}]
-  (map (fn [path]
-         ;; TODO result meta etc.
-         (let [entity (if (context/identity-association? path)
-                        (context/primary context)
-                        (context/path context path))]
-           (entity/value entity)))
-       paths))
+  (throw (new Exception "Not implemented")))
 
 (defmethod build :build-order [context _output-opts]
   (->> (context/entities-in-build-order context)

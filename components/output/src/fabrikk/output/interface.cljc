@@ -1,6 +1,12 @@
 (ns fabrikk.output.interface
   (:require [fabrikk.output.core :as output]))
 
+(defn ->result-meta [context]
+  (output/->result-meta context))
+
+(defn meta-result? [x]
+  (output/meta-result? x))
+
 (def build output/build)
 
 (defn as-meta []

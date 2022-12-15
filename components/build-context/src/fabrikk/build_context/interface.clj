@@ -1,5 +1,5 @@
-(ns fabrikk.build-context.interface.beta
-  (:require [fabrikk.build-context.beta.core :as build-context]))
+(ns fabrikk.build-context.interface
+  (:require [fabrikk.build-context.core :as build-context]))
 
 (defn init [primary]
   (build-context/init primary))
@@ -13,7 +13,7 @@
 (defn update-entity [build-context id f & args]
   (build-context/update-entity build-context id f args))
 
-(defn update-primary [build-context f args]
+(defn update-primary [build-context f & args]
   (build-context/update-primary build-context f args))
 
 (defn associate-entity
@@ -36,3 +36,6 @@
 
 (defn path [build-context path]
   (build-context/path build-context path))
+
+(defn entities-in-build-order [build-context]
+  (build-context/entities-in-build-order build-context))

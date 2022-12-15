@@ -1,7 +1,7 @@
 (ns fabrikk.execution.core
-  (:require [fabrikk.directive-core.interface :as directive-core]
+  (:require [fabrikk.build-context.interface :as context]
+            [fabrikk.directive-core.interface :as directive-core]
             [fabrikk.entity.interface :as entity]
-            [fabrikk.execution-context.interface :as context]
             [fabrikk.factory.interface :as factory]
             [fabrikk.output.interface :as output]
             [fabrikk.persistence.interface :as persistence]
@@ -59,8 +59,8 @@
 
 (defn build-list-context [factory number build-opt+]
   (let [contexts (build-many factory number build-opt+)
-        list-value  (mapv context/->result-meta contexts)
-        list-context (reduce (partial apply context/associate)
+        list-value  (mapv output/->result-meta contexts)
+        list-context (reduce (partial apply context/associate-context)
                              (context/init (entity/create-list!))
                              (map-indexed vector contexts))]
      ;;update the value after the context/associate calls, overwriting the list of assoc-as values
@@ -82,21 +82,14 @@
   [factory n build-opt+ output-opts]
   (output/build (build-list-context factory n build-opt+) output-opts))
 
-(defn unchanged? [entity persisted-entity]
-  (= (entity/value entity) (entity/value persisted-entity)))
-(def changed? (complement unchanged?))
-
 (defn persist-and-propagate! [output-opts context entity-id]
-  (let [current-entity (context/entity context entity-id)]
+  (let [current-entity (context/id->entity context entity-id)]
     (if (entity/needs-persist? current-entity)
       (let [value-with-dispatch (persistence/value-with-dispatch-meta current-entity output-opts)
             persisted-value (persistence/persist! value-with-dispatch)
             persisted-entity (entity/set-persisted-value current-entity persisted-value)]
-        (if (changed? current-entity persisted-entity)
-          (-> context
-              (context/set-entity persisted-entity)
-              (context/propagate persisted-entity))
-          context))
+        (-> context
+            (context/propagate persisted-entity)))
       context)))
 
 (defn persist-context [output-opts built-context]

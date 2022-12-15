@@ -1,7 +1,8 @@
 (ns fabrikk.build-context.interface-test
   (:require [clojure.test :as test :refer :all]
             [fabrikk.build-context.interface :as build-context]
-            [fabrikk.entity.interface :as entity]))
+            [fabrikk.entity.interface :as entity]
+            [loom.graph :as graph]))
 
 (def post-factory {:id ::post})
 (def post {:title "How to test fabrikk"})
@@ -31,7 +32,7 @@
             "Preserves primary")
         (is (= (:id joe) (-> associated (build-context/primary) (entity/value) :author))
             "Updates primary value")
-        (is (= user-entity (build-context/entity associated (entity/id user-entity)))
+        (is (= user-entity (build-context/id->entity associated (entity/id user-entity)))
             "Contains associated entity")))
     (testing "when associated entity has build-options"
       (let [user-entity (entity-with-value user-factory {:as :name} joe)
@@ -48,7 +49,7 @@
             "Author matches")
         (is (= (:id john) (-> associated (build-context/primary) (entity/value) :moderator))
             "Moderator matches")
-        (is (= 2 (-> associated :id->link count)) ;; peeling the interface slightly for convenience
+        (is (= 2 (-> associated graph/edges count))
             "Creates links")))
     (testing "when creating multiple links to the same entity"
       (let [user-entity (entity-with-value user-factory joe)
@@ -58,7 +59,7 @@
             {:keys [author author-name]} (-> associated (build-context/primary) (entity/value))]
         (is (= (:id joe) author) "Author matches")
         (is (= (:name joe) author-name) "Author name matches")
-        (is (= 2 (-> associated :id->link count)) "Creates separate links")))
+        (is (= 1 (-> associated graph/edges count)) "Creates one edge per entity pair")))
     (testing "when specifying a source entity"
       (let [author-entity (entity-with-value user-factory joe)
             editor-entity (entity-with-value user-factory john)
@@ -66,9 +67,12 @@
             post-context (build-context/associate-entity post-context :author author-entity)]
         (testing "that exists in the graph"
           (let [associated (build-context/associate-entity post-context author-entity :editor editor-entity)]
-            (is (= (:id john) (-> associated (build-context/entity author-entity) (entity/value) :editor)))))
+            (is (= (:id john) (-> associated
+                                  (build-context/id->entity (entity/id author-entity))
+                                  (entity/value)
+                                  :editor)))))
         (testing "that does not exist in the graph"
-          (is (thrown? AssertionError 
+          (is (thrown? AssertionError
                        (build-context/associate-entity post-context moderator-entity :editor editor-entity))))))))
 
 (deftest test-associate-context
@@ -82,18 +86,19 @@
         post-context (-> (build-context/init (entity-with-value post-factory post))
                          (build-context/associate-entity :moderator moderator-entity))
         post-entity (build-context/primary post-context)
-        
+
         associated (build-context/associate-context post-context :author author-context)]
     (is (entity/id-match? post-entity (build-context/primary associated))
         "Preserves primary")
     (is (= (:id joe) (-> associated (build-context/primary) (entity/value) :author))
         "Updates primary value")
     (testing "Merges other entities as-is"
-      (is (= author-entity (build-context/entity associated (entity/id author-entity))))
-      (is (= editor-entity (build-context/entity associated (entity/id editor-entity))))
-      (is (= moderator-entity (build-context/entity associated (entity/id moderator-entity)))))))
+      (is (= author-entity (build-context/id->entity associated (entity/id author-entity))))
+      (is (= editor-entity (build-context/id->entity associated (entity/id editor-entity))))
+      (is (= moderator-entity (build-context/id->entity associated (entity/id moderator-entity)))))))
 
 (deftest test-propagate
+  ;; TODO: fix
   (let [editor-entity (entity-with-value user-factory john)
         author-entity (entity-with-value user-factory joe)
         post-context (-> (build-context/init (entity-with-value post-factory post))
@@ -103,17 +108,18 @@
                                                          :editor-name
                                                          (entity/override-association editor-entity :name)))
         updated-editor (-> editor-entity
-                           (entity/override-association  :name)
+                           (entity/override-association :name)
                            (entity/update-value assoc :name "jim"))
         propagated (build-context/propagate post-context updated-editor)]
-    (is (= "jim" (-> (build-context/entity propagated author-entity) (entity/value) :editor-name))
+    (is (= "jim" (-> (build-context/id->entity propagated (entity/id author-entity)) (entity/value) :editor-name))
         "Updates changed derived values")
-    (is (= 2 (-> (build-context/entity propagated author-entity) (entity/value) :editor))
+    (is (= 2 (-> (build-context/id->entity propagated (entity/id author-entity)) (entity/value) :editor))
         "Non derived values are unaffected")
     (is (= (build-context/primary post-context) (build-context/primary propagated))
         "Only performs a single step")))
 
-(deftest test-path
+(deftest test-traverse-path
+   ;; TODO: fix
   (let [author-entity (entity-with-value user-factory joe)
         editor-entity (entity-with-value user-factory john)
         list-entity (entity/create-list!)
@@ -127,13 +133,20 @@
                     (build-context/associate-entity list-entity 1 m2)
                     (build-context/associate-entity list-entity 2 m3)
                     (build-context/associate-entity m3 :editor editor-entity))]
-    (is (= (:primary context) (build-context/path context nil)) "Nil path gives primary")
-    (is (= (:primary context) (build-context/path context [])) "Empty path gives primary")
-    (is (= (entity/id author-entity) (build-context/path context [:author])))
-    (is (= (entity/id list-entity) (build-context/path context [:moderators])))
-    (is (= (entity/id m1) (build-context/path context [:moderators 0])))
-    (is (= (entity/id editor-entity)
-           (build-context/path context [:editor])
-           (build-context/path context [:author :editor])
-           (build-context/path context [:moderators 2 :editor]))
-        "Multiple paths supported")))
+    (is (entity/id-match? (build-context/primary context)
+                          (build-context/traverse-path context nil)) "Nil path gives primary")
+    (is (entity/id-match? (build-context/primary context)
+                          (build-context/traverse-path context [])) "Empty path gives primary")
+    (tap> [::BEF])
+    (is (entity/id-match? author-entity
+                          (build-context/traverse-path context [:author])))
+    (tap> [::AFT])
+    (is (entity/id-match? list-entity
+                          (build-context/traverse-path context [:moderators])))
+    (is (entity/id-match? m1
+                          (build-context/traverse-path context [:moderators 0])))
+    (testing "Multiple paths supported")
+    (is (entity/id-match? editor-entity
+                          (build-context/traverse-path context [:editor])))
+    (is (entity/id-match? editor-entity (build-context/traverse-path context [:author :editor])))
+    (is (entity/id-match? editor-entity (build-context/traverse-path context [:moderators 2 :editor])))))

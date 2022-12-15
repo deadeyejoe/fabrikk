@@ -3,7 +3,7 @@
             [fabrikk.alpha.core :as fab]
             [fabrikk.directives.interface :as directives]
             [fabrikk.utils.interface :as utils]
-            [fabrikk.execution-context.interface :as context]
+            [fabrikk.output.interface :as output]
             [fabrikk.factory.interface :as factory]
             [medley.core :as medley])
   (:refer-clojure :exclude [type]))
@@ -102,9 +102,9 @@
                                               {:with {:name "John"}}])]
     (is (match "Jane" :name jane))
     (is (match "John" :name rest)))
-  (is (context/meta-result? (fab/build-list post 10)) "top level list is has a meta context")
-  (is (every? context/meta-result? (fab/build-list post 10)) "elements have a meta context")
-  (is (every? context/meta-result? (fab/build-list user 10 {:as :name})) "'as' does not change output"))
+  (is (output/meta-result? (fab/build-list post 10)) "top level list is has a meta context")
+  (is (every? output/meta-result? (fab/build-list post 10)) "elements have a meta context")
+  (is (every? output/meta-result? (fab/build-list user 10 {:as :name})) "'as' does not change output"))
 
 (deftest test-constant
   (is (= identity (get (fab/build user {:with {:const (fab/constant identity)}}) :const))))
@@ -265,6 +265,7 @@
                                                  :moderator-label (fab/derive [:moderator]
                                                                               #(-> % :name ((partial str "Mod: "))))}}
                                          {:output-as :collection})]
+        
         (is (empty? other-users))
         (is (match "Unsaved" :status built-posts))
         (is (match "Saved" :status posts))
@@ -284,6 +285,6 @@
                                                             {:output-as :build-order})]
         (is (= 4 @call-count))
         (is (match (:id created-user) :author created-posts)))))
-  (is (context/meta-result? (fab/create-list post 10)) "Result is a meta context")
-  (is (every? context/meta-result? (fab/create-list post 10)) "Elements are meta contexts")
-  (is (every? context/meta-result? (fab/create-list user 10 {:as :name})) "'as' does not change output"))
+  (is (output/meta-result? (fab/create-list post 10)) "Result is a meta context")
+  (is (every? output/meta-result? (fab/create-list post 10)) "Elements are meta contexts")
+  (is (every? output/meta-result? (fab/create-list user 10 {:as :name})) "'as' does not change output"))

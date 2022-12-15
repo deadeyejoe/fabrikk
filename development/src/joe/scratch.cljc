@@ -1,17 +1,11 @@
 (ns joe.scratch
   (:require [fabrikk.directives.interface :as directives :refer [build build-list]]
             [fabrikk.directive-core.interface :as directive-core :refer [as]]
-            [fabrikk.entity.interface :as entity]
-            [fabrikk.execution.interface :as execution]
-            [fabrikk.execution-context.interface :as context]
             [fabrikk.factory.interface :as factory]
-            [fabrikk.build-graph.interface :as build-graph]
-            [loom.alg :as graph-alg]
             [fabrikk.persistence.interface :as persistence]
             [fabrikk.alpha.core :as fab]
             [fabrikk.output.interface :as output]
-            [loom.graph :as graph]
-            [fabrikk.template.interface :as template]))
+            [loom.graph :as graph]))
 
 (def organization
   (factory/->factory
@@ -33,7 +27,7 @@
                :org (fab/one organization)}
     :traits {:admin {:role "admin"}}
     :transients [:foo]
-    :after-build (fn [ctx value] 
+    :after-build (fn [ctx value]
                    (tap> [::after-build ctx value])
                    value)}))
 
@@ -41,8 +35,7 @@
   (factory/->factory
    {:id ::post
     :primary-id :id
-    :template [
-               {:author (fab/one user)}
+    :template [{:author (fab/one user)}
                [:content-length (fab/derive :content count)]
                {:id (fab/sequence)
                 :title "Fabrikk of society"
@@ -65,8 +58,7 @@
 
 (defmethod persistence/persist! [:foo ::user] [value]
   (tap> ::foo!)
-  (persistence/store! (assoc value :id (random-uuid)
-                             )))
+  (persistence/store! (assoc value :id (random-uuid))))
 
 (comment
   "Factory"
@@ -84,8 +76,7 @@
                                   {:output-as :tuple})
         prim-node (context/primary context)]
     [(:uuid prim-node)
-     (graph/out-edges context (:uuid prim-node))])
-  )
+     (graph/out-edges context (:uuid prim-node))]))
 
 (comment
   "Template"
@@ -99,18 +90,16 @@
                    :traits [:admin]})
   (let [org (fab/build organization)]
     (fab/build user {:with {:org (as :name org)}}))
-  
+
   (fab/build user)
 
   (fab/build-list user 2)
-  
+
   (let [org (fab/build organization)]
     [org
      (fab/build group
                 {:with {:users (fab/many user 3
-                                         {:with {:org org}})}})])
-
-  )
+                                         {:with {:org org}})}})]))
 (comment
   "Output"
   (fab/build post)
@@ -127,7 +116,7 @@
     (persistence/reset-store!)
     (let [user (fab/create user {:persist-with :foo})]
       [user
-       @persistence/store])) 
+       @persistence/store]))
 
   (do
     (persistence/reset-store!)
@@ -143,11 +132,9 @@
           group (fab/create group {:with {:users users}})]
       [group
        @persistence/store]))
-  
+
   (do
     (persistence/reset-store!)
     (let [post (fab/create post)]
       [post
-       @persistence/store]))
-  )
-  
+       @persistence/store])))

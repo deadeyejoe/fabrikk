@@ -1,5 +1,5 @@
-(ns fabrikk.build-context.interface
-  (:require [fabrikk.build-context.core :as bc])
+(ns fabrikk.build-context.interface.alpha
+  (:require [fabrikk.build-context.alpha.core :as bc])
   (:refer-clojure :exclude [merge]))
 
 (defn init [primary]

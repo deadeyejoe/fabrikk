@@ -34,9 +34,7 @@
 
 (defn create! [factory build-opts]
   {:uuid (random-uuid)
-   :factory (:id factory)
-   :primary-id (:primary-id factory)
-   :persistable (:persistable factory)
+   :factory (select-keys factory [:id :persistable :primary-id])
    :persisted false
    :build-opts build-opts
    :value {}})
@@ -100,12 +98,12 @@
      (combine one two)]))
 
 (defn factory-id [entity]
-  (-> entity :factory))
+  (-> entity :factory :id))
 
 (defn associate-as [entity]
   (or (-> entity :associate-as)
       (-> entity :build-opts :as)
-      (-> entity :primary-id)
+      (-> entity :factory :primary-id)
       :identity))
 
 (def list-item-kw :list-item)
@@ -140,7 +138,8 @@
 
 (def pending? (complement persisted?))
 
-(def persistable? :persistable)
+(defn persistable? [entity]
+  (-> entity :factory :persistable))
 
 (defn needs-persist? [entity]
   (and (persistable? entity)

@@ -87,7 +87,7 @@
   (let [current-entity (context/id->entity context entity-id)]
     (if (entity/needs-persist? current-entity)
       (let [value-with-dispatch (persistence/value-with-dispatch-meta current-entity output-opts)
-            persisted-value (persistence/persist! value-with-dispatch)
+            persisted-value (persistence/persist! (entity/factory-id current-entity) value-with-dispatch)
             persisted-entity (entity/set-persisted-value current-entity persisted-value)]
         (-> context
             (context/propagate persisted-entity)))

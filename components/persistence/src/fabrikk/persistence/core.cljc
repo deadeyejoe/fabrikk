@@ -14,17 +14,12 @@
 
 (defn persist-dispatch-value [entity {:keys [persist-with] :as _create-opts}]
   (assert (entity/factory-id entity) "Cannot persist without a factory id!")
-  (let [method (or persist-with
-                   (entity/persist-with entity)
-                   (default-persistence-method))]
-    (cond
-      (= :store method) :store
-      method [method (entity/factory-id entity)]
-      :else (entity/factory-id entity))))
+  (or persist-with
+      (entity/persist-with entity)
+      (default-persistence-method)))
 
 (defn value-with-dispatch-meta [entity create-opts]
   (let [dispatch-value (persist-dispatch-value entity create-opts)]
-    (tap> [::dispatch dispatch-value])
     (with-meta (entity/value entity) {::dispatch dispatch-value
                                       ::factory-id (entity/factory-id entity)})))
 
@@ -35,7 +30,7 @@
    This feels a little janky, but we're in control of invocation of persist!, can add the
    meta just prior to calling it and discard the value immediately, and it's not required 
    for any further logic since we'll have the full entity in our code."
-  [value]
+  [_factory-id value]
   (-> value meta ::dispatch))
 
 (defmulti persist!
@@ -47,7 +42,7 @@
    in a vectory keyed to their factory-id"
   #'dispatch-from-meta)
 
-(defmethod persist! :default [_entity]
+(defmethod persist! :default [_factory-id _entity]
   (throw (IllegalArgumentException. "No default persistence method found")))
 
 ;; ============ DEFAULT STORE ============
@@ -56,14 +51,13 @@
 
 (def collect-entity (fnil conj []))
 
-(defn store! [value]
-  (let [factory-id (-> value meta ::factory-id)]
-    (-> (swap! store update factory-id collect-entity value)
-        factory-id
-        last)))
+(defn store! [factory-id value]
+  (-> (swap! store update factory-id collect-entity value)
+      factory-id
+      last))
 
 (defn reset-store! []
   (reset! store {}))
 
-(defmethod persist! :store [entity]
-  (store! entity))
+(defmethod persist! :store [factory-id entity]
+  (store! factory-id entity))

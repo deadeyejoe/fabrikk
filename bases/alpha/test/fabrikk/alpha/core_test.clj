@@ -3,7 +3,8 @@
             [fabrikk.alpha.core :as fab]
             [fabrikk.directives.interface :as directives]
             [fabrikk.output.interface :as output]
-            [medley.core :as medley])
+            [medley.core :as medley]
+            [fabrikk.persistence.interface :as persistence])
   (:refer-clojure :exclude [type]))
 
 (defn coerce-to-list [x+]
@@ -218,9 +219,9 @@
                                                           :model org-model
                                                           :type (fab/derive [:model :node-types 1] :name)}})))))
 
-(def do-persist! identity)
-(defmethod fab/persist! :store [entity]
-  (do-persist! entity))
+(def do-persist! (constantly nil))
+(defmethod fab/persist! :store [factory-id entity]
+  (do-persist! factory-id entity))
 
 (deftest test-create
   (with-redefs [do-persist! #(assoc %
@@ -285,3 +286,23 @@
   (is (output/meta-result? (fab/create-list post 10)) "Result is a meta context")
   (is (every? output/meta-result? (fab/create-list post 10)) "Elements are meta contexts")
   (is (every? output/meta-result? (fab/create-list user 10 {:as :name})) "'as' does not change output"))
+
+(def do-test-persist! (constantly nil))
+(defmethod persistence/persist! :test-persist [factory-id entity]
+  (do-test-persist! factory-id entity))
+
+(deftest test-override-persist
+  (testing "not called by default"
+    (with-redefs [do-test-persist! (fn [& args] (throw Exception))
+                  do-persist! (fn [factory-id entity] entity)]
+      (is (fab/create user))))
+  (with-redefs [do-test-persist! (fn [factory-id entity]
+                                   (is (= (:id user) factory-id)
+                                       "overridden in build opts")
+                                   entity)]
+    (fab/create user {:persist-with :test-persist}))
+  (with-redefs [do-test-persist! (fn [factory-id entity]
+                                   (is (= (:id user) factory-id)
+                                       "overridden in output opts")
+                                   entity)]
+    (fab/create user {} {:persist-with :test-persist})))

@@ -51,14 +51,7 @@
                :name "Normies"
                :users (fab/many user 3)}}))
 
-(defmethod persistence/persist! :store [value]
-  (tap> ::store!)
-  (persistence/store! (assoc value :id (random-uuid)
-                             :content "Some content or other")))
 
-(defmethod persistence/persist! [:foo ::user] [value]
-  (tap> ::foo!)
-  (persistence/store! (assoc value :id (random-uuid))))
 
 (comment
   "Factory"

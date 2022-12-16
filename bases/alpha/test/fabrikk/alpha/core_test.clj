@@ -219,14 +219,15 @@
                                                           :model org-model
                                                           :type (fab/derive [:model :node-types 1] :name)}})))))
 
-(def do-persist! (constantly nil))
+(def do-persist! (fn [_factory-id entity] entity))
 (defmethod fab/persist! :store [factory-id entity]
   (do-persist! factory-id entity))
 
 (deftest test-create
-  (with-redefs [do-persist! #(assoc %
-                                    :id (random-uuid)
-                                    :persisted true)]
+  (with-redefs [do-persist! (fn [_factory_id entity]
+                              (assoc entity
+                                     :id (random-uuid)
+                                     :persisted true))]
     (testing "create single"
       (let [random-id (random-uuid)
             built (fab/build user {:with {:id random-id}})
@@ -272,7 +273,8 @@
 
 (deftest test-create-list
   (let [call-count (atom 0)]
-    (with-redefs [do-persist! (fn [entity]
+    (with-redefs [do-persist! (fn [_factory-id entity]
+                                (tap> entity)
                                 (swap! call-count inc)
                                 (assoc entity
                                        :id (random-uuid)

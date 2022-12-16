@@ -120,5 +120,4 @@
         assoc-as (if (sequential? derive-from)
                    transform
                    (comp transform derive-from))]
-    (tap> [derive-from source-entity assoc-as])
     (context/associate-entity context key (entity/override-association source-entity assoc-as))))

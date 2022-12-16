@@ -204,7 +204,6 @@
          [built-node] :node
          [model] :model
          :as coll} (fab/build node {} {:output-as :collection})
-        _ (tap> coll)
         with-type-id (fab/build node {:with {:type-id (fab/derive [:model :node-types 0] :id)}})]
     (is (match "Person" :type built-node))
     (is (match (:id model) :model built-node))

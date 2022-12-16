@@ -137,10 +137,8 @@
                           (build-context/traverse-path context nil)) "Nil path gives primary")
     (is (entity/id-match? (build-context/primary context)
                           (build-context/traverse-path context [])) "Empty path gives primary")
-    (tap> [::BEF])
     (is (entity/id-match? author-entity
                           (build-context/traverse-path context [:author])))
-    (tap> [::AFT])
     (is (entity/id-match? list-entity
                           (build-context/traverse-path context [:moderators])))
     (is (entity/id-match? m1

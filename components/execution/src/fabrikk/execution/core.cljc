@@ -84,7 +84,6 @@
   (output/build (build-list-context factory n build-opt+) output-opts))
 
 (defn persist-and-propagate! [output-opts context entity-id]
-  (tap> [output-opts context entity-id])
   (let [current-entity (context/id->entity context entity-id)]
     (if (entity/needs-persist? current-entity)
       (let [value-with-dispatch (persistence/value-with-dispatch-meta current-entity output-opts)

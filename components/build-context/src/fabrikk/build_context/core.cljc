@@ -47,20 +47,15 @@
          (associate-entity source-entity label target-primary)))))
 
 (defn changed? [entity other]
-  (tap> [:changed? entity other
-         (not= (entity/value entity) (entity/value other))])
   (not= (entity/value entity) (entity/value other)))
 
 (defn propagate-link [build-context source-id target-id pending-entity]
-  (tap> [:link build-context source-id target-id pending-entity])
   (let [values (->> (build-graph/edge-value build-context source-id target-id)
                     (medley/map-vals (partial entity/value-to-assoc pending-entity)))]
-    (tap> [:values (build-graph/edge-value build-context source-id target-id) values])
     (build-graph/update-node build-context source-id
                              entity/update-value merge values)))
 
 (defn propagate [build-context pending-entity]
-  (tap> [:entity build-context pending-entity])
   (let [existing-entity (id->entity build-context (entity/id pending-entity))]
     (if (changed? existing-entity pending-entity)
       (let [updated-context (build-graph/set-node build-context (entity/id pending-entity) pending-entity)]
@@ -75,7 +70,6 @@
     (->> (graph/out-edges build-context (entity/id source))
          (some (fn [[source-id target-id :as _edge]]
                  (let [edge-value (build-graph/edge-value build-context source-id target-id)]
-                   (tap> [build-context _edge edge-value])
                    (when (contains? edge-value label)
                      (build-graph/node-value build-context target-id))))))))
 

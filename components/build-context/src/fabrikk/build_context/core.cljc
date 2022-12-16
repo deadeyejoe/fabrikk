@@ -3,8 +3,7 @@
             [fabrikk.entity.interface :as entity]
             [loom.alg :as graph-alg]
             [loom.graph :as graph]
-            [medley.core :as medley]
-            [fabrikk.build-context.interface.alpha :as build-context]))
+            [medley.core :as medley]))
 
 (defn init [primary]
   (-> (build-graph/build)

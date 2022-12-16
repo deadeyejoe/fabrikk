@@ -2,9 +2,7 @@
   (:require [clojure.test :as test :refer :all]
             [fabrikk.alpha.core :as fab]
             [fabrikk.directives.interface :as directives]
-            [fabrikk.utils.interface :as utils]
             [fabrikk.output.interface :as output]
-            [fabrikk.factory.interface :as factory]
             [medley.core :as medley])
   (:refer-clojure :exclude [type]))
 

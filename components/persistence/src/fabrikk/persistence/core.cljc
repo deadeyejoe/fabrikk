@@ -24,6 +24,7 @@
 
 (defn value-with-dispatch-meta [entity create-opts]
   (let [dispatch-value (persist-dispatch-value entity create-opts)]
+    (tap> [::dispatch dispatch-value])
     (with-meta (entity/value entity) {::dispatch dispatch-value
                                       ::factory-id (entity/factory-id entity)})))
 

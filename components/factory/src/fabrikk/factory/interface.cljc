@@ -1,9 +1,5 @@
 (ns fabrikk.factory.interface
-  (:require [fabrikk.factory.core :as core])
-  (:refer-clojure :exclude [resolve]))
-
-(defn resolve [id]
-  (core/resolve id))
+  (:require [fabrikk.factory.core :as core]))
 
 (defn ->factory [factory]
   (core/->factory factory))

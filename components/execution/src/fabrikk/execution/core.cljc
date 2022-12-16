@@ -1,6 +1,7 @@
 (ns fabrikk.execution.core
   (:require [fabrikk.build-context.interface :as context]
             [fabrikk.directive-core.interface :as directive-core]
+            [fabrikk.directory.interface :as directory]
             [fabrikk.entity.interface :as entity]
             [fabrikk.factory.interface :as factory]
             [fabrikk.output.interface :as output]
@@ -15,7 +16,7 @@
 (defn resolve-factory [factory]
   (cond
     (factory/factory? factory) factory
-    (factory/resolve factory) (factory/resolve factory)
+    (directory/resolve-factory factory) (directory/resolve-factory factory)
     :else (throw (IllegalArgumentException. (str "Unrecognised factory: " factory)))))
 
 (defn after-build-fn [after-build-config]
@@ -83,6 +84,7 @@
   (output/build (build-list-context factory n build-opt+) output-opts))
 
 (defn persist-and-propagate! [output-opts context entity-id]
+  (tap> [output-opts context entity-id])
   (let [current-entity (context/id->entity context entity-id)]
     (if (entity/needs-persist? current-entity)
       (let [value-with-dispatch (persistence/value-with-dispatch-meta current-entity output-opts)

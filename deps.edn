@@ -12,6 +12,7 @@
                                poly/build-graph {:local/root "components/build-graph"}
                                poly/directive-core {:local/root "components/directive-core"}
                                poly/directives {:local/root "components/directives"}
+                               poly/directory {:local/root "components/directory"}
                                poly/entity {:local/root "components/entity"}
                                poly/execution {:local/root "components/execution"}
                                poly/factory {:local/root "components/factory"}
@@ -28,6 +29,7 @@
                                  "components/build-graph/test"
                                  "components/directive-core/test"
                                  "components/directives/test"
+                                 "components/directory/test"
                                  "components/entity/test"
                                  "components/execution/test"
                                  "components/factory/test"

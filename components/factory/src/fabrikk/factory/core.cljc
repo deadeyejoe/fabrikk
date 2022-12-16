@@ -1,18 +1,13 @@
 (ns fabrikk.factory.core
   (:require [fabrikk.specs.interface :as specs]
+            [fabrikk.directory.interface :as directory]
             [fabrikk.template.interface :as template]
-            [clojure.spec.alpha :as s])
-  (:refer-clojure :exclude [resolve]))
-
-(def directory (atom {}))
-
-(defn resolve [id]
-  (get @directory id))
+            [clojure.spec.alpha :as s]))
 
 (defn ->factory [{:keys [id] :as description}]
   (let [factory (merge {:persistable true}
                        description)]
-    (swap! directory assoc id factory)
+    (directory/register-factory id factory)
     (with-meta factory {::factory true})))
 (s/fdef ->factory
   :ret ::specs/factory)

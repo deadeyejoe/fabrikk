@@ -1,6 +1,7 @@
 (ns fabrikk.output.core
   (:require [fabrikk.build-context.interface :as context]
-            [fabrikk.entity.interface :as entity]))
+            [fabrikk.entity.interface :as entity]
+            [fabrikk.directory.interface :as directory]))
 
 (defn ->result [context]
   (-> context context/primary entity/value))
@@ -14,7 +15,7 @@
 
 (defn build-dispatch-fn [context output-opts]
   (or (:output-as output-opts)
-      (-> context context/primary entity/factory :output-as)
+      (-> context context/primary entity/factory-id directory/resolve-factory :output-as)
       :meta))
 
 (defmulti build #'build-dispatch-fn)

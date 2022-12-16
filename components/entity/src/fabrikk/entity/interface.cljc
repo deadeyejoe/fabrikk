@@ -35,9 +35,6 @@
 (defn combine-no-conflict [entity other-entity]
   (core/combine-no-conflict entity other-entity))
 
-(defn factory [entity]
-  (core/factory entity))
-
 (defn factory-id [entity]
   (core/factory-id entity))
 

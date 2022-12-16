@@ -1,11 +1,12 @@
 (ns fabrikk.directives.core
-  (:require [fabrikk.directive-core.interface :as core]
+  (:require [fabrikk.build-context.interface :as context]
+            [fabrikk.directive-core.interface :as core]
+            [fabrikk.directory.interface :as directory]
             [fabrikk.entity.interface :as entity]
             [fabrikk.execution.interface :as execution]
-            [fabrikk.build-context.interface :as context]
+            [fabrikk.factory.interface :as factory]
             [fabrikk.specs.interface :as specs]
-            [clojure.spec.alpha :as s]
-            [fabrikk.factory.interface :as factory])
+            [clojure.spec.alpha :as s])
   (:refer-clojure :exclude [sequence derive]))
 
 (s/def ::directive map?)
@@ -63,17 +64,17 @@
 
 ;; =========== BUILD ===========
 
-(defn coerce-factory [factory]
+(defn factory->id [factory]
   (cond
     (factory/factory? factory) (:id factory)
-    (factory/resolve factory) factory
+    (directory/resolve-factory factory) factory
     :else (throw (IllegalArgumentException. (str "Unrecognised factory: " factory)))))
 
 (defn build
   ([factory] (build factory {}))
   ([factory build-opts]
    (core/->directive ::build
-                     {:value (coerce-factory factory)
+                     {:value (factory->id factory)
                       :build-opts build-opts
                       :ordering :pre})))
 
@@ -88,7 +89,7 @@
   ([factory n] (build-list factory n [{}]))
   ([factory n build-opt+]
    (core/->directive ::build-list
-                     {:value (coerce-factory factory)
+                     {:value (factory->id factory)
                       :number n
                       :build-opt+ build-opt+
                       :ordering :pre})))

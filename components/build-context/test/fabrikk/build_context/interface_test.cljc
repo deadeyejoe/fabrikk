@@ -2,7 +2,10 @@
   (:require [clojure.test :as test :refer :all]
             [fabrikk.build-context.interface :as build-context]
             [fabrikk.entity.interface :as entity]
-            [loom.graph :as graph]))
+            [loom.graph :as graph]
+            [loom.alg :as graph-alg]
+            [loom.io :as lio]
+            [fabrikk.build-context.interface :as context]))
 
 (def post-factory {:id ::post})
 (def post {:title "How to test fabrikk"})
@@ -119,7 +122,6 @@
         "Only performs a single step")))
 
 (deftest test-traverse-path
-   ;; TODO: fix
   (let [author-entity (entity-with-value user-factory joe)
         editor-entity (entity-with-value user-factory john)
         list-entity (entity/create-list!)
@@ -148,3 +150,22 @@
                           (build-context/traverse-path context [:editor])))
     (is (entity/id-match? editor-entity (build-context/traverse-path context [:author :editor])))
     (is (entity/id-match? editor-entity (build-context/traverse-path context [:moderators 2 :editor])))))
+
+(deftest path-to-test
+  (let [author-entity (entity-with-value user-factory joe)
+        editor-entity (entity-with-value user-factory john)
+        list-entity (entity/create-list!)
+        [m1 m2 m3] (map #(entity-with-value user-factory {:id %}) (range 1 4))
+        context (-> (build-context/init (entity-with-value post-factory post))
+                    (build-context/associate-entity :author author-entity)
+                    (build-context/associate-entity :name-of-author (entity/override-association author-entity :name))
+                    (build-context/associate-entity :editor editor-entity)
+                    (build-context/associate-entity author-entity :editor editor-entity)
+                    (build-context/associate-entity :moderators list-entity)
+                    (build-context/associate-entity list-entity 0 m1)
+                    (build-context/associate-entity list-entity 1 m2)
+                    (build-context/associate-entity list-entity 2 m3)
+                    (build-context/associate-entity m3 :editor editor-entity))]
+    (is (= [[:editor]] (build-context/path-to context editor-entity)) "Finds the shortest path")
+    (is (= [[:author :name-of-author]] (build-context/path-to context author-entity)) "Returns multi-labels")
+    (is (= [[:moderators] [2]] (build-context/path-to context m3)) "Returns multiple segments")))

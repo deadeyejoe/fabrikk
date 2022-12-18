@@ -37,5 +37,8 @@
 (defn path [build-context path]
   (build-context/path build-context path))
 
+(defn path-to [build-context entity]
+  (build-context/path-to build-context entity))
+
 (defn entities-in-build-order [build-context]
   (build-context/entities-in-build-order build-context))

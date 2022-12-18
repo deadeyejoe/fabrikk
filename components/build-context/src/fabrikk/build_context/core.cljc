@@ -89,3 +89,17 @@
          (reverse)
          (map (partial id->entity build-context)))
     (throw (IllegalArgumentException. "Build graph must be a DAG"))))
+
+(defn path-to
+  "Given a context and an entity, finds the shortest path from the
+   primary node to that entity. Returns the labels on each edge.
+   
+   Edges may have multiple labels (an entity may have several attributes
+   that depend on another entity), so this returns a list of vectors"
+  [{:keys [primary] :as build-context} entity]
+  (some->> (graph-alg/bf-path build-context primary (entity/id entity))
+           (partition 2 1)
+           (map (comp vec
+                      sort
+                      keys
+                      (partial apply build-graph/edge-value build-context)))))

@@ -7,7 +7,9 @@
             [fabrikk.output.interface :as output]
             [fabrikk.persistence.interface :as persistence]
             [fabrikk.template.interface :as template]
-            [fabrikk.utils.interface :as utils]))
+            [fabrikk.utils.interface :as utils]
+            [superstring.core :as str])
+  (:import java.lang.Exception))
 
 (defn remove-transients [context transients]
   (cond-> context
@@ -58,16 +60,7 @@
        (utils/pad-with-last number)
        (map (partial build-context factory))))
 
-(defn build-list-context [factory number build-opt+]
-  (let [contexts (build-many factory number build-opt+)
-        list-value  (mapv output/->result-meta contexts)
-        list-context (reduce (partial apply context/associate-context)
-                             (context/init (entity/create-list!))
-                             (map-indexed vector contexts))]
-     ;;update the value after the context/associate calls, overwriting the list of assoc-as values
-    (context/update-primary list-context entity/update-value (constantly list-value))))
-
-(defn build-list 
+(defn build-list-context 
   "The output of this should be:
    
    First: an inspectable list of entities (i.e. not just their primary id or assoc-as values).
@@ -78,19 +71,39 @@
    Third: a list that can be destructured into contextful entities. These entities can in turn
    be passed as dependents in other builds.
    
-   With this in mind we do something weird looking: the primary value of the context that's
-   passed to `output/build` is a list of contextful entities."
-  [factory n build-opt+ output-opts]
+   With this in mind we do something weird looking: the return value is a list of contextful entities."
+  [factory number build-opt+]
+  (let [contexts (build-many factory number build-opt+)
+        list-value  (mapv output/->result-meta contexts)
+        list-context (reduce (partial apply context/associate-context)
+                             (context/init (entity/create-list!))
+                             (map-indexed vector contexts))]
+     ;;update the value after the context/associate calls, overwriting the list of assoc-as values
+    (context/update-primary list-context entity/update-value (constantly list-value))))
+
+(defn build-list [factory n build-opt+ output-opts]
   (output/build (build-list-context factory n build-opt+) output-opts))
+
+(defn wrap-persist-error [context entity exception]
+  (let [full-path (context/path-to context entity)
+        display-path (map first full-path)]
+    (ex-info (str "Error persisting at path: "
+                  (str/join " -> " display-path)
+                  ", " (ex-message exception))
+             {:value (entity/value entity)
+              :full-path full-path}
+             exception)))
 
 (defn persist-and-propagate! [output-opts context entity-id]
   (let [current-entity (context/id->entity context entity-id)]
     (if (entity/needs-persist? current-entity)
       (let [value-with-dispatch (persistence/value-with-dispatch-meta current-entity output-opts)
-            persisted-value (persistence/persist! (entity/factory-id current-entity) value-with-dispatch)
+            persisted-value (try
+                              (persistence/persist! (entity/factory-id current-entity) value-with-dispatch)
+                              (catch Exception e
+                                (throw (wrap-persist-error context current-entity e))))
             persisted-entity (entity/set-persisted-value current-entity persisted-value)]
-        (-> context
-            (context/propagate persisted-entity)))
+        (context/propagate context persisted-entity))
       context)))
 
 (defn persist-context [output-opts built-context]

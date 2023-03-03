@@ -49,16 +49,27 @@
 (defn changed? [entity other]
   (not= (entity/value entity) (entity/value other)))
 
-(defn propagate-link [build-context source-id target-id pending-entity]
-  (let [values (->> (build-graph/edge-value build-context source-id target-id)
-                    (medley/map-vals (partial entity/value-to-assoc pending-entity)))]
-    (build-graph/update-node build-context source-id
-                             entity/update-value merge values)))
+(defn assoc-into-entity
+  "Assoc the key value pairs into entity. Not using merge here because the entity may be a list."
+  [entity key->value]
+  (entity/update-value entity
+                       #(reduce-kv (partial assoc) % key->value)))
+
+(defn propagate-link
+  "Propagate the changes in the target entity to the source entity. The target entity may be 
+   referenced by the source entity through several keys with a different associated value for each."
+  [build-context source-id target-id pending-entity]
+  (let [entity-key->associate-as (build-graph/edge-value build-context source-id target-id)
+        entity-key->value (medley/map-vals (partial entity/value-to-assoc pending-entity)
+                                           entity-key->associate-as)]
+    (build-graph/update-node build-context source-id assoc-into-entity entity-key->value)))
 
 (defn propagate [build-context pending-entity]
   (let [existing-entity (id->entity build-context (entity/id pending-entity))]
     (if (changed? existing-entity pending-entity)
-      (let [updated-context (build-graph/set-node build-context (entity/id pending-entity) pending-entity)]
+      (let [updated-context (build-graph/set-node build-context 
+                                                  (entity/id pending-entity) 
+                                                  pending-entity)]
         (->> (graph/in-edges updated-context (entity/id existing-entity))
              (reduce (fn [context [source-id target-id]]
                        (propagate-link context source-id target-id pending-entity))

@@ -1,4 +1,4 @@
 {:paths ["src" "resources"]
- :deps {}
+ :deps {superstring/superstring {:mvn/version "3.1.0"}}
  :aliases {:test {:extra-paths ["test"]
                   :extra-deps {}}}}

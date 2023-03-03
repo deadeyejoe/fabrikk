@@ -8,17 +8,34 @@
             [fabrikk.template.interface :as template])
   (:refer-clojure :exclude [sequence derive]))
 
-(defn set-default-persistence [key]
-  (persistence/set-default-persistence key))
+;; ============== Define factories
 
 (defn ->factory [description]
   (factory/->factory description))
 
+;; =============== Templates
+
 (defn update-template [template field value]
   (template/update template field value))
 
+;; =============== Context 
+
 (defn path [context path]
   (entity/value (context/path context path)))
+
+;; ================ Persistence
+
+(def store persistence/store)
+
+(defn reset-store! []
+  (persistence/reset-store!))
+
+(defn set-default-persistence [key]
+  (persistence/set-default-persistence key))
+
+(def persist! persistence/persist!)
+
+;; =============== Build & Create
 
 (defn build
   ([factory]
@@ -52,7 +69,7 @@
   ([factory n one+-build-opts output-opts]
    (execution/create-list factory n one+-build-opts output-opts)))
 
-(def persist! persistence/persist!)
+;; ============= Directives
 
 (defn constant [x]
   (directives/constant x))

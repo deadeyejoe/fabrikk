@@ -7,6 +7,8 @@
             [fabrikk.persistence.interface :as persistence])
   (:refer-clojure :exclude [type]))
 
+(persistence/set-default-persistence :store)
+
 (defn coerce-to-list [x+]
   (if (sequential? x+) x+ [x+]))
 
@@ -274,7 +276,6 @@
 (deftest test-create-list
   (let [call-count (atom 0)]
     (with-redefs [do-persist! (fn [_factory-id entity]
-                                (tap> entity)
                                 (swap! call-count inc)
                                 (assoc entity
                                        :id (random-uuid)
@@ -284,7 +285,12 @@
                                                             {:with {:author built-user}}
                                                             {:output-as :build-order})]
         (is (= 4 @call-count))
-        (is (match (:id created-user) :author created-posts)))))
+        (is (match (:id created-user) :author created-posts)))
+      (testing "with meta output"
+        (let [built-user (fab/build user {:as :id})
+              created-posts (fab/create-list post 3 {:with {:author built-user}})]
+          (is (= 3 (count created-posts)))
+          (is (not (match (:id built-user) :author created-posts)))))))
   (is (output/meta-result? (fab/create-list post 10)) "Result is a meta context")
   (is (every? output/meta-result? (fab/create-list post 10)) "Elements are meta contexts")
   (is (every? output/meta-result? (fab/create-list user 10 {:as :name})) "'as' does not change output"))

@@ -10,6 +10,7 @@
 * [Referencing Entities](tutorial/referencing-entities.md)
 * [Deriving Values](tutorial/deriving-values.md)
 * [Persistence](tutorial/persistence.md)
+* [Many](tutorial/many.md)
 
 ## How to
 

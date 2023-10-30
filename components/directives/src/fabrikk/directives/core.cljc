@@ -33,6 +33,9 @@
 (defn reset-sequence! []
   (reset! sequence-cache {}))
 
+(comment
+  (reset-sequence!))
+
 (defn sequence
   "Creates a directive that returns a sequence of numbers that may be transformed by
    an optional function 'f'. The sequence is scoped to the primary factory by default.

@@ -1,6 +1,6 @@
 # Persistence
 
-So far everything we've done has been geared towards building pure data, but there's a good chance you'll want to write tests that involve your persistence layer. Wouldn't be nice to be able to use fabrikk to persist the entities it creates? That's what we're going to cover in this section of the tutorial.
+So far everything we've done has been geared towards building our entities as pure data, but there's a good chance you'll want to write tests that involve your persistence layer. Wouldn't be nice to be able to use fabrikk to persist the entities it creates? That's what we're going to cover in this section of the tutorial.
 
 Let's recap the current state of our factories:
 
@@ -35,9 +35,9 @@ Let's recap the current state of our factories:
                :author-name (fab/derive [:author] :name)}}))
 ```
 
-To support persistence we need to write some code that connects fabrikk to your persistence code. No changes to our factories or your persistence code are required. This might be surprising: our factories build entities with ids, and references entities using these ids, but frequently our persistence layer is in control of setting these values, so won't this cause problems? No. Let's find out why.
+To support persistence we need to write some code that connects fabrikk to our persistence code. No changes to our factories or the persistence code should be required. This might be surprising: our factories build entities with ids, and references entities using these ids, but frequently our persistence layer is in control of setting these values, so won't this cause problems? No. Let's find out why.
 
-Since this is a tutorial we'll use a simple atom, the persistence code looks like this:
+Since this is a tutorial we'll use a simple atom to persist our entities, the persistence code looks like this:
 
 {% code overflow="wrap" %}
 ```clojure
@@ -60,9 +60,9 @@ Since this is a tutorial we'll use a simple atom, the persistence code looks lik
 ```
 {% endcode %}
 
-Fabrikk exposes a `persist!` multimethod so you can connect it to your persistence layer. It is expected to take 2 arguments - the ID of the factory and the entitiy we're creating - and return the persisted entity. To persist an entity we simply collect it in a vector using the factory id as a key. To simulate not being in control of our ids, we assign them randomly.
+Fabrikk exposes a `persist!` multimethod so you can connect it to your persistence layer. It is expected to take 2 arguments - the ID of the factory and the entity we're creating - and return the persisted entity. To persist an entity we simply collect it in a vector using the factory id as a key. To simulate not being in control of our ids, we assign them randomly.
 
-Now let's see `create` this in action:
+Now let's see `create` in action:
 
 ```clojure
 (fab/create post)
@@ -86,7 +86,7 @@ Now let's see `create` this in action:
 
 Note that the post is referencing the author via its randomly assigned id. The build graph we mentioned earlier in [referencing-entities.md](referencing-entities.md "mention") allows us to create entities in the correct order i.e. user->post, and allows us to _**propagate**_ the changes that our persistence layer makes in the user to the post.
 
-This propagation also applies to all derived values. Let's change our persistence layer so the user name is out of our control:
+This propagation also applies to all values calculated using fabrikk's `derive` directive. Let's tweak our persistence function so the user name is also out of our control:
 
 ```clojure
 (defmethod fab/persist! :my-store [factory-id entity]
@@ -106,7 +106,6 @@ This propagation also applies to all derived values. Let's change our persistenc
 ;;     :author-name "User-5570"}
 ```
 
-The user name is based on a different randomly chosen integer from the user id, and this randomly chosen name is also propagated to the post before it's persisted.
+The user name is based on a different randomly chosen integer from the user id, and this randomly chosen name is also propagated to the post before it's persisted. 
 
-
-
+In our simple example so far we only have 2 types of entities in 2 'layers' to worry about, but since fabrikk is working with a graph under the hood, we can support arbitrarily complex hierarchies.

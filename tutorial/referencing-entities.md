@@ -32,7 +32,7 @@ It's unlikely that we're building an application that deals solely with users, l
 ```
 {% endcode %}
 
-To switch things up a little, posts are identified by a uuid, so we can use `random-uuid` to generate one. Posts also have a `title` , some `content` , and an `author`. It's here we meet our next directive: `one`.
+To switch things up a little, posts are identified by a uuid, so we can use clojure core's `random-uuid` function to generate one. Posts also have a `title` , some `content` , and an `author`. It's here we meet our next directive: `one`.
 
 The `one` directive tells fabrikk that the current entity depends on an entity built by another factory. In this case we've given it the id of our user factory (which we mentioned in [factories-and-building.md](factories-and-building.md "mention")), so when we build a post, it'll automatically build a user:
 
@@ -142,7 +142,7 @@ A final note for this section: even though we've used the `one` directive in the
 ;;      :content "Some content goes here...."})
 ```
 
-Or add to it at will:
+Or add additional dependent entities at will:
 
 ```clojure
 (fab/build post {:with {:editor (fab/one ::user)}})

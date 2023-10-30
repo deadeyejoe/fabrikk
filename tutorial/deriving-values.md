@@ -56,7 +56,7 @@ Let's see this in action on the user entity first:
 ;; => {:id 2, :name "Omega-Admin", :email "admin-7767@example.com", :role "admin", :verified true}
 ```
 
-The derived value responds to changes in the value of the underlying key - if we change the ID we change the authors name - or we can specify whatever name we want and the derivation won't happen. Also, note that `derive` will work just as well for a key on the template - we've put it on the admin trait because it fits the totally realistic narrative this tutorial is working off.
+The derived value responds to changes in the value of the underlying key - if we specify the ID it gets reflected in the user's name. If we specify the name the derivation won't happen. Also, note that while in this case we're deriving a value in the admin trait from a key in the template, it's perfectly possible to derive a value in the template from a key in a trait.
 
 Now for the post factory:
 
@@ -70,33 +70,28 @@ Now for the post factory:
 
 (let [jimmy (fab/build user {:with {:name "Jimmy Murphy"}})]
   (fab/build post {:with {:author jimmy}}))
-;; => {:author 6,
-;;     :id #uuid "d291eb5b-9e68-460d-ad35-cfea8073d485",
+;; => {:author 4,
+;;     :id #uuid "564653ee-5e06-40bd-a5a0-8cf8b0032172",
 ;;     :title "This one weird trick",
 ;;     :content "Some content goes here....",
 ;;     :author-name "Jimmy Murphy"}
 ```
 
-As before: if we change the name of the author user, we change the value of the author-name key.
-
-Finally note what will happen if instead of using a path, we derive from `author`:
+As before: if we change the name of the author user, we change the value of the author-name key. Now let's try:
 
 ```clojure
-(def post
-  (fab/->factory
-   {:id ::post
-    :template {:id random-uuid
-               :title "This one weird trick"
-               :content "Some content goes here...."
-               :author (fab/one ::user)
-               :author-name (fab/derive :author str)}}))
-
-(fab/build post)
-;; => {:author 8,
-;;     :id #uuid "49910b5c-a0d4-41b9-b232-e910fcb835c4",
+(fab/build post {:with {:author-name (fab/derive :author str)
+                        :author-email (fab/derive [:author] :email)}})
+;; => {:author 5,
+;;     :id #uuid "781f0ca7-6399-46de-b056-3232cae71a98",
 ;;     :title "This one weird trick",
 ;;     :content "Some content goes here....",
-;;     :author-name "8"}
+;;     :author-name "5",
+;;     :author-email "john@example.org"}
 ```
 
-Instead of deriving a value from the user entity, we've derived a value from the id of that entity.
+There are a few things to unpack here:
+
+- The `derive` directive works happily in a `:with` option
+- If we derive from the keyword `:author` instead of a path `[:author]`, we derive from the value of that key on the post entity we build i.e. the id of the author entity
+- We can derive multiple values from the same dependent entity

@@ -34,16 +34,15 @@ With this factory we can build some users:
 ;; => {:name "John Smith", :email "john@example.org", :role "admin"}
 ```
 
-But wait, this generates the same user every time! We can pass _build options_ to `build` to vary  the output, using the `with` option:
+But wait, this generates the same user every time! We can pass _build options_ to `build` to vary the output, using the `with` option:
 
 ```clojure
 ;; we use with to change the name:
 (fab/build user {:with {:name "John Murphy"}})
 ;; => {:name "John Murphy", :email "john@example.org", :role "admin"}
 
-;; or add an arbitrary key to the map:
+;; or add an arbitrary key to the entity:
 (fab/build user {:with {:favourite-food "chips"}})
 ;; => {:name "John Smith", :email "john@example.org", :role "admin", 
 ;;     :favourite-food "chips"}
 ```
-

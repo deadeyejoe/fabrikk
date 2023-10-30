@@ -49,7 +49,7 @@
 ;;     :title "This one weird trick",
 ;;     :content "Some content goes here...."}
 
-(fab/build post {} {:output-as :build-order})
+(fab/build post {} {:output-as :context})
 ;; => ({:id 5, :name "John Smith", :email "john@example.org", :role "user", :verified true}
 ;;     {:author 5,
 ;;      :id #uuid "83ee842e-ee37-4dd1-b385-6aba8f7a6c0f",
@@ -79,3 +79,19 @@
 ;;      :id #uuid "fb0d88e9-fd82-4730-adf3-ddb5b532396f",
 ;;      :title "This one weird trick",
 ;;      :content "Some content goes here...."})
+
+(fab/build post
+           {:with {:author "John"}}
+           {:output-as :build-order})
+;; => ({:author "John",
+;;      :id #uuid "1073fbdb-0842-4747-8c46-8bc959d2de8b",
+;;      :title "This one weird trick",
+;;      :content "Some content goes here...."})
+
+
+(fab/build post {:with {:editor (fab/one ::user)}})
+;; => {:author 8,
+;;     :editor 9,
+;;     :id #uuid "f99f03e6-270c-4aa1-924a-08606857fe0e",
+;;     :title "This one weird trick",
+;;     :content "Some content goes here...."}

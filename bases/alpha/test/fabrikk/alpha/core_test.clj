@@ -4,9 +4,11 @@
             [fabrikk.directives.interface :as directives]
             [fabrikk.output.interface :as output]
             [medley.core :as medley]
-            [fabrikk.persistence.interface :as persistence])
+            [fabrikk.persistence.interface :as persistence]
+            [orchestra.spec.test :as ost])
   (:refer-clojure :exclude [type]))
 
+(ost/instrument)
 (persistence/set-default-persistence :store)
 
 (defn coerce-to-list [x+]

@@ -1,6 +1,6 @@
 (ns fabrikk.directives.interface
   (:require [fabrikk.directives.core :as core])
-  (:refer-clojure :exclude [sequence]))
+  (:refer-clojure :exclude [sequence derive]))
 
 (defn constant [x]
   (core/constant x))

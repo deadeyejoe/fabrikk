@@ -62,7 +62,7 @@
   (directive? nil)
   (defrecord Constant [value]
     Directive
-    (evaluate [x build-context key]
+    (evaluate [_x build-context key]
       (assoc-value build-context key value)))
   (evaluate (->Constant 1) {} :foo))
 

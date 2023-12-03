@@ -8,8 +8,11 @@
             [fabrikk.persistence.interface :as persistence]
             [fabrikk.template.interface :as template]
             [fabrikk.utils.interface :as utils]
+            [fabrikk.specs.interface :as specs]
+            [clojure.spec.alpha :as s]
             [superstring.core :as str])
-  (:import java.lang.Exception))
+  (:import java.lang.Exception
+           java.lang.IllegalArgumentException))
 
 (defn remove-transients [context transients]
   (cond-> context
@@ -48,6 +51,11 @@
 
 (defn build [factory build-opts output-opts]
   (output/build (build-context factory build-opts) output-opts))
+(s/fdef build
+  :args (s/cat :factory (s/or :instance ::specs/factory
+                              :reference qualified-keyword?)
+               :build-opts (s/nilable ::specs/build-opts)
+               :output-opts (s/nilable ::specs/output-opts)))
 
 (defn coerce-to-list [build-opt-list+]
   (cond

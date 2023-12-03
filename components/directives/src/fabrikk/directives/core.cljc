@@ -7,7 +7,8 @@
             [fabrikk.factory.interface :as factory]
             [fabrikk.specs.interface :as specs]
             [clojure.spec.alpha :as s])
-  (:refer-clojure :exclude [sequence derive]))
+  (:refer-clojure :exclude [sequence derive])
+  (:import java.lang.IllegalArgumentException))
 
 (s/def ::directive map?)
 

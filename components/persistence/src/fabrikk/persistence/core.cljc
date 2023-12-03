@@ -1,5 +1,6 @@
 (ns fabrikk.persistence.core
-  (:require [fabrikk.entity.interface :as entity]))
+  (:require [fabrikk.entity.interface :as entity])
+  (:import java.lang.IllegalArgumentException))
 
 
 (defonce options (atom {:default-method :store}))

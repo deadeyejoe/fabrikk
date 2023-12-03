@@ -1,4 +1,4 @@
-(ns joe.tutorial.alpha.create
+(ns joe.tutorial.alpha.persistence
   (:require [fabrikk.alpha.core :as fab]))
 
 (defn admin-email []
@@ -75,4 +75,3 @@
 ;;     :title "This one weird trick",
 ;;     :content "Some content goes here....",
 ;;     :author-name "User-5570"}
-

@@ -109,7 +109,7 @@
 (def list-item-kw :list-item)
 (def identity-association? #{:identity :itself list-item-kw})
 
-(defn value-to-assoc [{:keys [value] :as entity} associate-as]
+(defn value-to-assoc [{:keys [value] :as _entity} associate-as]
   (cond
     (identity-association? associate-as) value
     (fn? associate-as) (associate-as value)

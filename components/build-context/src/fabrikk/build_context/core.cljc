@@ -3,7 +3,8 @@
             [fabrikk.entity.interface :as entity]
             [loom.alg :as graph-alg]
             [loom.graph :as graph]
-            [medley.core :as medley]))
+            [medley.core :as medley])
+  (:import java.lang.IllegalArgumentException))
 
 (defn init [primary]
   (-> (build-graph/build)

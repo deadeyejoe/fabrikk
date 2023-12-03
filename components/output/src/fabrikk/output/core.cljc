@@ -1,7 +1,8 @@
 (ns fabrikk.output.core
   (:require [fabrikk.build-context.interface :as context]
             [fabrikk.entity.interface :as entity]
-            [fabrikk.directory.interface :as directory]))
+            [fabrikk.directory.interface :as directory])
+  (:import java.lang.IllegalArgumentException))
 
 (defn ->result [context]
   (-> context context/primary entity/value))
@@ -44,8 +45,8 @@
        (reduce (partial apply collect-value)
                {})))
 
-(defmethod build :path [context {:keys [paths] :as output-opts}]
-  (throw (new Exception "Not implemented")))
+(defmethod build :path [_context {:keys [_paths] :as _output-opts}]
+  (throw (new IllegalArgumentException "Not implemented")))
 
 (defmethod build :build-order [context _output-opts]
   (->> (context/entities-in-build-order context)

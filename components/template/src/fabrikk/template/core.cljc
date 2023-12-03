@@ -1,7 +1,8 @@
 (ns fabrikk.template.core
   (:require [clojure.spec.alpha :as s]
             [fabrikk.directive-core.interface :as directive-core])
-  (:refer-clojure :exclude [compile exists?]))
+  (:refer-clojure :exclude [compile exists?])
+  (:import java.lang.IllegalArgumentException))
 
 (s/def ::field keyword?)
 (s/def ::value any?)

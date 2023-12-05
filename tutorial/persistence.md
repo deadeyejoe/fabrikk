@@ -5,7 +5,7 @@ So far everything we've done has been geared towards building our entities as pu
 Let's recap the current state of our factories:
 
 ```clojure
-(ns create.demo
+(ns fab.tutorial
   (:require [fabrikk.alpha.core :as fab]))
 
 (defn admin-email []
@@ -82,9 +82,9 @@ Now let's see `create` in action:
 ;;       :author-name "John Smith"}]}
 ```
 
-`create` takes all the same arguments as build, persists the entities (in build order), and returns the persisted entity (or entities depending on `output-as`).&#x20;
+`create` takes all the same arguments as build, persists the entities (in build order), and returns the persisted entity (or entities depending on what options you pass to create, it supports the same `output-as` option as `build`).
 
-Note that the post is referencing the author via its randomly assigned id. The build graph we mentioned earlier in [referencing-entities.md](referencing-entities.md "mention") allows us to create entities in the correct order i.e. user->post, and allows us to _**propagate**_ the changes that our persistence layer makes in the user to the post.
+Note that the post is referencing the author via its randomly assigned id. The build graph we mentioned earlier in [referencing-entities.md](referencing-entities.md "mention") allows us to create entities in the correct order i.e. user->post, and allows us to _**propagate**_ the change to the user our persistence layer makes to the post.
 
 This propagation also applies to all values calculated using fabrikk's `derive` directive. Let's tweak our persistence function so the user name is also out of our control:
 
@@ -106,6 +106,6 @@ This propagation also applies to all values calculated using fabrikk's `derive` 
 ;;     :author-name "User-5570"}
 ```
 
-The user name is based on a different randomly chosen integer from the user id, and this randomly chosen name is also propagated to the post before it's persisted. 
+The user name is based on a different randomly chosen integer from the user id, and this randomly chosen name is also propagated to the post before it's persisted.
 
 In our simple example so far we only have 2 types of entities in 2 'layers' to worry about, but since fabrikk is working with a graph under the hood, we can support arbitrarily complex hierarchies.

@@ -10,7 +10,7 @@ Some new requirements for app have come in:
 Function 'directives' (see [directives-101.md](directives-101.md "mention")) won't really help us here since they don't have access to the entity being built. We need a new directive, `derive`:
 
 ```clojure
-(ns derive-demo
+(ns fab.tutorial
   (:require [fabrikk.alpha.core :as fab]))
 
 (defn admin-email []
@@ -39,7 +39,7 @@ Function 'directives' (see [directives-101.md](directives-101.md "mention")) won
                :author-name (fab/derive [:author] :name}}))
 ```
 
-`derive` allows us to, well, _derive_ values from either keys on the same entity or from any dependent entities created using `one`.  It's first argument can be a key or a **path** - i.e. it identifies the source value to be derived from - the second is a function that's used to transform the source value into the derived value.&#x20;
+`derive` allows us to, well, _derive_ values from either keys on the same entity or from any dependent entities created using `one`. It's first argument can be a key or a **path** - i.e. it identifies the source value to be derived from - the second is a function that's used to transform the source value into the derived value.
 
 We'll go into more detail on paths later, for now it's enough to know that a path is a sequence of one or more keywords. Our path in the post factory is `[:author]` which can be translated to 'derive a value from the entity referenced through the author key', and we're using `:name` as the transform function to get the author's name.
 
@@ -92,6 +92,6 @@ As before: if we change the name of the author user, we change the value of the 
 
 There are a few things to unpack here:
 
-- The `derive` directive works happily in a `:with` option
-- If we derive from the keyword `:author` instead of a path `[:author]`, we derive from the value of that key on the post entity we build i.e. the id of the author entity
-- We can derive multiple values from the same dependent entity
+* The `derive` directive works happily in a `:with` option
+* If we derive from the keyword `:author` instead of a path `[:author]`, we derive from the value of that key on the post entity we build i.e. the id of the author entity
+* We can derive multiple values from the same dependent entity

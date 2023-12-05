@@ -6,7 +6,7 @@ Let's update our factory again:
 
 {% code lineNumbers="true" %}
 ```
-(ns directives-demo
+(ns fab.tutorial
   (:require [fabrikk.alpha.core :as fab]))
 
 (defn admin-email []

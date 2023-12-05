@@ -9,7 +9,7 @@ First we'll learn how to create factories and how to use them to build entities.
 We might write our factory definition as:
 
 ```clojure
-(ns factories.user
+(ns fab.tutorial
   (:require [fabrikk.core.alpha :as fab]))
 
 (def user
@@ -20,7 +20,7 @@ We might write our factory definition as:
                 :role "admin"}}) 
 ```
 
-A factory definition is a map with at least an `id` and a  `template` key:
+A factory definition is a map with at least an `id` and a `template` key:
 
 * The id uniquely identifies the factory, it's best to use a namespaced keyword for this. This doesn't do much for us yet but will be handy later
 * The template details the keys that our entity will have, and the values of those keys

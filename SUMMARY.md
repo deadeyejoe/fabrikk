@@ -10,7 +10,8 @@
 * [Referencing Entities](tutorial/referencing-entities.md)
 * [Deriving Values](tutorial/deriving-values.md)
 * [Persistence](tutorial/persistence.md)
-* [Many](tutorial/many.md)
+* [Collections](tutorial/many.md)
+* [Next Steps](tutorial/next-steps.md)
 
 ## How to
 
@@ -18,6 +19,7 @@
 
 ## Reference
 
+* [Build Hooks](reference/build-hooks.md)
 * [Concepts](reference/concepts.md)
 * [Directives](reference/directives.md)
 * [API](reference/api.md)

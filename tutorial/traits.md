@@ -10,7 +10,7 @@ Now our email key is linked to the role of the user, so we might want to control
 
 {% code lineNumbers="true" %}
 ```clojure
-(ns trait-demo
+(ns fab.tutorial
  (:require [fabrikk.alpha.core :as fab]))
  
 (def user

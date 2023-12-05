@@ -4,7 +4,7 @@ It's unlikely that we're building an application that deals solely with users, l
 
 {% code lineNumbers="true" %}
 ```clojure
-(ns reference-demo
+(ns fab.tutorial
   (:require [fabrikk.alpha.core :as fab]))
 
 (defn admin-email []
@@ -98,7 +98,7 @@ We can take a look at the build graph by getting the metadata of a post:
 
 Yikes! There's a lot going on there, but you shouldn't need to worry about these details. This might not seem very useful yet, but it will be soon when we talk about using fabrikk to persist the entities it builds.
 
-What happens when we want a list of posts?
+What happens when we want a list of posts? We use the `build-list` function, this function has an almost identical signature to `build`, with the addition of a quantity argument to specify how many entities you'd like to build.
 
 ```clojure
 (fab/build-list post 2)
@@ -130,7 +130,7 @@ We can see here that fabrikk has created a new user for each post. If you want t
 ;;      :content "Some content goes here...."})
 ```
 
-Using the build-order output again, we can see that both posts will share the same user.&#x20;
+Here we can see that `build-list` accepts the same build and output options as build, and since we're using the build-order output, we can see that both posts will share the same user.
 
 A final note for this section: even though we've used the `one` directive in the post factory, the relationship we're describing isn't between the factories. All we're saying is that the default representation of a post requires that a user be created. We're free to override that if we wish:
 
@@ -142,7 +142,9 @@ A final note for this section: even though we've used the `one` directive in the
 ;;      :content "Some content goes here...."})
 ```
 
-Or add additional dependent entities at will:
+No user was created here because we overrode the `author` key to be a plain string.
+
+We can also add additional entities to the factory at will. Here we'll add an extra `editor` user to the post:
 
 ```clojure
 (fab/build post {:with {:editor (fab/one ::user)}})
@@ -152,3 +154,5 @@ Or add additional dependent entities at will:
 ;;     :title "This one weird trick",
 ;;     :content "Some content goes here...."}
 ```
+
+and we get a distinct user as an editor of the post.

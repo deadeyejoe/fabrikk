@@ -48,7 +48,7 @@
                      {:value f
                       :identifier identifier})))
 (s/fdef sequence
-  :args (s/cat :f ::specs/transformer :identifier (s/nilable keyword?))
+  :args (s/cat :f fn? :identifier (s/nilable keyword?))
   :ret ::core/directive)
 
 (defn increment-number [cache sequence-key]
@@ -79,8 +79,7 @@
   ([factory build-opts]
    (core/->directive ::build
                      {:value (factory->id factory)
-                      :build-opts build-opts
-                      :ordering :pre})))
+                      :build-opts build-opts})))
 
 (defmethod core/run ::build [context key {:keys [value build-opts] :as _directive}]
   (context/associate-context context
@@ -95,8 +94,7 @@
    (core/->directive ::build-list
                      {:value (factory->id factory)
                       :number n
-                      :build-opt+ build-opt+
-                      :ordering :pre})))
+                      :build-opt+ build-opt+})))
 
 (defmethod core/run ::build-list [context key
                                   {:keys [value number build-opt+]
@@ -114,8 +112,7 @@
   ([key-or-path f]
    (core/->directive ::derive
                      {:value key-or-path
-                      :transform f
-                      :ordering :post})))
+                      :transform f})))
 
 (defmethod core/run ::derive [context key {:keys [transform] derive-from :value :as _directive}]
   (let [source-entity (if (sequential? derive-from)

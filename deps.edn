@@ -8,6 +8,7 @@
                                expound/expound {:mvn/version "0.9.0"}
                                djblue/portal {:mvn/version "0.34.2"}
                                aysylu/loom {:mvn/version "1.0.2"}
+                               org.clj-commons/pretty {:mvn/version "2.2.1"}
 
                                poly/assembly {:local/root "components/assembly"}
                                poly/build-context {:local/root "components/build-context"}

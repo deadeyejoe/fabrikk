@@ -1,6 +1,7 @@
 {:paths ["src" "resources"]
  :deps {org.clojure/clojure {:mvn/version "1.11.1"}
         medley/medley {:mvn/version "1.3.0"}
+        orchestra/orchestra {:mvn/version "2021.01.01-1"}
 
         poly/build-context {:local/root "../../components/build-context"}
         poly/build-graph {:local/root "../../components/build-graph"}

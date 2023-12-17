@@ -1,22 +1,16 @@
 (ns fabrikk.alpha.core
-  (:require [fabrikk.directives.interface :as directives]
+  (:require [fabrikk.build-context.interface :as context]
+            [fabrikk.directives.interface :as directives]
             [fabrikk.entity.interface :as entity]
-            [fabrikk.build-context.interface :as context]
             [fabrikk.execution.interface :as execution]
             [fabrikk.factory.interface :as factory]
-            [fabrikk.persistence.interface :as persistence]
-            [fabrikk.template.interface :as template])
+            [fabrikk.persistence.interface :as persistence])
   (:refer-clojure :exclude [sequence derive]))
 
 ;; ============== Define factories
 
 (defn ->factory [description]
   (factory/->factory description))
-
-;; =============== Templates
-
-(defn update-template [template field value]
-  (template/update template field value))
 
 ;; =============== Context 
 

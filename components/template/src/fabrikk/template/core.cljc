@@ -1,6 +1,5 @@
 (ns fabrikk.template.core
-  (:require [clojure.spec.alpha :as s]
-            [fabrikk.directive-core.interface :as directive-core])
+  (:require [clojure.spec.alpha :as s])
   (:refer-clojure :exclude [compile exists?])
   (:import java.lang.IllegalArgumentException))
 
@@ -11,14 +10,17 @@
 (s/def ::fragment (s/or :map ::template-map
                         :tuple ::template-tuple))
 (s/def ::fragment-list (s/coll-of ::fragment :kind sequential?))
-(s/def ::instance (s/or :map ::template-map
-                        :list (s/coll-of ::fragment)))
+(s/def ::description (s/or :map ::template-map
+                           :list ::fragment-list))
+
+(s/def ::ordering (s/coll-of ::field :kind sequential?))
+(s/def ::field->tuple (s/map-of ::field ::template-tuple))
+(s/def ::compiled (s/keys :req [::ordering
+                                ::field->tuple]))
 
 (defn init []
-  {:pre-ordering []
-   :ordering []
-   :post-ordering []
-   :field->tuple {}})
+  {::ordering []
+   ::field->tuple {}})
 
 (defn coerce-to-tuples [fragment]
   (cond
@@ -33,51 +35,56 @@
     (s/valid? ::fragment-list description) description
     :else (throw (IllegalArgumentException. (str "Invalid template " description)))))
 
-(defn exists? [{:keys [pre-ordering ordering post-ordering] :as _template} field]
-  (or (< -1 (.indexOf pre-ordering field))
-      (< -1 (.indexOf ordering field))
-      (< -1 (.indexOf post-ordering field))))
+(declare new?)
 
-(def new? (complement exists?))
-
-(defn ordering-collection [[_field value :as _tuple]]
-  (or
-   (when (directive-core/directive? value)
-     (case (:ordering value)
-       :pre :pre-ordering
-       :post :post-ordering
-       nil))
-   :ordering))
+(defn update-tuple [template [field _value :as tuple]]
+  (assoc-in template [::field->tuple field] tuple))
 
 (defn add-tuple [template [field _value :as tuple]]
-  (let [new? (new? template field)
-        collection-to-update (ordering-collection tuple)]
-    (cond-> (assoc-in template [:field->tuple field] tuple)
-      new? (update collection-to-update conj field))))
-
-(defn combine [tuples]
-  (reduce add-tuple (init) tuples))
+  (let [new? (new? template field)]
+    (cond-> (update-tuple template tuple)
+      new? (update ::ordering conj field))))
 
 (defn compile [descriptions]
   (->> descriptions
        (mapcat coerce-description-to-list)
        (mapcat coerce-to-tuples)
-       (combine)))
+       (reduce add-tuple (init))))
 
-(defn filter-ordering [attributes ordering]
-  (remove (set attributes) ordering))
+(defn combine [template description]
+  (->> (coerce-description-to-list description)
+       (mapcat coerce-to-tuples)
+       (reduce add-tuple template)))
 
-(defn without [template attributes]
-  (-> template
-      (update :field->tuple #(apply dissoc % attributes))
-      (update :pre-ordering (partial filter-ordering attributes))
-      (update :ordering (partial filter-ordering attributes))
-      (update :post-ordering (partial filter-ordering attributes))))
-
-(defn execute [{:keys [pre-ordering ordering post-ordering field->tuple] :as _template} f init-ctx]
+(defn execute [{:keys [::ordering ::field->tuple] :as _template} f init-ctx]
   (reduce (fn [ctx field]
             (apply f ctx (get field->tuple field)))
           init-ctx
-          (concat (distinct pre-ordering)
-                  (distinct ordering)
-                  (distinct post-ordering))))
+          ordering))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Public interface
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defn exists? [{:keys [::ordering] :as _template} field]
+  (< -1 (.indexOf ordering field)))
+
+(def new? (complement exists?))
+
+(defn without [template attributes]
+  (-> template
+      (update ::field->tuple #(apply dissoc % attributes))
+      (update ::ordering (partial remove (set attributes)))))
+
+(defn insert [template field value]
+  (cond-> template 
+   (new? template field) (add-tuple [field value])))
+
+(defn update-existing [template field value]
+  (cond-> template
+    (exists? template field) (update-tuple [field value])))
+
+(defn upsert [template field value]
+  (if (exists? template field)
+    (update-tuple template [field value])
+    (add-tuple template [field value])))

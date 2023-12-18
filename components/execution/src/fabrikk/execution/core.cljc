@@ -30,13 +30,13 @@
 
 (defn build-entity [execution-context
                     {:as factory
-                     :keys [before-build after-build transients]
-                     :or {before-build identity}}
+                     :keys [before-build after-build transients]}
                     build-opts]
   (let [effective-template (compile-template factory build-opts)
+        before (or before-build identity)
         after (after-build-fn after-build)]
     (-> effective-template
-        (before-build)
+        (before)
         (template/execute directive-core/run execution-context)
         (after)
         (remove-transients transients))))

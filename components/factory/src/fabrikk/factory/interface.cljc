@@ -5,6 +5,9 @@
 
 (defn ->factory [factory]
   (core/->factory factory))
+(s/fdef ->factory
+  :args (s/cat :description ::specs/factory-description)
+  :ret ::core/instance)
 
 (defn factory? [x]
   (core/factory? x))
@@ -18,7 +21,7 @@
 (defn build [factory build-opts output-opts]
   (core/build factory build-opts output-opts))
 (s/fdef build
-  :args (s/cat :factory (s/or :instance ::specs/factory
+  :args (s/cat :factory (s/or :instance ::core/instance
                               :reference qualified-keyword?)
                :build-opts (s/nilable ::specs/build-opts)
                :output-opts (s/nilable ::specs/output-opts)))

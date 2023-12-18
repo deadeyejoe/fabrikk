@@ -25,7 +25,7 @@
 (s/def ::uuid uuid?)
 (s/def ::value any?)
 (s/def ::persisted boolean?)
-(s/def ::instance (s/keys :opt-un [::specs/factory
+(s/def ::instance (s/keys :opt-un [::specs/factory-description
                                    ::persisted
                                    ::uuid
                                    ::value]))

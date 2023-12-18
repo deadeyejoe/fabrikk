@@ -2,20 +2,29 @@
   (:require [clojure.spec.alpha :as s]
             [fabrikk.directory.interface :as directory]
             [fabrikk.execution.interface :as execution]
-            [fabrikk.output.interface :as output]
-            [fabrikk.specs.interface :as specs])
+            [fabrikk.output.interface :as output])
   (:import java.lang.IllegalArgumentException))
 
+(defrecord Factory [id
+                    template
+                    primary-id
+                    persistable
+                    traits
+                    transients
+                    before-build
+                    after-build])
+
+(s/def ::instance (partial instance? Factory))
+
 (defn ->factory [{:keys [id] :as description}]
-  (let [factory (merge {:persistable true}
-                       description)]
+  (let [factory (->> description
+                     (merge {:persistable true}) 
+                     (map->Factory))]
     (directory/register-factory id factory)
-    (with-meta factory {::factory true})))
-(s/fdef ->factory
-  :ret ::specs/factory)
+    factory))
 
 (defn factory? [x]
-  (::factory (meta x)))
+  (instance? Factory x))
 
 (defn resolve-factory [factory-or-kw]
   (cond
@@ -32,11 +41,6 @@
 (defn build [factory build-opts output-opts]
   (let [resolved (resolve-factory factory)]
     (output/build (execution/build-context resolved build-opts) output-opts)))
-(s/fdef build
-  :args (s/cat :factory (s/or :instance ::specs/factory
-                              :reference qualified-keyword?)
-               :build-opts (s/nilable ::specs/build-opts)
-               :output-opts (s/nilable ::specs/output-opts)))
 
 (defn build-list [factory n build-opt+ output-opts]
   (output/build (execution/build-list-context factory n build-opt+) output-opts))

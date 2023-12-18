@@ -24,14 +24,14 @@
 (s/def ::transients ::template)
 (s/def ::before-build fn?)
 (s/def ::after-build fn?)
-(s/def ::factory (s/keys :req-un [::id
-                                  ::template]
-                         :opt-un [::primary-id
-                                  ::persistable
-                                  ::traits
-                                  ::transients
-                                  ::before-build
-                                  ::after-build]))
+(s/def ::factory-description (s/keys :req-un [::id
+                                              ::template]
+                                     :opt-un [::primary-id
+                                              ::persistable
+                                              ::traits
+                                              ::transients
+                                              ::before-build
+                                              ::after-build]))
 
 (s/def :build/with ::template)
 (s/def :build/traits (s/coll-of keyword?))

@@ -2,68 +2,56 @@
   (:require [fabrikk.build-context.interface :as context]
             [fabrikk.directives.interface :as directives]
             [fabrikk.entity.interface :as entity]
-            [fabrikk.execution.interface :as execution]
             [fabrikk.factory.interface :as factory]
             [fabrikk.persistence.interface :as persistence])
   (:refer-clojure :exclude [sequence derive]))
 
-;; ============== Define factories
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Define factories
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn ->factory [description]
   (factory/->factory description))
 
-;; =============== Context 
-
-(defn path [context path]
-  (entity/value (context/path context path)))
-
-;; ================ Persistence
-
-(def store persistence/store)
-
-(defn reset-store! []
-  (persistence/reset-store!))
-
-(defn set-default-persistence [key]
-  (persistence/set-default-persistence key))
-
-(def persist! persistence/persist!)
-
-;; =============== Build & Create
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Build & Create
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn build
   ([factory]
-   (execution/build factory {} {}))
+   (factory/build factory {} {}))
   ([factory build-opts]
-   (execution/build factory build-opts {}))
+   (factory/build factory build-opts {}))
   ([factory build-opts output-opts]
-   (execution/build factory build-opts output-opts)))
+   (factory/build factory build-opts output-opts)))
 
 (defn build-list
   ([factory n]
-   (execution/build-list factory n {} {}))
+   (factory/build-list factory n {} {}))
   ([factory n one+-build-opts]
-   (execution/build-list factory n one+-build-opts {}))
+   (factory/build-list factory n one+-build-opts {}))
   ([factory n one+-build-opts output-opts]
-   (execution/build-list factory n one+-build-opts output-opts)))
+   (factory/build-list factory n one+-build-opts output-opts)))
 
 (defn create
   ([factory]
-   (execution/create factory {} {}))
+   (factory/create factory {} {}))
   ([factory build-opts]
-   (execution/create factory build-opts {}))
+   (factory/create factory build-opts {}))
   ([factory build-opts output-opts]
-   (execution/create factory build-opts output-opts)))
+   (factory/create factory build-opts output-opts)))
 
 (defn create-list
   ([factory n]
-   (execution/create-list factory n {} {}))
+   (factory/create-list factory n {} {}))
   ([factory n one+-build-opts]
-   (execution/create-list factory n one+-build-opts {}))
+   (factory/create-list factory n one+-build-opts {}))
   ([factory n one+-build-opts output-opts]
-   (execution/create-list factory n one+-build-opts output-opts)))
+   (factory/create-list factory n one+-build-opts output-opts)))
 
-;; ============= Directives
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Directives
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn constant [x]
   (directives/constant x))
@@ -90,3 +78,24 @@
    (directives/derive key-or-path identity))
   ([key-or-path f]
    (directives/derive key-or-path f)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Context 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defn path [context path]
+  (entity/value (context/path context path)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Persistence
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(def store persistence/store)
+
+(defn reset-store! []
+  (persistence/reset-store!))
+
+(defn set-default-persistence [key]
+  (persistence/set-default-persistence key))
+
+(def persist! persistence/persist!)

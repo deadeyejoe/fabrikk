@@ -1,28 +1,21 @@
 (ns fabrikk.execution.core
   (:require [fabrikk.build-context.interface :as context]
             [fabrikk.directive-core.interface :as directive-core]
-            [fabrikk.directory.interface :as directory]
             [fabrikk.entity.interface :as entity]
-            [fabrikk.factory.interface :as factory]
             [fabrikk.output.interface :as output]
             [fabrikk.persistence.interface :as persistence]
             [fabrikk.template.interface :as template]
             [fabrikk.utils.interface :as utils]
-            [fabrikk.specs.interface :as specs]
-            [clojure.spec.alpha :as s]
             [superstring.core :as str])
-  (:import java.lang.Exception
-           java.lang.IllegalArgumentException))
+  (:import java.lang.Exception))
 
-(defn remove-transients [context transients]
-  (cond-> context
-    (seq transients) (context/update-primary entity/update-value #(apply dissoc % transients))))
-
-(defn resolve-factory [factory]
-  (cond
-    (factory/factory? factory) factory
-    (directory/resolve-factory factory) (directory/resolve-factory factory)
-    :else (throw (IllegalArgumentException. (str "Unrecognised factory: " factory)))))
+(defn compile-template [{:keys [template traits] :as _factory}
+                        {:keys [with without] selected-traits :traits :as _opts}]
+  ;; TODO: handle non-existent traits!
+  (cond-> (template/compile (-> [template]
+                                (into (map traits selected-traits))
+                                (into (if with [with] []))))
+    without (template/without without)))
 
 (defn after-build-fn [after-build-config]
   (if after-build-config
@@ -31,12 +24,16 @@
                               entity/update-value (partial after-build-config context)))
     identity))
 
+(defn remove-transients [context transients]
+  (cond-> context
+    (seq transients) (context/update-primary entity/update-value #(apply dissoc % transients))))
+
 (defn build-entity [execution-context
                     {:as factory
                      :keys [before-build after-build transients]
-                     :or {before-build identity }}
+                     :or {before-build identity}}
                     build-opts]
-  (let [effective-template (factory/compile-template factory build-opts)
+  (let [effective-template (compile-template factory build-opts)
         after (after-build-fn after-build)]
     (-> effective-template
         (before-build)
@@ -45,17 +42,8 @@
         (remove-transients transients))))
 
 (defn build-context [factory build-opts]
-  (let [resolved (resolve-factory factory)
-        context (context/init (entity/create! resolved build-opts))]
-    (build-entity context resolved build-opts)))
-
-(defn build [factory build-opts output-opts]
-  (output/build (build-context factory build-opts) output-opts))
-(s/fdef build
-  :args (s/cat :factory (s/or :instance ::specs/factory
-                              :reference qualified-keyword?)
-               :build-opts (s/nilable ::specs/build-opts)
-               :output-opts (s/nilable ::specs/output-opts)))
+  (let [context (context/init (entity/create! factory build-opts))]
+    (build-entity context factory build-opts)))
 
 (defn coerce-to-list [build-opt-list+]
   (cond
@@ -89,9 +77,6 @@
      ;;update the value after the context/associate calls, overwriting the list of assoc-as values
     (context/update-primary list-context entity/update-value (constantly list-value))))
 
-(defn build-list [factory n build-opt+ output-opts]
-  (output/build (build-list-context factory n build-opt+) output-opts))
-
 (defn wrap-persist-error [context entity exception]
   (let [full-path (context/path-to context entity)
         display-path (map first full-path)]
@@ -120,15 +105,3 @@
 
           (->> (context/entities-in-build-order built-context)
                (map :uuid))))
-
-(defn create [factory build-opts output-opts]
-  (output/build
-   (->> (build-context factory build-opts)
-        (persist-context output-opts))
-   output-opts))
-
-(defn create-list [factory n build-opt-list output-opts]
-  (output/build
-   (->> (build-list-context factory n build-opt-list)
-        (persist-context output-opts))
-   output-opts))

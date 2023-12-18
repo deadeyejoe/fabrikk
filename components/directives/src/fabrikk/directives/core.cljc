@@ -1,14 +1,11 @@
 (ns fabrikk.directives.core
-  (:require [fabrikk.build-context.interface :as context]
+  (:require [clojure.spec.alpha :as s]
+            [fabrikk.build-context.interface :as context]
             [fabrikk.directive-core.interface :as core]
-            [fabrikk.directory.interface :as directory]
             [fabrikk.entity.interface :as entity]
             [fabrikk.execution.interface :as execution]
-            [fabrikk.factory.interface :as factory]
-            [fabrikk.specs.interface :as specs]
-            [clojure.spec.alpha :as s])
-  (:refer-clojure :exclude [sequence derive])
-  (:import java.lang.IllegalArgumentException))
+            [fabrikk.factory.interface :as factory])
+  (:refer-clojure :exclude [sequence derive]))
 
 (s/def ::directive map?)
 
@@ -68,23 +65,19 @@
 
 ;; =========== BUILD ===========
 
-(defn factory->id [factory]
-  (cond
-    (factory/factory? factory) (:id factory)
-    (directory/resolve-factory factory) factory
-    :else (throw (IllegalArgumentException. (str "Unrecognised factory: " factory)))))
 
 (defn build
   ([factory] (build factory {}))
   ([factory build-opts]
    (core/->directive ::build
-                     {:value (factory->id factory)
+                     {:value (factory/->id factory)
                       :build-opts build-opts})))
 
 (defmethod core/run ::build [context key {:keys [value build-opts] :as _directive}]
-  (context/associate-context context
-                             key
-                             (execution/build-context value build-opts)))
+  (let [resolved (factory/resolve-factory value)]
+    (context/associate-context context
+                               key
+                               (execution/build-context resolved build-opts))))
 
 ;; =========== BUILD LIST ===========
 
@@ -92,7 +85,7 @@
   ([factory n] (build-list factory n [{}]))
   ([factory n build-opt+]
    (core/->directive ::build-list
-                     {:value (factory->id factory)
+                     {:value (factory/->id factory)
                       :number n
                       :build-opt+ build-opt+})))
 
@@ -100,7 +93,8 @@
                                   {:keys [value number build-opt+]
                                    :or {number 0}
                                    :as _directive}]
-  (let [list-values (execution/build-many value number build-opt+)
+  (let [resolved (factory/resolve-factory value)
+        list-values (execution/build-many resolved number build-opt+)
         list-context (reduce (partial apply context/associate-context)
                              (context/init (entity/create-list!))
                              (map-indexed vector list-values))]

@@ -1,49 +1,35 @@
 (ns fabrikk.template.core
-  (:require [clojure.spec.alpha :as s])
+  (:require [clojure.spec.alpha :as s]
+            [fabrikk.template.interface.specs :as template-specs] )
   (:refer-clojure :exclude [compile exists?])
   (:import java.lang.IllegalArgumentException))
 
-(s/def ::field keyword?)
-(s/def ::value any?)
-(s/def ::template-map (s/map-of ::field ::value))
-(s/def ::template-tuple (s/cat :field ::field :value ::value))
-(s/def ::fragment (s/or :map ::template-map
-                        :tuple ::template-tuple))
-(s/def ::fragment-list (s/coll-of ::fragment :kind sequential?))
-(s/def ::description (s/or :map ::template-map
-                           :list ::fragment-list))
-
-(s/def ::ordering (s/coll-of ::field :kind sequential?))
-(s/def ::field->tuple (s/map-of ::field ::template-tuple))
-(s/def ::compiled (s/keys :req [::ordering
-                                ::field->tuple]))
-
 (defn init []
-  {::ordering []
-   ::field->tuple {}})
+  {:ordering []
+   :field->tuple {}})
 
 (defn coerce-to-tuples [fragment]
   (cond
-    (s/valid? ::template-tuple fragment) [fragment]
-    (s/valid? ::template-map fragment) (into [] fragment)
+    (s/valid? ::template-specs/template-tuple fragment) [fragment]
+    (s/valid? ::template-specs/template-map fragment) (into [] fragment)
     :else (throw (IllegalArgumentException. (str "Invalid template fragment" fragment)))))
 
 (defn coerce-description-to-list [description]
   (cond
-    (s/valid? ::template-map description) [description]
-    (s/valid? ::template-tuple description) [description]
-    (s/valid? ::fragment-list description) description
+    (s/valid? ::template-specs/template-map description) [description]
+    (s/valid? ::template-specs/template-tuple description) [description]
+    (s/valid? ::template-specs/fragment-list description) description
     :else (throw (IllegalArgumentException. (str "Invalid template " description)))))
 
 (declare new?)
 
 (defn update-tuple [template [field _value :as tuple]]
-  (assoc-in template [::field->tuple field] tuple))
+  (assoc-in template [:field->tuple field] tuple))
 
 (defn add-tuple [template [field _value :as tuple]]
   (let [new? (new? template field)]
     (cond-> (update-tuple template tuple)
-      new? (update ::ordering conj field))))
+      new? (update :ordering conj field))))
 
 (defn compile [descriptions]
   (->> descriptions
@@ -56,7 +42,7 @@
        (mapcat coerce-to-tuples)
        (reduce add-tuple template)))
 
-(defn execute [{:keys [::ordering ::field->tuple] :as _template} f init-ctx]
+(defn execute [{:keys [:ordering :field->tuple] :as _template} f init-ctx]
   (reduce (fn [ctx field]
             (apply f ctx (get field->tuple field)))
           init-ctx
@@ -66,15 +52,15 @@
 ;; Public interface
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn exists? [{:keys [::ordering] :as _template} field]
+(defn exists? [{:keys [:ordering] :as _template} field]
   (< -1 (.indexOf ordering field)))
 
 (def new? (complement exists?))
 
 (defn without [template attributes]
   (-> template
-      (update ::field->tuple #(apply dissoc % attributes))
-      (update ::ordering (partial remove (set attributes)))))
+      (update :field->tuple #(apply dissoc % attributes))
+      (update :ordering (partial remove (set attributes)))))
 
 (defn insert [template field value]
   (cond-> template 

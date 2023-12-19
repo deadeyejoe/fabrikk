@@ -2,7 +2,9 @@
   (:require [clojure.spec.alpha :as s]
             [fabrikk.directory.interface :as directory]
             [fabrikk.execution.interface :as execution]
-            [fabrikk.output.interface :as output])
+            [fabrikk.output.interface :as output]
+            [fabrikk.template.interface :as template]
+            [fabrikk.template.interface.specs :as template-specs])
   (:import java.lang.IllegalArgumentException))
 
 (declare build)
@@ -20,14 +22,15 @@
   (invoke [this build-opts]
     (build this build-opts nil)))
 
-(s/def ::instance (partial instance? Factory))
+(s/def ::template ::template-specs/compiled)
+(s/def ::instance (s/and (partial instance? Factory)
+                         (s/keys :req-un [::template])))
 
 (defn ->factory [{:keys [id] :as description}]
-  (let [factory (->> description
+  (let [factory (->> (update description :template template/compile)
                      (merge {:persistable true}) 
                      (map->Factory))]
-    (when id
-      (directory/register-factory id factory))
+    (when id (directory/register-factory id factory))
     factory))
 
 (defn factory? [x]

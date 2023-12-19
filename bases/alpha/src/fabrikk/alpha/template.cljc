@@ -8,6 +8,9 @@
 (defn new? [template field]
   (template/new? template field))
 
+(defn value [template field]
+  (template/value template field))
+
 (defn insert [template field value]
   (template/insert template field value))
 

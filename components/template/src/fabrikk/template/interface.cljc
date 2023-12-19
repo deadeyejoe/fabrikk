@@ -2,19 +2,27 @@
   (:require [clojure.spec.alpha :as s]
             [fabrikk.template.core :as template]
             [fabrikk.template.interface.specs :as template-specs])
-  (:refer-clojure :exclude [compile exists?]))
+  (:refer-clojure :exclude [compile exists? merge]))
 
-(defn compile [descriptions]
-  (template/compile descriptions))
+(defn compile [description]
+  (template/compile description))
 (s/fdef compile
-  :args (s/cat :descriptions (s/coll-of ::template-specs/description :kind sequential?))
-  :ret ::template-specs/compiled)
+  :args (s/cat :description ::template-specs/description)
+  :ret (s/and ::template-specs/compiled
+              template/consistent?))
 
 (defn combine [template description]
   (template/combine template description))
 (s/fdef combine
   :args (s/cat :template ::template-specs/compiled
                :description ::template-specs/description)
+  :ret ::template-specs/compiled)
+
+(defn merge [template-1 template-2]
+  (template/merge template-1 template-2))
+(s/fdef merge
+  :args (s/cat :template-1 ::template-specs/compiled
+               :template-2 ::template-specs/compiled)
   :ret ::template-specs/compiled)
 
 (defn execute [template f init-ctx]
@@ -29,19 +37,25 @@
 ;; Public interface
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(s/def ::arg-pair (s/cat :template ::template-specs/compiled
+                         :field ::template-specs/field))
+
 (defn exists? [template field]
   (template/exists? template field))
 (s/fdef exists?
-  :args (s/cat :template ::template-specs/compiled
-               :field ::template-specs/field)
+  :args ::arg-pair
   :ret boolean?)
 
 (defn new? [template field]
   (template/new? template field))
 (s/fdef new?
-  :args (s/cat :template ::template-specs/compiled
-               :field ::template-specs/field)
+  :args ::arg-pair
   :ret boolean?)
+
+(defn value [template field]
+  (template/value template field))
+(s/fdef value
+  :args ::arg-pair)
 
 (s/def ::arg-triple (s/cat :template ::template-specs/compiled
                            :field ::template-specs/field

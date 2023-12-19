@@ -12,9 +12,10 @@
 (defn compile-template [{:keys [template traits] :as _factory}
                         {:keys [with without] selected-traits :traits :as _opts}]
   ;; TODO: handle non-existent traits!
-  (cond-> (template/compile (-> [template]
-                                (into (map traits selected-traits))
-                                (into (if with [with] []))))
+  (cond-> (->> selected-traits
+               (map traits)
+               (into (if with [with] []))
+               (reduce template/combine template))
     without (template/without without)))
 
 (defn after-build-fn [after-build-config]

@@ -24,9 +24,9 @@
 (s/def ::transients ::template)
 (s/def ::before-build fn?)
 (s/def ::after-build fn?)
-(s/def ::factory-description (s/keys :req-un [::id
-                                              ::template]
-                                     :opt-un [::primary-id
+(s/def ::factory-description (s/keys :req-un [::template]
+                                     :opt-un [::id
+                                              ::primary-id
                                               ::persistable
                                               ::traits
                                               ::transients

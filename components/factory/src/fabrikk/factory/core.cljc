@@ -5,6 +5,8 @@
             [fabrikk.output.interface :as output])
   (:import java.lang.IllegalArgumentException))
 
+(declare build)
+
 (defrecord Factory [id
                     template
                     primary-id
@@ -12,7 +14,11 @@
                     traits
                     transients
                     before-build
-                    after-build])
+                    after-build]
+  #?(:clj clojure.lang.IFn
+     :cljs cljs.core/IFn)
+  (invoke [this build-opts]
+    (build this build-opts nil)))
 
 (s/def ::instance (partial instance? Factory))
 
@@ -20,7 +26,8 @@
   (let [factory (->> description
                      (merge {:persistable true}) 
                      (map->Factory))]
-    (directory/register-factory id factory)
+    (when id
+      (directory/register-factory id factory))
     factory))
 
 (defn factory? [x]

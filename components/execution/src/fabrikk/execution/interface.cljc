@@ -1,6 +1,9 @@
 (ns fabrikk.execution.interface
   (:require [fabrikk.execution.core :as core]))
 
+( defn compile-template [factory build-opts]
+ (core/compile-template factory build-opts))
+
 (defn build-context [factory build-opts]
   (core/build-context factory build-opts))
 

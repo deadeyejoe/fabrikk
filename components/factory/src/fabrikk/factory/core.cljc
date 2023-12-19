@@ -64,6 +64,14 @@
     (directory/register-factory id inherited)
     inherited))
 
+(defn mould [factory-or-kw build-opts]
+  (let [resolved (resolve-factory factory-or-kw)
+        moulded (assoc resolved
+                       :id (random-uuid)
+                       :template (execution/compile-template resolved build-opts))]
+    (directory/register-factory (:id moulded) moulded)
+    moulded))
+
 (defn build [factory-or-kw build-opts output-opts]
   (let [resolved (resolve-factory factory-or-kw)]
     (output/build (execution/build-context resolved build-opts) output-opts)))

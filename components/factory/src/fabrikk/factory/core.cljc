@@ -17,20 +17,26 @@
                     transients
                     before-build
                     after-build]
-  #?(:clj clojure.lang.IFn
-     :cljs cljs.core/IFn)
-  (invoke [this build-opts]
-    (build this build-opts nil)))
+  #?@(:clj
+      (clojure.lang.IFn
+       (invoke [this] (build this {} {}))
+       (invoke [this opts] (build this opts {}))
+       (applyTo [this args] (apply build this args)))
+      :cljs
+      (cljs.core/IFn
+       (-invoke [this] (build this {} {}))
+       (-invoke [this opts] (build this opts {})))))
 
 (s/def ::template ::template-specs/compiled)
 (s/def ::instance (s/and (partial instance? Factory)
                          (s/keys :req-un [::template])))
 
-(defn ->factory [{:keys [id] :as description}]
-  (let [factory (->> (update description :template template/compile)
-                     (merge {:persistable true}) 
-                     (map->Factory))]
-    (when id (directory/register-factory id factory))
+(defn ->factory [description]
+  (let [{:keys [id] :as factory} (->> (update description :template template/compile)
+                                      (merge {:id (random-uuid)
+                                              :persistable true})
+                                      (map->Factory))]
+    (directory/register-factory id factory)
     factory))
 
 (defn factory? [x]
@@ -48,21 +54,34 @@
     (directory/resolve-factory factory-or-kw) factory-or-kw
     :else (throw (IllegalArgumentException. (str "Unrecognised factory: " factory-or-kw)))))
 
-(defn build [factory build-opts output-opts]
-  (let [resolved (resolve-factory factory)]
+(defn inherit [factory-or-kw {:keys [id template traits] :as description}]
+  (let [resolved (resolve-factory factory-or-kw)
+        inherited (-> resolved
+                      (merge {:id (random-uuid)} (dissoc description :template :traits))
+                      (update :template template/combine template)
+                      (update :traits merge traits)
+                      (assoc :parent (->id resolved)))]
+    (directory/register-factory id inherited)
+    inherited))
+
+(defn build [factory-or-kw build-opts output-opts]
+  (let [resolved (resolve-factory factory-or-kw)]
     (output/build (execution/build-context resolved build-opts) output-opts)))
 
-(defn build-list [factory n build-opt+ output-opts]
-  (output/build (execution/build-list-context factory n build-opt+) output-opts))
+(defn build-list [factory-or-kw n build-opt+ output-opts]
+  (let [resolved (resolve-factory factory-or-kw)]
+    (output/build (execution/build-list-context resolved n build-opt+) output-opts)))
 
-(defn create [factory build-opts output-opts]
-  (output/build
-   (->> (execution/build-context factory build-opts)
-        (execution/persist-context output-opts))
-   output-opts))
+(defn create [factory-or-kw build-opts output-opts]
+  (let [resolved (resolve-factory factory-or-kw)]
+    (output/build
+     (->> (execution/build-context resolved build-opts)
+          (execution/persist-context output-opts))
+     output-opts)))
 
-(defn create-list [factory n build-opt-list output-opts]
-  (output/build
-   (->> (execution/build-list-context factory n build-opt-list)
-        (execution/persist-context output-opts))
-   output-opts))
+(defn create-list [factory-or-kw n build-opt-list output-opts]
+  (let [resolved (resolve-factory factory-or-kw)]
+    (output/build
+     (->> (execution/build-list-context resolved n build-opt-list)
+          (execution/persist-context output-opts))
+     output-opts)))

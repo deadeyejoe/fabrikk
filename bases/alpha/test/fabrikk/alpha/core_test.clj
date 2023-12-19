@@ -72,6 +72,11 @@
           :name "Joe"
           :role "reader"}
          (fab/build user)))
+  (is (= {:id 2
+          :name "Joe"
+          :role "reader"}
+         (user))
+      "Calling factory calls build")
   (is (match "John" :name (fab/build user {:with {:name "John"}})))
   (is (match "Jane" :name (fab/build user {:with {:name #(str "Ja" "ne")}})))
   (is (match "admin" :role (fab/build user {:traits [:admin]})))
@@ -144,6 +149,20 @@
                                                                           3 {:with {:name "Ernest"}
                                                                              :as :name})}})))
       "'as' changes association value"))
+
+(deftest test-inherit
+  (let [inherited (fab/inherit ::user
+                               {:template {:role "reader"
+                                           :email "reader@example.com"}
+                                :traits {:verified {:verified true}}})]
+    (is (not= (:id user) (:id inherited))
+        "Inherited factory has a different id")
+    (is (= (:id user) (:parent inherited))
+        "Inherited factory has correct parent id")
+    (is (= ["reader" "reader@example.com"] ((juxt :role :email) (inherited)))
+        "template is merged")
+    (is (= "admin" (:role (inherited {:traits [:admin]}))))
+    (is (:verified (inherited {:traits [:verified]})))))
 
 (def topic
   (fab/->factory

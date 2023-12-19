@@ -14,6 +14,13 @@
   :args (s/cat :description ::specs/factory-description)
   :ret ::core/instance)
 
+(defn inherit [factory-or-kw factory-description]
+  (core/inherit factory-or-kw factory-description))
+(s/fdef inherit
+  :args (s/cat :factory-or-kw ::factory-or-kw
+               :factory-description ::specs/factory-description)
+  :ret ::core/instance)
+
 (defn factory? [x]
   (core/factory? x))
 

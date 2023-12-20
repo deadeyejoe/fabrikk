@@ -108,11 +108,18 @@
                      {:value key-or-path
                       :transform f})))
 
-(defmethod core/run ::derive [context key {:keys [transform] derive-from :value :as _directive}]
-  (let [source-entity (if (sequential? derive-from)
-                        (context/traverse-path context derive-from)
-                        (context/primary context))
-        assoc-as (if (sequential? derive-from)
-                   transform
-                   (comp transform derive-from))]
-    (context/associate-entity context key (entity/override-association source-entity assoc-as))))
+(defn derive-from-entity-at-path [context key {:keys [transform] derive-from :value :as _directive}]
+  (let [source-entity (cond-> (context/traverse-path context derive-from)
+                        transform (entity/override-association transform))]
+    (context/associate-entity context key source-entity)))
+
+(defn derive-from-primary-entity [context key {:keys [transform] derive-from :value :as _directive}]
+  (let [source-entity (-> (context/primary context)
+                          (entity/override-association (comp (or transform identity)
+                                                             derive-from)))]
+    (context/associate-entity context key source-entity)))
+
+(defmethod core/run ::derive [context key {derive-from :value :as directive}]
+  (if (sequential? derive-from)
+    (derive-from-entity-at-path context key directive)
+    (derive-from-primary-entity context key directive)))

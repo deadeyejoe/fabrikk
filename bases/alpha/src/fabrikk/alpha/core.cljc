@@ -78,7 +78,7 @@
 
 (defn derive
   ([key-or-path]
-   (directives/derive key-or-path identity))
+   (directives/derive key-or-path nil))
   ([key-or-path f]
    (directives/derive key-or-path f)))
 

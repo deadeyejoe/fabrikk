@@ -14,18 +14,19 @@ We might write our factory definition as:
 
 (def user
   (fab/->factory
-    {:id ::user
-     :template {:name "John Smith"
+    {:template {:name "John Smith"
                 :email "john@example.org"
                 :role "admin"}}) 
 ```
 
-A factory definition is a map with at least an `id` and a `template` key:
+A factory definition is a map with at least a `template` key:
 
 * The id uniquely identifies the factory, it's best to use a namespaced keyword for this. This doesn't do much for us yet but will be handy later
 * The template details the keys that our entity will have, and the values of those keys
 
-With this factory we can build some users:
+We'll explore more options in the course of this tutorial, and you can take a look at [#factory-definition](../reference/api.md#factory-definition "mention") to see a comprehensive list.
+
+Now that we have a  factory we can get building:
 
 ```clojure
 (fab/build user) 
@@ -37,7 +38,7 @@ With this factory we can build some users:
 But wait, this generates the same user every time! We can pass _build options_ to `build` to vary the output, using the `with` option:
 
 ```clojure
-;; we use with to change the name:
+;; we use 'with' to change the name:
 (fab/build user {:with {:name "John Murphy"}})
 ;; => {:name "John Murphy", :email "john@example.org", :role "admin"}
 

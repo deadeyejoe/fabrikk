@@ -96,7 +96,7 @@ We can take a look at the build graph by getting the metadata of a post:
 ;;      ............. and a ton more stuff
 ```
 
-Yikes! There's a lot going on there, but you shouldn't need to worry about these details. This might not seem very useful yet, but it will be soon when we talk about using fabrikk to persist the entities it builds.
+Yikes! There's a lot going on there, but you shouldn't need to worry about these details. This might not seem very useful yet, but it will be soon when we talk about using Fabrikk to persist the entities it builds.
 
 What happens when we want a list of posts? We use the `build-list` function, this function has an almost identical signature to `build`, with the addition of a quantity argument to specify how many entities you'd like to build.
 
@@ -112,7 +112,7 @@ What happens when we want a list of posts? We use the `build-list` function, thi
 ;;      :content "Some content goes here...."}]
 ```
 
-We can see here that fabrikk has created a new user for each post. If you want the same user for each post you need to be explicit about it:
+We can see here that Fabrikk has created a new user for each post. If you want the same user for each post you need to be explicit about it:
 
 ```clojure
 (let [author (fab/build user)]

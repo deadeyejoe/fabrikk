@@ -1,10 +1,16 @@
 # Concepts
 
+## What is an entity?
+
+This documentation makes heavy use of the word 'entity', but what is an entity? In general, entities are clojure **maps** that represent data in your application domain, e.g. a user with an id, name and email.&#x20;
+
+Fabrikk also considers lists of entities to be entities in their own right, but this is generally an implementation detail.
+
 ## Templates
 
 A template is a collection of keywords and associated values that is used to generate an entity. The values in a template can be either constants, or directives. The simplest template is a map e.g.:
 
-```
+```clojure
 {:id (fab/sequence)
  :name "Jim Murphy"
  :email "Jim@example.com"}
@@ -12,7 +18,7 @@ A template is a collection of keywords and associated values that is used to gen
 
 However, in some cases the ordering of evaluation of values might be important, e.g. when using the `derive` directive. In this case, a template can be an ordered collection of maps and/or tuples, e.g.
 
-```
+```clojure
 [{:id (fab/sequence)
   :name "Jim Murphy"}
   [:email (fab/derive :id #(str "User-" % "@example.com")]]
@@ -41,7 +47,7 @@ These templates are compiled into a single _Compiled template_ before the entity
   [:two 2]
   [:one 1]]]
   
-;; Compile to:
+;; Are equivalent to this one after compilation
 
 [[:one 1]
  [:two 2]
@@ -49,13 +55,13 @@ These templates are compiled into a single _Compiled template_ before the entity
  [:four "four"]]
 ```
 
-Thus tuples in a compiled template can have their value overwritten, but their ordering is fixed once added.&#x20;
+i.e. tuples in a compiled template can have their value overwritten, but their ordering is fixed once added.&#x20;
 
 To build the entity, each key-value tuple is processed in order, the value is evaluated  (processing any directives as necessary), and is then assoc'ed into the result map under the key.&#x20;
 
 ## Build Options
 
-Many functions accept the same options to vary the entity being created
+These functions accept build options to vary the entity being created:
 
 * `build`
 * `build-list`
@@ -64,40 +70,26 @@ Many functions accept the same options to vary the entity being created
 * `one`
 * `many`
 
-Build options have the following  structure, all options are optional
+Build options have the following  structure, all keys are optional:
 
-| Option     | Description                                                                                                                                 |
-| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| `:with`    | A template                                                                                                                                  |
-| :`traits`  | A list of trait keywords, the corresponding templates will be [compiled](concepts.md#compiled-template) in the order they're referenced     |
-| `:without` | A list of keywords to be removed from the [compiled template](concepts.md#compiled-template) before the entity is built                     |
-| `:as`      | A keyword or function. Overrides the primary-id of the entities factory, allowing you to control what value is used to reference the entity |
+<table><thead><tr><th width="140">Option</th><th>Description</th></tr></thead><tbody><tr><td><code>:with</code></td><td>A template</td></tr><tr><td>:<code>traits</code></td><td>A list of trait keywords, the corresponding templates will be <a href="concepts.md#compiled-template">compiled</a> in the order they're referenced</td></tr><tr><td><code>:without</code></td><td>A list of keywords to be removed from the <a href="concepts.md#compiled-template">compiled template</a> before the entity is built</td></tr><tr><td><code>:as</code></td><td>A keyword or function. Overrides the primary-id of the entities factory, allowing you to control what value is used to reference the entity</td></tr></tbody></table>
 
 ## Output Options
 
-Many functions accept the following options to vary the output from a factory
+These functions accept output options to vary the output from a factory:
 
 * `build`
 * `build-list`
 * `create`
 * `create-list`
 
-| Option       | Description                                                                                       |
-| ------------ | ------------------------------------------------------------------------------------------------- |
-| output-as    | Keyword, override the default output format                                                       |
-| transform    | A function that transforms the entity to be output (not supported for some values of `output-as`) |
-| persist-with | Keyword, override the default persistence method when creating this entity.                       |
+Output as options have the following  structure, all keys are optional:
+
+<table><thead><tr><th width="144">Option</th><th>Description</th></tr></thead><tbody><tr><td>output-as</td><td>Keyword, override the default output format</td></tr><tr><td>transform</td><td>A function that transforms the entity to be output (only supported for some values of <code>output-as</code>)</td></tr><tr><td>persist-with</td><td>Keyword, override the default persistence method when creating this entity. </td></tr></tbody></table>
 
 The `output-as` option supports a wide variety of values:
 
-| Output Option  | Supports transform | Description                                                                             |
-| -------------- | ------------------ | --------------------------------------------------------------------------------------- |
-| `:meta`        | No                 | Default. Outputs the primary entity with the build graph stored in metadata             |
-| :`value`       | Yes                | Outputs the primary entity only                                                         |
-| `:context`     | No                 | Outputs the build graph                                                                 |
-| `:tuple`       | Yes                | Outputs a 2 tuple of entity and build graph                                             |
-| `:grouped`     | No                 | Outputs a map, with all dependent entities grouped by their factory id                  |
-| `:build-order` | No                 | Outputs a list of entities in build order (reverse topological sort on the build graph) |
+<table><thead><tr><th width="169">Output Option</th><th width="186" data-type="checkbox">Supports transform</th><th>Description</th></tr></thead><tbody><tr><td><code>:meta</code></td><td>false</td><td>Default. Outputs the primary entity with the build graph stored in metadata</td></tr><tr><td>:<code>value</code></td><td>true</td><td>Outputs the primary entity only </td></tr><tr><td><code>:context</code></td><td>false</td><td>Outputs the build graph</td></tr><tr><td><code>:tuple</code></td><td>true</td><td>Outputs a 2 tuple of entity and build graph</td></tr><tr><td><code>:grouped</code></td><td>false</td><td>Outputs a map, with all dependent entities grouped by their factory id</td></tr><tr><td><code>:build-order</code></td><td>false</td><td>Outputs a list of entities in build order (reverse topological sort on the build graph)</td></tr></tbody></table>
 
 ## Build Context
 

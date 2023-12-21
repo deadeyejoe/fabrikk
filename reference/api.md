@@ -1,6 +1,6 @@
 # API
 
-## Factories
+## Factory Definition
 
 ### ->factory
 
@@ -8,9 +8,29 @@
 (->factory factory-description)
 ```
 
-Accepts a factory definition and returns a factory. Registers the factory in an internal directory so it can be referenced via the `id`. A factory definition has the following structure:
+Accepts a factory definition and returns a factory record. If an `id` is passed, then the factory is registered under that id in an internal directory, and can be referenced via this `id`.  If no `id` is passed, a random one is generated, and the factory cannot be referenced via `id`.
 
-<table><thead><tr><th width="141">Property</th><th width="108">Required?</th><th>Description</th></tr></thead><tbody><tr><td>id</td><td>Yes</td><td>A namespaced keyword to identify the factory</td></tr><tr><td>primary-id</td><td>No</td><td>A keyword that specifies a key in the template to identify the entity when referenced</td></tr><tr><td>template</td><td>Yes</td><td>A template specifying the default representation of the entity,  see <a data-mention href="concepts.md">concepts.md</a></td></tr><tr><td>persistable</td><td>No</td><td>A boolean that controls whether the entity should be persisted in calls to <code>create</code> and <code>create-list</code>. Defaults to <code>true</code></td></tr><tr><td>traits</td><td>No</td><td>A map of keywords to templates, traits are identified by these keywords, see <a data-mention href="concepts.md">concepts.md</a> for more </td></tr><tr><td>transients</td><td>No</td><td>A template whose keys will be removed from the entity after it is built, see <a data-mention href="concepts.md">concepts.md</a> for more</td></tr><tr><td>before-build</td><td>No</td><td>A function that takes the compiled template (constructed from template, transients and any build options) and returns an updated template, see <a data-mention href="build-hooks.md">build-hooks.md</a> for more</td></tr><tr><td>after-build</td><td>No</td><td>A function that takes the current build context, and the value of the built entity (including transients), and returns an updated entity, see <a data-mention href="build-hooks.md">build-hooks.md</a> for more</td></tr></tbody></table>
+Factories are records that can be called as functions:
+
+```clojure
+(def user (->factory ....))
+(user) ;;=> equivalent to (build user)
+(user build-opts) ;; equivalent to (build user build-opts)
+```
+
+A factory definition has the following structure:
+
+<table><thead><tr><th width="141">Property</th><th width="108" data-type="checkbox">Required?</th><th width="168">Inherit Behaviour</th><th>Description</th></tr></thead><tbody><tr><td>id</td><td>false</td><td>Replace</td><td>A namespaced keyword to identify the factory</td></tr><tr><td>primary-id</td><td>false</td><td>Replace</td><td>A keyword that specifies a key in the template to identify the entity when referenced</td></tr><tr><td>template</td><td>true</td><td>Merge</td><td>A template specifying the default representation of the entity,  see <a data-mention href="concepts.md">concepts.md</a></td></tr><tr><td>persistable</td><td>false</td><td>Replace</td><td>A boolean that controls whether the entity should be persisted in calls to <code>create</code> and <code>create-list</code>. Defaults to <code>true</code></td></tr><tr><td>traits</td><td>false</td><td>Merge</td><td>A map of keywords to templates, traits are identified by these keywords, see <a data-mention href="concepts.md">concepts.md</a> for more </td></tr><tr><td>transients</td><td>false</td><td>Replace</td><td>A template whose keys will be removed from the entity after it is built, see <a data-mention href="concepts.md">concepts.md</a> for more</td></tr><tr><td>before-build</td><td>false</td><td>Replace</td><td>A function that takes the compiled template (constructed from template, transients and any build options) and returns an updated template, see <a data-mention href="build-hooks.md">build-hooks.md</a> for more</td></tr><tr><td>after-build</td><td>false</td><td>Replace</td><td>A function that takes the current build context, and the value of the built entity (including transients), and returns an updated entity, see <a data-mention href="build-hooks.md">build-hooks.md</a> for more</td></tr></tbody></table>
+
+### inherit
+
+```clojure
+(inherit factory-or-id factory-description)
+```
+
+Accepts an existing factory and a factory description, and combines them into a new factory. All keys listed in [#greater-than-factory](api.md#greater-than-factory "mention") may be specified, see the inherit behaviour column in the table for more.
+
+A template must be specified in the inherited factory. This template is combined with the existing template following the behaviour described in [#compiled-template](concepts.md#compiled-template "mention")
 
 ## Building and Creation
 
@@ -72,7 +92,7 @@ As for `build-list` but also persists each entity in the graph in build order. S
 (constant x)
 ```
 
-Returns a directive that evaluates to `x` during build. Useful if you don't want fabrikk to try and interpret the value (e.g. if you want to specify a function as a value)
+Returns a directive that evaluates to `x` during build. Useful if you don't want Fabrikk to try and interpret the value (e.g. if you want to specify a function as a value)
 
 ### sequence
 
@@ -84,7 +104,7 @@ Returns a directive that evaluates to `x` during build. Useful if you don't want
 
 Returns a directive that evaluates to an increasing series of integers, producing a new value each time the enclosing factory is invoked. Accepts an optional `transform-fn` that is called with the generated integer.&#x20;
 
-By default each call to sequence creates an isolated 'series' of integers. If the optional `identifier` keyword is passed, then the sequence will be shared with each other `sequence` directive with that identifier.
+By default each call to `sequence` creates an 'series' of integers isolated to this specific key on this specific factory. If the optional `identifier` keyword is passed, then the sequence will be shared with each other `sequence` directive with that identifier.
 
 Sequences persist for the lifetime of the program.
 
@@ -112,7 +132,7 @@ Returns a directive that will invoke the given factory at build time, build `qua
 
 The list of entities are referenced via the key associated with this directive in the template. Entities can be referenced within this list via their index.&#x20;
 
-Either the factory instance itself or its id can be used. Accepts the same build options as `build` etc. As is the case for `build`, either a single build option can be passed, or a list. See [#build-options](concepts.md#build-options "mention") for more.
+Either the factory instance itself or its id can be used. Accepts the same build options as `build` etc. As is the case for `build-list`, either a single build option can be passed, or a list. See [#build-options](concepts.md#build-options "mention") for more.
 
 ### derive
 
@@ -121,9 +141,11 @@ Either the factory instance itself or its id can be used. Accepts the same build
 (derive key-or-path transform-fn)
 ```
 
-Returns a directive that derives a value the build graph at build time. If a keyword is passed, then the value will be derived from the current entity. If a path - i.e. a list of keywords - is passed, then the value is the entity at that path, relative to the current entity.&#x20;
+Returns a directive that derives a value from the build graph at build time. If a keyword is passed, then the value will be derived from the current entity. If a path - i.e. a list of keywords - is passed, then the value will be derived from the entity at that path, relative to the current entity.&#x20;
 
-Accepts an optional transform-fn that accepts the derived value and returns a transformed value.
+Accepts an optional `transform-fn` that accepts the derived value and returns a transformed value.&#x20;
+
+When deriving from an entity in the build graph using a path, if no `transform-fn` is specified the derived value will be the `primary-id` if the entities factory specifies one (see [#greater-than-factory](api.md#greater-than-factory "mention")), or the entity itself otherwise.
 
 ## Persistence
 
@@ -133,7 +155,7 @@ Accepts an optional transform-fn that accepts the derived value and returns a tr
 (defmethod persist! persistence-method [factory-id entity])
 ```
 
-A multimethod that facilitates custom persistence methods. Takes a factory id, and an entity, and expects a persisted version of that entity to be returned. Changes made to the entity during persistence will be propagated through the build graph as necessary.
+A multimethod that facilitates custom persistence methods. Takes a factory id, and an entity, and expects a persisted version of that entity to be returned. Changes made to the entity during persistence will be propagated through the build graph as necessary, depending on what other entities have references to the persisted one.
 
 ### set-default-persistence!
 

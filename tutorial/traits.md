@@ -29,7 +29,7 @@ Now our email key is linked to the role of the user, so we might want to control
 We've added a `traits` key to the factory definition, and added two traits `admin` and `unverified`. Now we can use the traits as shorthand when we build by specifying them in the build options:
 
 {% code overflow="wrap" %}
-```
+```clojure
 (fab/build user)
 ;; => {:name "John Smith", :email "john@example.org", :role "user", :verified true}
 
@@ -41,7 +41,7 @@ We've added a `traits` key to the factory definition, and added two traits `admi
 Traits can be composed:
 
 {% code overflow="wrap" %}
-```
+```clojure
 (fab/build user {:traits [:admin :unverified]})
 ;; => {:name "John Smith", :email "admin-0001@example.org", :role "admin", :verified false}
 ```

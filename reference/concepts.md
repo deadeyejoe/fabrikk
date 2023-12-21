@@ -123,7 +123,7 @@ When you build an entity it forms a node in the build graph. When an entity depe
 
 (let [bob (fab/build user {:with {:name "Bob"}})]
   (fab/build user {:with {:parent bob
-                          :parent-name (fab/derive [:parent] :name)}}))
+                          :parent-name (fab/associate-as bob :name)}}))
 ;;=> {:id 2, :name "Alice", :parent 1, :parent-name "Bob"}
 ```
 
@@ -131,7 +131,7 @@ The build graph here has 2 nodes - users "Alice" and "Bob" - and 2 edges between
 
 ### Associating
 
-When building a [#dependent-entity](concepts.md#dependent-entity "mention"), the act of inserting it into the build graph is referred to as '_Association**'**_. More concretely, when an entity is associated:
+When building a [#dependent-entity](concepts.md#dependent-entity "mention"), the act of referencing it on the primary entity and inserting it into the build graph is referred to as '_Association**'**_. More concretely, when an entity is associated:
 
 * A `key` is required, and an `:associate-as` option may be passed or inferred&#x20;
 * If necessary the build graph of the dependent entity is merged into the build graph of the primary entity (only the first time this entity is associated)

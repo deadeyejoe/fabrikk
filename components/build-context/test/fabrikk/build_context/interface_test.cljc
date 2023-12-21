@@ -11,7 +11,7 @@
 (def post {:title "How to test fabrikk"})
 
 (def user-factory {:id ::user
-                   :primary-id :id})
+                   :primary-key :id})
 (def joe {:id 1
           :name "Joe"})
 (def john {:id 2

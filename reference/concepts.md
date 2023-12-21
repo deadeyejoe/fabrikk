@@ -72,7 +72,7 @@ These functions accept build options to vary the entity being created:
 
 Build options have the following  structure, all keys are optional:
 
-<table><thead><tr><th width="140">Option</th><th>Description</th></tr></thead><tbody><tr><td><code>:with</code></td><td>A template</td></tr><tr><td>:<code>traits</code></td><td>A list of trait keywords, the corresponding templates will be <a href="concepts.md#compiled-template">compiled</a> in the order they're referenced</td></tr><tr><td><code>:without</code></td><td>A list of keywords to be removed from the <a href="concepts.md#compiled-template">compiled template</a> before the entity is built</td></tr><tr><td><code>:as</code></td><td>A keyword or function. Overrides the primary-id of the entities factory, allowing you to control what value is used to reference the entity</td></tr></tbody></table>
+<table><thead><tr><th width="140">Option</th><th>Description</th></tr></thead><tbody><tr><td><code>:with</code></td><td>A template</td></tr><tr><td>:<code>traits</code></td><td>A list of trait keywords, the corresponding templates will be <a href="concepts.md#compiled-template">compiled</a> in the order they're referenced</td></tr><tr><td><code>:without</code></td><td>A list of keywords to be removed from the <a href="concepts.md#compiled-template">compiled template</a> before the entity is built</td></tr><tr><td><code>:as</code></td><td>A keyword or function. Overrides the primary-key of the entities factory, allowing you to control what value is used to reference the entity</td></tr></tbody></table>
 
 ## Output Options
 
@@ -92,6 +92,3 @@ The `output-as` option supports a wide variety of values:
 <table><thead><tr><th width="169">Output Option</th><th width="186" data-type="checkbox">Supports transform</th><th>Description</th></tr></thead><tbody><tr><td><code>:meta</code></td><td>false</td><td>Default. Outputs the primary entity with the build graph stored in metadata</td></tr><tr><td>:<code>value</code></td><td>true</td><td>Outputs the primary entity only </td></tr><tr><td><code>:context</code></td><td>false</td><td>Outputs the build graph</td></tr><tr><td><code>:tuple</code></td><td>true</td><td>Outputs a 2 tuple of entity and build graph</td></tr><tr><td><code>:grouped</code></td><td>false</td><td>Outputs a map, with all dependent entities grouped by their factory id</td></tr><tr><td><code>:build-order</code></td><td>false</td><td>Outputs a list of entities in build order (reverse topological sort on the build graph)</td></tr></tbody></table>
 
 ## Build Context
-
-
-

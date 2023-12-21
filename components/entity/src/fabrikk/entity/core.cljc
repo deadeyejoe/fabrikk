@@ -34,7 +34,7 @@
 
 (defn create! [factory build-opts]
   {:uuid (random-uuid)
-   :factory (select-keys factory [:id :persistable :primary-id])
+   :factory (select-keys factory [:id :persistable :primary-key])
    :persisted false
    :build-opts build-opts
    :value {}})
@@ -103,7 +103,7 @@
 (defn associate-as [entity]
   (or (-> entity :associate-as)
       (-> entity :build-opts :as)
-      (-> entity :factory :primary-id)
+      (-> entity :factory :primary-key)
       :identity))
 
 (def list-item-kw :list-item)

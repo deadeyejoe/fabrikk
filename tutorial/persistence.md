@@ -14,7 +14,7 @@ Let's recap the current state of our factories:
 (def user
   (fab/->factory
    {:id ::user
-    :primary-id :id
+    :primary-key :id
     :template {:id (fab/sequence)
                :name "John Smith"
                :email "john@example.org"

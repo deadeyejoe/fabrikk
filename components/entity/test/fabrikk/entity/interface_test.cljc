@@ -46,8 +46,8 @@
 
 (deftest test-associate-as
   (let [with-no-factory (entity/create! {} {})
-        with-factory (entity/create! {:primary-id ::factory} {})
-        with-build-opt (entity/create! {:primary-id ::factory} {:as ::build-opt})]
+        with-factory (entity/create! {:primary-key ::factory} {})
+        with-build-opt (entity/create! {:primary-key ::factory} {:as ::build-opt})]
     (testing "Identity is the fallback"
       (is (= :identity (entity/associate-as (entity/create-list!))))
       (is (= :identity (entity/associate-as with-no-factory))))
@@ -61,7 +61,7 @@
       (is (= ::override (entity/associate-as (entity/override-association with-build-opt ::override)))))))
 
 (deftest test-value-to-assoc
-  (let [entity (-> (entity/create! {:primary-id ::factory} {})
+  (let [entity (-> (entity/create! {:primary-key ::factory} {})
                    (entity/update-value assoc :id 1))]
     (is (= {:id 1} (entity/value-to-assoc entity :identity)))
     (is (= {:id 1} (entity/value-to-assoc entity :itself)))
@@ -72,9 +72,9 @@
     (is (= "1" (entity/value-to-assoc entity (comp str :id))))))
 
 (deftest test-suppress-list-association
-  (let [no-build-opt (entity/create! {:primary-id ::factory} {})
-        other-build-opt (entity/create! {:primary-id ::factory} {:as ::something})
-        list-build-opt (entity/create! {:primary-id ::factory} {:as entity/list-item-kw})]
+  (let [no-build-opt (entity/create! {:primary-key ::factory} {})
+        other-build-opt (entity/create! {:primary-key ::factory} {:as ::something})
+        list-build-opt (entity/create! {:primary-key ::factory} {:as entity/list-item-kw})]
     (is (nil? (-> no-build-opt (entity/suppress-list-association) :build-opts :as)))
     (is (= ::something (-> other-build-opt (entity/suppress-list-association) :build-opts :as)))
     (is (nil? (-> list-build-opt (entity/suppress-list-association) :build-opts :as)))))

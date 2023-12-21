@@ -11,7 +11,7 @@
 
 (defrecord Factory [id
                     template
-                    primary-id
+                    primary-key
                     persistable
                     traits
                     transients

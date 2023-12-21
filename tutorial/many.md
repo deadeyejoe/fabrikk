@@ -15,7 +15,7 @@ Let's recap our factories and persistence logic:
 (def user
   (fab/->factory
    {:id ::user
-    :primary-id :id
+    :primary-key :id
     :template {:id (fab/sequence)
                :name "John Smith"
                :email "john@example.org"
@@ -169,7 +169,7 @@ In some situations, you may want an entity to reference a list of entities. We c
 (def group
   (fab/->factory
    {:id ::group
-    :primary-id :id
+    :primary-key :id
     :template {:id random-uuid
                :name "Group"
                :members (fab/many ::user 3)}}))
@@ -209,4 +209,4 @@ Also, remember that we haven't created a concrete association between groups and
 ;;     :name "Group"}
 ```
 
-Here we've built a group of posts instead of users. Since the post factory doesn't specify a `primary-id` the full post entity is used instead.
+Here we've built a group of posts instead of users. Since the post factory doesn't specify a `primary-key` the full post entity is used instead.

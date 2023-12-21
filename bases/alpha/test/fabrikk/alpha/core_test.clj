@@ -62,7 +62,7 @@
 (def post
   (fab/->factory
    {:id ::post
-    :primary-id :id
+    :primary-key :id
     :template {:id (fab/sequence)
                :title "How to test fabrikk"
                :author (fab/one user)}}))
@@ -167,7 +167,7 @@
 (def topic
   (fab/->factory
    {:id ::topic
-    :primary-id :id
+    :primary-key :id
     :template {:name "Testing"
                :tags ["stuff" "things"]
                :posts (fab/many post 2)
@@ -193,7 +193,7 @@
 (def model
   (fab/->factory
    {:id ::model
-    :primary-id :id
+    :primary-key :id
     :template [{:id (fab/sequence)
                 :name "model"}
                [:node-types (fab/many type 1 {:with {:name "Person"}})]
@@ -212,7 +212,7 @@
 (def node
   (fab/->factory
    {:id ::node
-    :primary-id :id
+    :primary-key :id
     :template {:id (fab/sequence)
                :model (fab/one model)
                :type (fab/derive [:model :node-types 0] :name)

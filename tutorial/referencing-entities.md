@@ -50,7 +50,7 @@ The `one` directive tells fabrikk that the current entity depends on an entity b
 (def user
   (fab/->factory
    {:id ::user
-    :primary-id :id
+    :primary-key :id
     :template {:id (fab/sequence)
                :name "John Smith"
                :email "john@example.org"
@@ -61,7 +61,7 @@ The `one` directive tells fabrikk that the current entity depends on an entity b
              :unverified {:verified false}}}))
 ```
 
-Fabrikk doesn't make any assumptions about what key identifies a user, so you can tell it to identify them by their `id` by specifying a `primary-id`. Now let's try bulding another post:
+Fabrikk doesn't make any assumptions about what key identifies a user, so you can tell it to identify them by their `id` by specifying a `primary-key`. Now let's try bulding another post:
 
 ```clojure
 (fab/build post)

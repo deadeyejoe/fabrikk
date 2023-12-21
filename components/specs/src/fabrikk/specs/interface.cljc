@@ -18,7 +18,7 @@
 (s/def ::template (s/or :template-map ::template-map
                         :template-list ::template-list))
 
-(s/def ::primary-id keyword?)
+(s/def ::primary-key keyword?)
 (s/def ::persistable boolean?)
 (s/def ::traits (s/map-of keyword? ::template))
 (s/def ::transients ::template)
@@ -26,7 +26,7 @@
 (s/def ::after-build fn?)
 (s/def ::factory-description (s/keys :req-un [::template]
                                      :opt-un [::id
-                                              ::primary-id
+                                              ::primary-key
                                               ::persistable
                                               ::traits
                                               ::transients

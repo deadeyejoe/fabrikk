@@ -1,8 +1,8 @@
----
-description: An entity generation library for Clojure
----
-
 # Fabrikk
+
+An entity generation library for Clojure
+
+[![Clojars Project](https://img.shields.io/clojars/v/org.clojars.joe-douglas/fabrikk.svg)](https://clojars.org/org.clojars.joe-douglas/fabrikk)
 
 ## Introduction
 

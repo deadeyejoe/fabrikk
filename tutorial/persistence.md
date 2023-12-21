@@ -62,6 +62,8 @@ Since this is a tutorial we'll use a simple atom to persist our entities, the pe
 
 Fabrikk exposes a `persist!` multimethod so you can connect it to your persistence layer. It is expected to take 2 arguments - the ID of the factory and the entity we're creating - and return the persisted entity. To persist an entity we simply collect it in a vector using the factory id as a key. To simulate not being in control of our ids, we assign them randomly.
 
+In fact, fabrikk provides a built-in persistence mechanism almost identical to the one we've written, but this one will make some behaviours easier to explain.
+
 Now let's see `create` in action:
 
 ```clojure
@@ -84,7 +86,7 @@ Now let's see `create` in action:
 
 `create` takes all the same arguments as build, persists the entities (in build order), and returns the persisted entity (or entities depending on what options you pass to create, it supports the same `output-as` option as `build`).
 
-Note that the post is referencing the author via its randomly assigned id. The build graph we mentioned earlier in [referencing-entities.md](referencing-entities.md "mention") allows us to create entities in the correct order i.e. user->post, and allows us to _**propagate**_ the change to the user our persistence layer makes to the post.
+Note that the post is referencing the author via its randomly assigned id. The build graph we mentioned earlier in [referencing-entities.md](referencing-entities.md "mention") allows us to create entities in the correct order i.e. user->post, and allows us to _**propagate**_ the change our persistence layer makes to the user on to the post.
 
 This propagation also applies to all values calculated using fabrikk's `derive` directive. Let's tweak our persistence function so the user name is also out of our control:
 

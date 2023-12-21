@@ -13,13 +13,12 @@
 * [Collections](tutorial/many.md)
 * [Next Steps](tutorial/next-steps.md)
 
-## How to
-
-* [Untitled](how-to/untitled.md)
-
 ## Reference
 
-* [Build Hooks](reference/build-hooks.md)
 * [Concepts](reference/concepts.md)
-* [Directives](reference/directives.md)
 * [API](reference/api.md)
+* [Build Hooks](reference/build-hooks.md)
+
+## explanation
+
+* [Why Fabrikk?](explanation/why-fabrikk.md)

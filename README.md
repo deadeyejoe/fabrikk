@@ -43,4 +43,4 @@ And start building:
 ;; => {:name "John Murphy", :email "john@example.org", :role "admin"}
 ```
 
-Sound good? Then jump straight into the tutorial!
+Sound good? Then jump straight into the [tutorial](broken-reference)!

@@ -33,11 +33,12 @@
 
 
 (defn create! [factory build-opts]
-  {:uuid (random-uuid)
-   :factory (select-keys factory [:id :persistable :primary-key])
-   :persisted false
-   :build-opts build-opts
-   :value {}})
+  (merge {:uuid (random-uuid)
+          :factory (select-keys factory [:id :persistable :primary-key])
+          :persisted false
+          :build-opts build-opts ;; keep the original build opts for reference/debugging
+          :value {}}
+         (select-keys build-opts [:associate-as :persist-with])))
 
 (defn create-list! [value]
   {:uuid (random-uuid)
@@ -100,14 +101,15 @@
 (defn factory-id [entity]
   (-> entity :factory :id))
 
+(defn override-association [entity associate-as]
+  (assoc entity :associate-as associate-as))
+
 (defn associate-as [entity]
   (or (-> entity :associate-as)
-      (-> entity :build-opts :as)
       (-> entity :factory :primary-key)
       :identity))
 
-(def list-item-kw :list-item)
-(def identity-association? #{:identity :itself list-item-kw})
+(def identity-association? #{:identity :itself})
 
 (defn value-to-assoc [{:keys [value] :as _entity} associate-as]
   (cond
@@ -115,14 +117,6 @@
     (fn? associate-as) (associate-as value)
     (keyword? associate-as) (get value associate-as)
     :else value))
-
-(defn suppress-list-association [entity]
-  (if (= list-item-kw (-> entity :build-opts :as))
-    (update entity :build-opts dissoc :as)
-    entity))
-
-(defn override-association [entity associate-as]
-  (assoc entity :associate-as associate-as))
 
 (def value :value)
 
@@ -146,4 +140,4 @@
        (pending? entity)))
 
 (defn persist-with [entity]
-  (-> entity :build-opts :persist-with))
+  (-> entity :persist-with))

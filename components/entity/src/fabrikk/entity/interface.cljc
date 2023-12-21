@@ -44,12 +44,6 @@
 (defn value-to-assoc [entity associate-as]
   (core/value-to-assoc entity associate-as))
 
-(def list-item-kw
-  core/list-item-kw)
-
-(defn suppress-list-association [entity]
-  (core/suppress-list-association entity))
-
 (defn override-association [entity associate-as]
   (core/override-association entity associate-as))
 

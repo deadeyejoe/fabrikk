@@ -75,7 +75,7 @@
         list-context (reduce (partial apply context/associate-context)
                              (context/init (entity/create-list!))
                              (map-indexed vector contexts))]
-     ;;update the value after the context/associate calls, overwriting the list of assoc-as values
+     ;;update the value after the context/associate-context calls, overwriting the list of assoc-as values
     (context/update-primary list-context entity/update-value (constantly list-value))))
 
 (defn wrap-persist-error [context entity exception]

@@ -70,12 +70,3 @@
 
 (defn run-directives [context m]
   (reduce-kv run context m))
-
-
-;; =========== AS ===========
-
-(defn as [associate-as entity]
-  (if (output/meta-result? entity)
-    (vary-meta entity (fn [context]
-                        (context/update-primary context entity/override-association associate-as)))
-    entity))

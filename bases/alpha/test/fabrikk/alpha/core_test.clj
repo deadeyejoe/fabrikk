@@ -127,9 +127,9 @@
 (deftest test-one
   (is (match "Joe" [:author :name] (fab/build post)))
   (is (match "Joe" [:name] (first (fab/build post
-                                             {:with {:author (fab/one user {:as :id})}}
+                                             {:with {:author (fab/one user {:associate-as :id})}}
                                              {:output-as :build-order}))))
-  (is (match "Joe" :author (fab/build post {:with {:author (fab/one user {:as :name})}})))
+  (is (match "Joe" :author (fab/build post {:with {:author (fab/one user {:associate-as :name})}})))
   (is (match "Joe" [:author :name] (fab/build-list post 10)))
   (is (->> (fab/build-list post 10)
            (map :author)
@@ -147,8 +147,8 @@
   (is (every? #{"Ernest"} (:editors (fab/build post
                                                {:with {:editors (fab/many user
                                                                           3 {:with {:name "Ernest"}
-                                                                             :as :name})}})))
-      "'as' changes association value"))
+                                                                             :associate-as :name})}})))
+      "'associate-as' changes association value"))
 
 (deftest test-inherit
   (let [inherited (fab/inherit ::user
@@ -174,7 +174,7 @@
                :moderator (fab/one user)}}))
 
 (deftest test-incremental-build
-  (let [author (fab/build user {:as :id})
+  (let [author (fab/build user {:associate-as :id})
         posts (fab/build-list post 2 {:with {:author author}})
         {:keys [post user]
          [topic] :topic :as output} (fab/build topic {:with {:posts posts
@@ -268,13 +268,13 @@
         (is (not= (:id built-user) (:id created-user)))
         (is (= (get-in post [:author :id]) (:id created-user)))))
     (testing "sub-resource referenced as id"
-      (let [built-user (fab/build user {:as :id})
+      (let [built-user (fab/build user {:associate-as :id})
             [created-user post] (fab/create post {:with {:author built-user}} {:output-as :build-order})]
         (is (match true :persisted [created-user post]))
         (is (not= (:id built-user) (:id created-user)))
         (is (= (:author post) (:id created-user)))))
     (testing "derived properties and unification and more"
-      (let [built-user (fab/build user {:as :id})
+      (let [built-user (fab/build user {:associate-as :id})
             built-posts (fab/build-list post 2
                                         {:with {:author built-user
                                                 :status (fab/derive [:author]
@@ -287,7 +287,6 @@
                                                  :moderator-label (fab/derive [:moderator]
                                                                               #(-> % :name ((partial str "Mod: "))))}}
                                          {:output-as :collection})]
-        
         (is (empty? other-users))
         (is (match "Unsaved" :status built-posts))
         (is (match "Saved" :status posts))
@@ -301,14 +300,14 @@
                                 (assoc entity
                                        :id (random-uuid)
                                        :persisted true))]
-      (let [built-user (fab/build user {:as :id})
+      (let [built-user (fab/build user {:associate-as :id})
             [created-user & created-posts] (fab/create-list post 3
                                                             {:with {:author built-user}}
                                                             {:output-as :build-order})]
         (is (= 4 @call-count))
         (is (match (:id created-user) :author created-posts)))
       (testing "with meta output"
-        (let [built-user (fab/build user {:as :id})
+        (let [built-user (fab/build user {:associate-as :id})
               created-posts (fab/create-list post 3 {:with {:author built-user}})]
           (is (= 3 (count created-posts)))
           (is (not (match (:id built-user) :author created-posts)))))))

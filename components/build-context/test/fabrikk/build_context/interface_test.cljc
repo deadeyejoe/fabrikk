@@ -38,7 +38,7 @@
         (is (= user-entity (build-context/id->entity associated (entity/id user-entity)))
             "Contains associated entity")))
     (testing "when associated entity has build-options"
-      (let [user-entity (entity-with-value user-factory {:as :name} joe)
+      (let [user-entity (entity-with-value user-factory {:associate-as :name} joe)
             associated (build-context/associate-entity post-context :author user-entity)]
         (is (= (:name joe) (-> associated (build-context/primary) (entity/value) :author))
             "Updates primary with correct value")))

@@ -42,4 +42,4 @@ And start building:
 ;; => {:name "John Murphy", :email "john@example.org", :role "admin"}
 ```
 
-Sound good? Then jump straight into the [tutorial](broken-reference)!
+Sound good? Then jump straight into the [tutorial](https://deadeyejoe.gitbook.io/fabrikk/tutorial/factories-and-building)!

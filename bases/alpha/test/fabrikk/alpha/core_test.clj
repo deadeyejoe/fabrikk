@@ -174,11 +174,11 @@
                :moderator (fab/one user)}}))
 
 (deftest test-incremental-build
-  (let [author (fab/build user {:associate-as :id})
-        posts (fab/build-list post 2 {:with {:author author}})
+  (let [author (fab/build user)
+        posts (fab/build-list post 2 {:with {:author (fab/associate-as author :id)}})
         {:keys [post user]
          [topic] :topic :as output} (fab/build topic {:with {:posts posts
-                                                             :moderator author}}
+                                                             :moderator (fab/associate-as author :id)}}
                                                {:output-as :collection})]
     (is (= 2 (count post)))
     (is (= 1 (count user)))

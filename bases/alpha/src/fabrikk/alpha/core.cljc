@@ -1,6 +1,7 @@
 (ns fabrikk.alpha.core
   (:require [fabrikk.build-context.interface :as context]
             [fabrikk.directives.interface :as directives]
+            [fabrikk.directive-core.interface :as directive-core]
             [fabrikk.entity.interface :as entity]
             [fabrikk.factory.interface :as factory]
             [fabrikk.persistence.interface :as persistence])
@@ -81,6 +82,9 @@
    (directives/derive key-or-path nil))
   ([key-or-path f]
    (directives/derive key-or-path f)))
+
+(defn associate-as [entity associate-as]
+  (directive-core/associate-as entity associate-as))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Context 

@@ -1,6 +1,6 @@
 (ns joe.scratch
   (:require [fabrikk.directives.interface :as directives :refer [build build-list]]
-            [fabrikk.directive-core.interface :as directive-core :refer [as]]
+            [fabrikk.directive-core.interface :as directive-core :refer [associate-as]]
             [fabrikk.factory.interface :as factory]
             [fabrikk.persistence.interface :as persistence]
             [fabrikk.alpha.core :as fab]
@@ -26,7 +26,7 @@
                :role "user"
                :org (fab/one organization)}
     :traits {:admin {:role "admin"}}
-    :transients [:foo]
+    :transients {:foo :bar}
     :after-build (fn [ctx value]
                    (tap> [::after-build ctx value])
                    value)}))
@@ -82,7 +82,7 @@
   (fab/build user {:with {:name "Bob"}
                    :traits [:admin]})
   (let [org (fab/build organization)]
-    (fab/build user {:with {:org (as :name org)}}))
+    (fab/build user {:with {:org (associate-as org :name)}}))
 
   (fab/build user)
 

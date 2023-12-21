@@ -30,10 +30,9 @@ Then write some factories:
 ```clojure
 (def user
   (fab/->factory
-    {:id ::user
-     :template {:name "John Smith"
+    {:template {:name "John Smith"
                 :email "john@example.org"
-                :role "admin"}}) 
+                :role "admin"}}))
 ```
 
 And start building:

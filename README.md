@@ -4,11 +4,9 @@ An entity generation library for Clojure
 
 [![Clojars Project](https://img.shields.io/clojars/v/org.clojars.joe-douglas/fabrikk.svg)](https://clojars.org/org.clojars.joe-douglas/fabrikk)
 
-{% hint style="info" %}
-Library Status: Beta
+#### **Library Status: Beta**
 
 I don't anticipate making any more breaking changes to the API, but expect bugs and rough edges.
-{% endhint %}
 
 ## Introduction
 

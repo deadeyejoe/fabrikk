@@ -50,8 +50,8 @@
 
 (def user
   (fab/->factory
-   {:id ::user
-    :template {:id (fab/sequence)
+   ::user
+   {:template {:id (fab/sequence)
                :name "Joe"
                :role "reader"}
     :traits {:admin {:role "admin"}
@@ -61,8 +61,8 @@
 
 (def post
   (fab/->factory
-   {:id ::post
-    :primary-key :id
+   ::post
+   {:primary-key :id
     :template {:id (fab/sequence)
                :title "How to test fabrikk"
                :author (fab/one user)}}))
@@ -152,6 +152,7 @@
 
 (deftest test-inherit
   (let [inherited (fab/inherit ::user
+                               ::reader-user
                                {:template {:role "reader"
                                            :email "reader@example.com"}
                                 :traits {:verified {:verified true}}})]
@@ -166,8 +167,8 @@
 
 (def topic
   (fab/->factory
-   {:id ::topic
-    :primary-key :id
+   ::topic
+   {:primary-key :id
     :template {:name "Testing"
                :tags ["stuff" "things"]
                :posts (fab/many post 2)
@@ -187,13 +188,13 @@
 
 (def type
   (fab/->factory
-   {:id ::type
-    :template {:id (random-uuid)
+   ::type
+   {:template {:id (random-uuid)
                :name "Thing"}}))
 (def model
   (fab/->factory
-   {:id ::model
-    :primary-key :id
+   ::model
+   {:primary-key :id
     :template [{:id (fab/sequence)
                 :name "model"}
                [:node-types (fab/many type 1 {:with {:name "Person"}})]
@@ -211,8 +212,8 @@
                        (update :edge-types (partial medley/index-by :id))))}))
 (def node
   (fab/->factory
-   {:id ::node
-    :primary-key :id
+   ::node
+   {:primary-key :id
     :template {:id (fab/sequence)
                :model (fab/one model)
                :type (fab/derive [:model :node-types 0] :name)

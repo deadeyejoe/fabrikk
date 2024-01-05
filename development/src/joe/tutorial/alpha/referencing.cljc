@@ -5,24 +5,22 @@
   (str "admin-" (rand-int 10000) "@example.com"))
 
 (def user
-  (fab/->factory
-   {:id ::user
-    :template {:id (fab/sequence)
-               :name "John Smith"
-               :email "john@example.org"
-               :role "user"
-               :verified true}
-    :traits {:admin {:email admin-email
-                     :role "admin"}
-             :unverified {:verified false}}}))
+  (fab/->factory ::user
+                 {:template {:id (fab/sequence)
+                             :name "John Smith"
+                             :email "john@example.org"
+                             :role "user"
+                             :verified true}
+                  :traits {:admin {:email admin-email
+                                   :role "admin"}
+                           :unverified {:verified false}}}))
 
 (def post
-  (fab/->factory
-   {:id ::post
-    :template {:id random-uuid
-               :title "This one weird trick"
-               :content "Some content goes here...."
-               :author (fab/one ::user)}}))
+  (fab/->factory ::post
+                 {:template {:id random-uuid
+                             :title "This one weird trick"
+                             :content "Some content goes here...."
+                             :author (fab/one ::user)}}))
 
 (fab/build post)
 ;; => {:author {:id 2, :name "John Smith", :email "john@example.org", :role "user", :verified true},
@@ -31,17 +29,16 @@
 ;;     :content "Some content goes here...."}
 
 (def user
-  (fab/->factory
-   {:id ::user
-    :primary-id :id
-    :template {:id (fab/sequence)
-               :name "John Smith"
-               :email "john@example.org"
-               :role "user"
-               :verified true}
-    :traits {:admin {:email admin-email
-                     :role "admin"}
-             :unverified {:verified false}}}))
+  (fab/->factory ::user
+                 {:primary-id :id
+                  :template {:id (fab/sequence)
+                             :name "John Smith"
+                             :email "john@example.org"
+                             :role "user"
+                             :verified true}
+                  :traits {:admin {:email admin-email
+                                   :role "admin"}
+                           :unverified {:verified false}}}))
 
 (fab/build post)
 ;; => {:author 4,

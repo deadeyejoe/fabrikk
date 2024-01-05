@@ -5,8 +5,8 @@
   (str "admin-" (rand-int 10000) "@example.com"))
 
 (def user
-  (fab/->factory
-   {:id ::user
+  (fab/->factory ::user
+   {
     :primary-id :id
     :template {:id (fab/sequence)
                :name "John Smith"
@@ -19,13 +19,12 @@
              :unverified {:verified false}}}))
 
 (def post
-  (fab/->factory
-   {:id ::post
-    :template {:id random-uuid
-               :title "This one weird trick"
-               :content "Some content goes here...."
-               :author (fab/one ::user)
-               :author-name (fab/derive [:author] :name)}}))
+  (fab/->factory ::post
+                 {:template {:id random-uuid
+                             :title "This one weird trick"
+                             :content "Some content goes here...."
+                             :author (fab/one ::user)
+                             :author-name (fab/derive [:author] :name)}}))
 
 (defonce my-store (atom {}))
 (reset! my-store {})

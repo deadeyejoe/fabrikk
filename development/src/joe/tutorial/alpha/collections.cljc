@@ -5,27 +5,25 @@
   (str "admin-" (rand-int 10000) "@example.com"))
 
 (def user
-  (fab/->factory
-   {:id ::user
-    :primary-id :id
-    :template {:id (fab/sequence)
-               :name "John Smith"
-               :email "john@example.org"
-               :role "user"
-               :verified true}
-    :traits {:admin {:name (fab/derive :id (partial str "Admin-"))
-                     :email admin-email
-                     :role "admin"}
-             :unverified {:verified false}}}))
+  (fab/->factory ::user
+                 {:primary-id :id
+                  :template {:id (fab/sequence)
+                             :name "John Smith"
+                             :email "john@example.org"
+                             :role "user"
+                             :verified true}
+                  :traits {:admin {:name (fab/derive :id (partial str "Admin-"))
+                                   :email admin-email
+                                   :role "admin"}
+                           :unverified {:verified false}}}))
 
 (def post
-  (fab/->factory
-   {:id ::post
-    :template {:id random-uuid
-               :title "This one weird trick"
-               :content "Some content goes here...."
-               :author (fab/one ::user)
-               :author-name (fab/derive [:author] :name)}}))
+  (fab/->factory ::post
+                 {:template {:id random-uuid
+                             :title "This one weird trick"
+                             :content "Some content goes here...."
+                             :author (fab/one ::user)
+                             :author-name (fab/derive [:author] :name)}}))
 
 (defonce my-store (atom {}))
 (reset! my-store {})
@@ -136,12 +134,11 @@
 ;;     (401125 401125 401125 401125 401125)]
 
 (def group
-  (fab/->factory
-   {:id ::group
-    :primary-id :id
-    :template {:id random-uuid
-               :name "Group"
-               :members (fab/many ::user 3)}}))
+  (fab/->factory ::group
+                 {:primary-id :id
+                  :template {:id random-uuid
+                             :name "Group"
+                             :members (fab/many ::user 3)}}))
 
 (fab/build group)
 ;; => {:id #uuid "1bfaa980-6f0d-43c7-b485-dfa5d0e3c23a", 

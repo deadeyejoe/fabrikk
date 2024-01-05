@@ -33,8 +33,7 @@
 
 (defn ->factory [description]
   (let [{:keys [id] :as factory} (->> (update description :template template/compile)
-                                      (merge {:id (random-uuid)
-                                              :persistable true})
+                                      (merge {:persistable true})
                                       (map->Factory))]
     (directory/register-factory id factory)
     factory))

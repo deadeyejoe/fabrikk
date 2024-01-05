@@ -3,31 +3,31 @@
             [fabrikk.assembly.interface :as assembly]))
 
 (def workspace
-  (fab/->factory {:id ::workspace
-                  :template {:id random-uuid
+  (fab/->factory ::workspace
+                 {:template {:id random-uuid
                              :name "workspace"}}))
 
 (def model
-  (fab/->factory {:id ::model
-                  :template {:id random-uuid
+  (fab/->factory ::model
+                 {:template {:id random-uuid
                              :name "model"
                              :workspace (fab/one workspace)}}))
 
 (def field
-  (fab/->factory {:id ::field
-                  :template {:id random-uuid
+  (fab/->factory ::field
+                 {:template {:id random-uuid
                              :name "field"
                              :workspace (fab/one workspace)}}))
 
 (def node
-  (fab/->factory {:id ::node
-                  :template {:id random-uuid
+  (fab/->factory ::node
+                 {:template {:id random-uuid
                              :name "field"
                              :workspace (fab/one workspace)}}))
 
 (def edge
-  (fab/->factory {:id ::edge
-                  :template {:id random-uuid
+  (fab/->factory :edge
+                 {:template {:id random-uuid
                              :name "field"
                              :source (fab/one node)
                              :target (fab/one node)

@@ -2,8 +2,7 @@
   (:require [clojure.spec.alpha :as s]))
 
 
-(s/def ::id qualified-keyword?)
-(s/def ::factory-id ::id)
+(s/def ::id keyword?)
 
 (s/def ::entity-map map?)
 (s/def ::entity-list coll?)
@@ -24,9 +23,9 @@
 (s/def ::transients ::template)
 (s/def ::before-build fn?)
 (s/def ::after-build fn?)
-(s/def ::factory-description (s/keys :req-un [::template]
-                                     :opt-un [::id
-                                              ::primary-key
+(s/def ::factory-description (s/keys :req-un [::id
+                                              ::template]
+                                     :opt-un [::primary-key
                                               ::persistable
                                               ::traits
                                               ::transients

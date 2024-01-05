@@ -11,11 +11,11 @@
 ;; Define factories
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn ->factory [description]
-  (factory/->factory description))
+(defn ->factory [factory-id-kw description]
+  (factory/->factory (assoc description :id factory-id-kw)))
 
-(defn inherit [factory-or-kw description]
-  (factory/inherit factory-or-kw description))
+(defn inherit [parent-factory factory-id-kw description]
+  (factory/inherit parent-factory (assoc description :id factory-id-kw)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Build & Create

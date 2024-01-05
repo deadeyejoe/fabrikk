@@ -2,11 +2,10 @@
   (:require [fabrikk.alpha.core :as fab]))
 
 (def user
-  (fab/->factory
-   {:id ::user
-    :template {:name "John Smith"
-               :email "john@example.org"
-               :role "admin"}}))
+  (fab/->factory ::user
+                 {:template {:name "John Smith"
+                             :email "john@example.org"
+                             :role "admin"}}))
 
 (fab/build user)
 ;; we use with to change the name:

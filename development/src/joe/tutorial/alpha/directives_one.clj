@@ -5,16 +5,15 @@
   (str "admin-" (rand-int 10000) "@example.com"))
 
 (def user
-  (fab/->factory
-   {:id ::user
-    :template {:id (fab/sequence)
-               :name "John Smith"
-               :email "john@example.org"
-               :role "user"
-               :verified true}
-    :traits {:admin {:email admin-email
-                     :role "admin"}
-             :unverified {:verified false}}}))
+  (fab/->factory ::user
+                 {:template {:id (fab/sequence)
+                             :name "John Smith"
+                             :email "john@example.org"
+                             :role "user"
+                             :verified true}
+                  :traits {:admin {:email admin-email
+                                   :role "admin"}
+                           :unverified {:verified false}}}))
 
 (fab/build user)
 ;; => {:id 1, :name "John Smith", :email "john@example.org", :role "user", :verified true}

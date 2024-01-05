@@ -7,7 +7,7 @@
 * [Factories & Building](tutorial/factories-and-building.md)
 * [Traits](tutorial/traits.md)
 * [Directives 101](tutorial/directives-101.md)
-* [Referencing Entities](tutorial/referencing-entities.md)
+* [Dependent Entities](tutorial/referencing-entities.md)
 * [Deriving Values](tutorial/deriving-values.md)
 * [Persistence](tutorial/persistence.md)
 * [Collections](tutorial/many.md)

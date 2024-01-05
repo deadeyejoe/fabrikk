@@ -5,10 +5,12 @@
 ### ->factory
 
 ```clojure
-(->factory factory-description)
+(->factory factory-id factory-description)
 ```
 
-Accepts a factory definition and returns a factory record. If an `id` is passed, then the factory is registered under that id in an internal directory, and can be referenced via this `id`. If no `id` is passed, a random one is generated, and the factory cannot be referenced via `id`.
+Accepts a keyword and a factory definition and returns a factory record. The keyword will be used as an id  to register the factory in a global directory internal to fabrikk. If a factory with the key already exists in the directory, it will be overwritten. Namespaced keywords are recommended.
+
+Most of the API accepts either a factory record or the id, with the exception of the `persist!` multimethod which requires the id.
 
 Factories are records that can be called as functions:
 
@@ -20,15 +22,15 @@ Factories are records that can be called as functions:
 
 A factory definition has the following structure:
 
-<table><thead><tr><th width="141">Property</th><th width="108" data-type="checkbox">Required?</th><th width="168">Inherit Behaviour</th><th>Description</th></tr></thead><tbody><tr><td>id</td><td>false</td><td>Replace</td><td>A namespaced keyword to identify the factory</td></tr><tr><td>primary-key</td><td>false</td><td>Replace</td><td>A keyword that specifies a key in the template to identify the entity when referenced</td></tr><tr><td>template</td><td>true</td><td>Merge</td><td>A template specifying the default representation of the entity, see <a data-mention href="concepts.md">concepts.md</a></td></tr><tr><td>persistable</td><td>false</td><td>Replace</td><td>A boolean that controls whether the entity should be persisted in calls to <code>create</code> and <code>create-list</code>. Defaults to <code>true</code></td></tr><tr><td>traits</td><td>false</td><td>Merge</td><td>A map of keywords to templates, traits are identified by these keywords, see <a data-mention href="concepts.md">concepts.md</a> for more</td></tr><tr><td>transients</td><td>false</td><td>Replace</td><td>A template whose keys will be removed from the entity after it is built, see <a data-mention href="concepts.md">concepts.md</a> for more</td></tr><tr><td>before-build</td><td>false</td><td>Replace</td><td>A function that takes the compiled template (constructed from template, transients and any build options) and returns an updated template, see <a data-mention href="build-hooks.md">build-hooks.md</a> for more</td></tr><tr><td>after-build</td><td>false</td><td>Replace</td><td>A function that takes the current build context, and the value of the built entity (including transients), and returns an updated entity, see <a data-mention href="build-hooks.md">build-hooks.md</a> for more</td></tr></tbody></table>
+<table><thead><tr><th width="141">Property</th><th width="108" data-type="checkbox">Required?</th><th width="168">Inherit Behaviour</th><th>Description</th></tr></thead><tbody><tr><td>primary-key</td><td>false</td><td>Replace</td><td>A keyword that specifies a key in the template to identify the entity when referenced</td></tr><tr><td>template</td><td>true</td><td>Merge</td><td>A template specifying the default representation of the entity, see <a data-mention href="concepts.md">concepts.md</a></td></tr><tr><td>persistable</td><td>false</td><td>Replace</td><td>A boolean that controls whether the entity should be persisted in calls to <code>create</code> and <code>create-list</code>. Defaults to <code>true</code></td></tr><tr><td>traits</td><td>false</td><td>Merge</td><td>A map of keywords to templates, traits are identified by these keywords, see <a data-mention href="concepts.md">concepts.md</a> for more</td></tr><tr><td>transients</td><td>false</td><td>Replace</td><td>A template whose keys will be removed from the entity after it is built, see <a data-mention href="concepts.md">concepts.md</a> for more</td></tr><tr><td>before-build</td><td>false</td><td>Replace</td><td>A function that takes the compiled template (constructed from template, transients and any build options) and returns an updated template, see <a data-mention href="build-hooks.md">build-hooks.md</a> for more</td></tr><tr><td>after-build</td><td>false</td><td>Replace</td><td>A function that takes the current build context, and the value of the built entity (including transients), and returns an updated entity, see <a data-mention href="build-hooks.md">build-hooks.md</a> for more</td></tr></tbody></table>
 
 ### inherit
 
 ```clojure
-(inherit factory-or-id factory-description)
+(inherit parent-factory-or-id factory-id factory-description)
 ```
 
-Accepts an existing factory and a factory description, and combines them into a new factory. All keys listed in [#greater-than-factory](api.md#greater-than-factory "mention") may be specified, see the inherit behaviour column in the table for more.
+Accepts an existing factory (or id), a keyword and a factory description, and returns a new new factory that inherits from the existing factory. All keys listed in [#greater-than-factory](api.md#greater-than-factory "mention") may be specified, see the inherit behaviour column in the table for more.
 
 A template must be specified in the inherited factory. This template is combined with the existing template following the behaviour described in [#compiled-template](concepts.md#compiled-template "mention")
 

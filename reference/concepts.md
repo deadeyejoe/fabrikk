@@ -49,7 +49,7 @@ In practice, Clojure maps below 8 keys are usually array maps that have a define
 Templates can come from the following sources in order of precedence:
 
 * The main factory template
-* Trait templates (in the same order they're specified in build-opts)
+* Trait templates (in the same order they're specified in  [#build-options](concepts.md#build-options "mention"))
 * `with` arguments in build-opts
 
 These templates are compiled into a single _Compiled template_ before the entity is built. Compiled templates are built one template at a time, in the order of precedence, preserving the ordering of keys that are already in the compiled template. As a concrete example:

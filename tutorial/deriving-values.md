@@ -18,8 +18,8 @@ Function 'directives' (see [directives-101.md](directives-101.md "mention")) won
 
 (def user
   (fab/->factory
-   {:id ::user
-    :template {:id (fab/sequence)
+   ::user
+   {:template {:id (fab/sequence)
                :name "John Smith"
                :email "john@example.org"
                :role "user"
@@ -31,8 +31,8 @@ Function 'directives' (see [directives-101.md](directives-101.md "mention")) won
 
 (def post
   (fab/->factory
-   {:id ::post
-    :template {:id random-uuid
+   ::post
+   {:template {:id random-uuid
                :title "This one weird trick"
                :content "Some content goes here...."
                :author (fab/one ::user)

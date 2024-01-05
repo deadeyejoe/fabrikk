@@ -14,8 +14,8 @@ Let's update our factory again:
 
 (def user
   (fab/->factory
-   {:id ::user
-    :template {:id (fab/sequence)
+   ::user
+   {:template {:id (fab/sequence)
                :name "John Smith"
                :email "john@example.org"
                :role "user"

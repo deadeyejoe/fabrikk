@@ -13,8 +13,8 @@ Let's recap the current state of our factories:
 
 (def user
   (fab/->factory
-   {:id ::user
-    :primary-key :id
+   ::user
+   {:primary-key :id
     :template {:id (fab/sequence)
                :name "John Smith"
                :email "john@example.org"
@@ -27,8 +27,8 @@ Let's recap the current state of our factories:
 
 (def post
   (fab/->factory
-   {:id ::post
-    :template {:id random-uuid
+   ::post
+   {:template {:id random-uuid
                :title "This one weird trick"
                :content "Some content goes here...."
                :author (fab/one ::user)
@@ -60,7 +60,11 @@ Since this is a tutorial we'll use a simple atom to persist our entities, the pe
 ```
 {% endcode %}
 
-Fabrikk exposes a `persist!` multimethod so you can connect it to your persistence layer. It is expected to take 2 arguments - the ID of the factory and the entity we're creating - and return the persisted entity. To persist an entity we simply collect it in a vector using the factory id as a key. To simulate not being in control of our ids, we assign them randomly.
+Fabrikk exposes a `persist!` multimethod so you can connect it to your persistence layer. It is expected to take 2 arguments - the ID of the factory and the entity we're creating - and return the persisted entity. To simulate persisting an entity, we simply add it to a vector in a map, keyed by the factory id. To simulate not being in control of our ids, we assign them randomly.
+
+{% hint style="info" %}
+In general fabrikk is easygoing about whether you provide it with a factory instance or id, but the `persist!`multimethod requires you to use the factory's id
+{% endhint %}
 
 In fact, fabrikk provides a built-in persistence mechanism almost identical to the one we've written, but this one will make some behaviours easier to explain.
 

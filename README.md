@@ -4,6 +4,12 @@ An entity generation library for Clojure
 
 [![Clojars Project](https://img.shields.io/clojars/v/org.clojars.joe-douglas/fabrikk.svg)](https://clojars.org/org.clojars.joe-douglas/fabrikk)
 
+{% hint style="info" %}
+Library Status: Beta
+
+I don't anticipate making any more breaking changes to the API, but expect bugs and rough edges.
+{% endhint %}
+
 ## Introduction
 
 Fabrikk is a pure clojure library for generating realistic data for your tests or development workflow. It lets you quickly build entities from your application domain by defining a factory for each one, provides a high degree of control over how they're constructed, and models associations between them.
@@ -29,7 +35,8 @@ Then write some factories:
 
 ```clojure
 (def user
-  (fab/->factory
+  (fab/->factory 
+    ::user
     {:template {:name "John Smith"
                 :email "john@example.org"
                 :role "admin"}}))

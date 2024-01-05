@@ -15,8 +15,8 @@ Now our email key is linked to the role of the user, so we might want to control
  
 (def user
   (fab/->factory
-   {:id ::user
-    :template {:name "John Smith"
+   ::user
+   {:template {:name "John Smith"
                :email "john@example.org"
                :role "user"
                :verified true}

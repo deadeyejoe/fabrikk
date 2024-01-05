@@ -14,8 +14,8 @@ Let's recap our factories and persistence logic:
 
 (def user
   (fab/->factory
-   {:id ::user
-    :primary-key :id
+   ::user
+   {:primary-key :id
     :template {:id (fab/sequence)
                :name "John Smith"
                :email "john@example.org"
@@ -28,8 +28,8 @@ Let's recap our factories and persistence logic:
 
 (def post
   (fab/->factory
-   {:id ::post
-    :template {:id random-uuid
+   ::post
+   {:template {:id random-uuid
                :title "This one weird trick"
                :content "Some content goes here...."
                :author (fab/one ::user)
@@ -51,7 +51,7 @@ Let's recap our factories and persistence logic:
 
 ## Building Collections
 
-We've already met the `build-list` function in [referencing-entities.md](referencing-entities.md "mention"), but let's recap it here. It is a function that accepts a factory, a quantity, and the same build options as `build` and (as you might expect), builds that quantity of the entity. It's important to note that by default a new user is built for each post, which might not be what you want. Let's create a list of posts with the same user:
+We've already met the `build-list` function in [referencing-entities.md](referencing-entities.md "mention"), but let's recap it here. It's a function that accepts a factory, a quantity, and the same build options as `build` and (as you might expect), builds that quantity of the entity. It's important to note that by default a new user is built for each post, which might not be what you want. Let's create a list of posts with the same user:
 
 ```clojure
 (let [author (fab/build user {:with {:name "Jimmy Smith"}})]
@@ -108,7 +108,7 @@ Again, by default fabrikk will create a separate user for each post. And we can 
 ;; => (974 974 974 974 974)
 ```
 
-## Mixing building and creation&#x20;
+## Mixing building and creation
 
 The headline here is:
 
@@ -168,8 +168,8 @@ In some situations, you may want an entity to reference a list of entities. We c
 ```clojure
 (def group
   (fab/->factory
-   {:id ::group
-    :primary-key :id
+   ::group
+   {:primary-key :id
     :template {:id random-uuid
                :name "Group"
                :members (fab/many ::user 3)}}))

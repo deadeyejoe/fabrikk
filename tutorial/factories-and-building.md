@@ -14,14 +14,15 @@ We might write our factory definition as:
 
 (def user
   (fab/->factory
+    ::user
     {:template {:name "John Smith"
                 :email "john@example.org"
                 :role "admin"}}) 
 ```
 
-A factory definition is a map with at least a `template` key:
+To create a factory we need an `id` and a factory definition; a map with at least a `template` key:
 
-* The id uniquely identifies the factory, it's best to use a namespaced keyword for this. This doesn't do much for us yet but will be handy later
+* The id is a keyword that uniquely identifies the factory, namespaced keywords are recommended. Fabrikk accepts factory ids and instances interchangeably in most places (see [#greater-than-factory](../reference/api.md#greater-than-factory "mention") for more)
 * The template details the keys that our entity will have, and the values of those keys
 
 We'll explore more options in the course of this tutorial, and you can take a look at [#factory-definition](../reference/api.md#factory-definition "mention") to see a comprehensive list.

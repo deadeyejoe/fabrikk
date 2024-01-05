@@ -1,4 +1,4 @@
-# Referencing Entities
+# Dependent Entities
 
 It's unlikely that we're building an application that deals solely with users, let's be super imaginative and say we're building a.... revolutionary blogging platform! We'll add a `post` factory:
 
@@ -12,8 +12,8 @@ It's unlikely that we're building an application that deals solely with users, l
 
 (def user
   (fab/->factory
-   {:id ::user
-    :template {:id (fab/sequence)
+   ::user
+   {:template {:id (fab/sequence)
                :name "John Smith"
                :email "john@example.org"
                :role "user"
@@ -24,8 +24,8 @@ It's unlikely that we're building an application that deals solely with users, l
 
 (def post
   (fab/->factory
-   {:id ::post
-    :template {:id random-uuid
+   ::post
+   {:template {:id random-uuid
                :title "This one weird trick"
                :content "Some content goes here...."
                :author (fab/one ::user)}}))
@@ -49,8 +49,8 @@ The `one` directive tells fabrikk that the current entity depends on an entity b
 ```clojure
 (def user
   (fab/->factory
-   {:id ::user
-    :primary-key :id
+   ::user
+   {:primary-key :id
     :template {:id (fab/sequence)
                :name "John Smith"
                :email "john@example.org"
@@ -84,7 +84,7 @@ So now we're referencing something that looks like a user id, but where's the us
 
 Output options are a third optional argument to `build` (and related functions), in this case we're not supplying any build options so our second argument is an empty hash.
 
-There's our missing user! It's here that I reveal that the output of `(fab/build post)` gives you an entity map, but there's a _**build graph**_ hiding in the [metadata](https://clojure.org/reference/metadata) of that map. The build graph keeps track of the entities that the output depends on, and the `build-order` option outputs a reverse [topological sort](https://en.wikipedia.org/wiki/Topological\_sorting) of that graph.
+There's our missing user! It's here that I reveal that the output of `(fab/build post)` gives you an entity map with a _**build graph**_ hiding in the [metadata](https://clojure.org/reference/metadata). The build graph keeps track of the entities that the output depends on, and the `build-order` option outputs a reverse [topological sort](https://en.wikipedia.org/wiki/Topological\_sorting) of that graph.
 
 We can take a look at the build graph by getting the metadata of a post:
 
